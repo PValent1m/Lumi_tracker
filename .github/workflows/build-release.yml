@@ -34,20 +34,20 @@ jobs:
       - name: Verify executable output
         shell: pwsh
         run: |
-          if (-not (Test-Path "dist/LuminescentTracker.exe")) {
-            Write-Error "LuminescentTracker.exe nao foi gerado."
+          if (-not (Test-Path "dist/LumiTracker.exe")) {
+            Write-Error "LumiTracker.exe nao foi gerado."
             exit 1
           }
 
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LuminescentTracker-windows
-          path: dist/LuminescentTracker.exe
+          name: LumiTracker-windows
+          path: dist/LumiTracker.exe
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/LuminescentTracker.exe
+          files: dist/LumiTracker.exe
           generate_release_notes: true

@@ -101,13 +101,13 @@ def load_level_ranges():
     ranges = {}
     if os.path.exists(ENCOUNTER_LOC_JSON):
         with open(ENCOUNTER_LOC_JSON, "r", encoding="utf-8") as f:
-            el_data = json.load(f)
-        for _, encs in el_data.items():
-            for e in encs:
-                route = e.get("routeName")
-                mon = e.get("pokemonName")
-                min_lvl = e.get("minLevel")
-                max_lvl = e.get("maxLevel")
+            encounter_locations_data = json.load(f)
+        for _, encounters in encounter_locations_data.items():
+            for encounter in encounters:
+                route = encounter.get("routeName")
+                mon = encounter.get("pokemonName")
+                min_lvl = encounter.get("minLevel")
+                max_lvl = encounter.get("maxLevel")
                 if route and mon and min_lvl is not None and max_lvl is not None:
                     key = (route, mon)
                     if key not in ranges:
@@ -140,30 +140,30 @@ def parse_mdx_special_events():
             if "<th" in row:
                 continue
 
-            name_m = re.search(
+            name_match = re.search(
                 r"<h3[^>]*>.*?<span class=\"heading-text\">(?:&emsp;)?([^<]+)</span>",
                 row,
                 re.DOTALL,
             )
-            if not name_m:
-                name_m = re.search(
+            if not name_match:
+                name_match = re.search(
                     r"<h3[^>]*>\s*(?:&emsp;)?\s*([A-Za-z0-9\s\'\.\(\)-]+?)\s*</h3>",
                     row,
                     re.DOTALL,
                 )
 
-            id_m = re.search(r'<h3 id="([^"]+)"', row)
+            id_match = re.search(r'<h3 id="([^"]+)"', row)
 
             lis = re.findall(r"<li>(.*?)</li>", row, re.DOTALL)
             clean_lis = [re.sub(r"<[^>]+>", "", li).strip() for li in lis]
             text = " ".join(clean_lis).replace("\n", " ")
             text = re.sub(r"\s+", " ", text).strip()
 
-            if name_m:
-                mon_name = name_m.group(1).strip()
+            if name_match:
+                mon_name = name_match.group(1).strip()
                 conditions[mon_name.lower()] = text
-            if id_m:
-                slug = id_m.group(1).lower()
+            if id_match:
+                slug = id_match.group(1).lower()
                 conditions[slug] = text
 
     return conditions
@@ -371,29 +371,29 @@ def main():
 
     # Estatísticas e Relatórios
     total_records = len(records)
-    tod_counter = Counter()
+    time_of_day_counter = Counter()
     null_report = []
 
-    for idx, r in enumerate(records):
-        tod = tuple(r["time_of_day"])
+    for idx, record in enumerate(records):
+        tod = tuple(record["time_of_day"])
         if tod == ("Morning",):
-            tod_counter["Exclusivo Manhã"] += 1
+            time_of_day_counter["Exclusivo Manhã"] += 1
         elif tod == ("Day",):
-            tod_counter["Exclusivo Dia"] += 1
+            time_of_day_counter["Exclusivo Dia"] += 1
         elif tod == ("Night",):
-            tod_counter["Exclusivo Noite"] += 1
+            time_of_day_counter["Exclusivo Noite"] += 1
         elif len(tod) == 3:
-            tod_counter["Qualquer Horário (Manhã, Dia, Noite)"] += 1
+            time_of_day_counter["Qualquer Horário (Manhã, Dia, Noite)"] += 1
         else:
-            tod_counter[f"Outro período ({tod})"] += 1
+            time_of_day_counter[f"Outro período ({tod})"] += 1
 
         # Verificação de campos nulos ou sem horário
-        null_fields = [k for k, v in r.items() if v is None or v == ""]
-        if not r.get("time_of_day"):
+        null_fields = [key for key, value in record.items() if value is None or value == ""]
+        if not record.get("time_of_day"):
             null_fields.append("time_of_day")
 
         if null_fields:
-            null_report.append((idx, r.get("pokemon"), r.get("location"), null_fields))
+            null_report.append((idx, record.get("pokemon"), record.get("location"), null_fields))
 
     print("\n" + "=" * 60)
     print("RELATÓRIO DE EXTRAÇÃO E EXPORTAÇÃO")
@@ -404,14 +404,14 @@ def main():
     print(f"  - CSV:  {OUTPUT_CSV}")
 
     print("\n--- Contagem de Encontros por Período ---")
-    for period, count in tod_counter.items():
+    for period, count in time_of_day_counter.items():
         pct = (count / total_records) * 100
         print(f"  {period:<40}: {count:>5} ({pct:>5.1f}%)")
 
     print("\n--- Métodos de Encontro Padronizados ---")
-    method_counter = Counter(r["method"] for r in records)
-    for m, cnt in method_counter.most_common():
-        print(f"  {m:<20}: {cnt:>5}")
+    method_counter = Counter(record["method"] for record in records)
+    for method_name, method_count in method_counter.most_common():
+        print(f"  {method_name:<20}: {method_count:>5}")
 
     print("\n--- Relatório de Validação e Integridade ---")
     if not null_report:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 app.py
-Lançador Desktop para o Luminescent Platinum - Playthrough Tracker.
+Lançador Desktop para o Lumi Tracker.
 Usa pywebview para criar uma janela nativa independente e leve no Windows,
 com servidor HTTP embutido e persistência de localStorage em %APPDATA%/LumiTracker.
 """
@@ -10,6 +10,9 @@ com servidor HTTP embutido e persistência de localStorage em %APPDATA%/LumiTrac
 import os
 import sys
 import webview
+
+APP_TITLE = "Lumi Tracker"
+STORAGE_DIR_NAME = "LumiTracker"
 
 
 def get_base_dir():
@@ -20,12 +23,12 @@ def get_base_dir():
 
 
 def main():
-    BASE_DIR = get_base_dir()
-    os.chdir(BASE_DIR)
+    base_dir = get_base_dir()
+    os.chdir(base_dir)
 
     # Diretório seguro e persistente para localStorage, cookies e dados do WebView2
-    appdata = os.environ.get("APPDATA", os.path.expanduser("~"))
-    storage_path = os.path.join(appdata, "LumiTracker")
+    app_data_dir = os.environ.get("APPDATA", os.path.expanduser("~"))
+    storage_path = os.path.join(app_data_dir, STORAGE_DIR_NAME)
     os.makedirs(storage_path, exist_ok=True)
 
     # Habilita downloads de arquivos (necessário para o botão de Backup JSON)
@@ -33,8 +36,8 @@ def main():
     webview.settings["ALLOW_FILE_URLS"] = True
 
     # Cria a janela nativa do Desktop
-    window = webview.create_window(
-        title="Luminescent Platinum - Playthrough Tracker",
+    webview.create_window(
+        title=APP_TITLE,
         url="index.html",
         width=1200,
         height=800,
