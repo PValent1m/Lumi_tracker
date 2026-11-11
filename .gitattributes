@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.bat text=crlf
+*.cmd text=crlf
+*.py text=lf
+*.html text=lf
+*.json text=lf
+*.md text=lf
+*.txt text=lf
+*.yml text=lf
+*.yaml text=lf

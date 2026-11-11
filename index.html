@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminescent Platinum - Playthrough & Encontros Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pokedex: {
+              dark: '#080c14',
+              card: '#0f172a',
+              border: '#1e293b',
+              accent: '#38bdf8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars for clean second-screen view */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080c14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    .sprite-img {
+      image-rendering: pixelated;
+    }
+    /* Smooth card transitions */
+    .pkm-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pkm-card.is-caught {
+      background: rgba(15, 23, 42, 0.65);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
+
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-40 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-xl px-4 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+      
+      <!-- Brand & Project Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20">
+          <span class="text-xl">✨</span>
+        </div>
+        <div>
+          <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2">
+            LUMINESCENT <span class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">PLATINUM 2.2F</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-medium">Guia de Encontros & Rastreador de Playthrough</p>
+        </div>
+      </div>
+
+      <!-- Live Clock & Mode Controls -->
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        
+        <!-- Live Clock & Sinnoh Period Tracker -->
+        <div id="clockBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono shadow-inner">
+          <span id="periodIcon" class="text-base">🕒</span>
+          <div>
+            <div id="clockDisplay" class="font-bold text-slate-200">--:--:--</div>
+            <div id="periodDisplay" class="text-[10px] text-cyan-400 font-sans tracking-wide uppercase font-semibold">Calculando...</div>
+          </div>
+        </div>
+
+        <!-- Mode: "Disponível Agora" Toggle Button -->
+        <button id="btnAvailableNow" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-500/50 text-slate-300 font-semibold flex items-center gap-1.5 transition-all active:scale-95 text-xs shadow-sm" title="Combina o horário atual, a rota selecionada e oculta os Pokémon já capturados">
+          <span id="availableNowIcon" class="text-slate-400">⚡</span>
+          <span>Disponível Agora</span>
+          <span id="availableNowBadge" class="w-2 h-2 rounded-full bg-slate-600 ml-0.5"></span>
+        </button>
+
+        <!-- Backup & Import Actions -->
+        <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+          <button id="btnExport" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Exportar backup do progresso (JSON)">
+            <span>💾</span>
+            <span class="hidden sm:inline">Backup</span>
+          </button>
+          
+          <label class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px] cursor-pointer" title="Importar backup anteriormente salvo">
+            <span>📂</span>
+            <span class="hidden sm:inline">Importar</span>
+            <input type="file" id="importFileInput" accept=".json" class="hidden">
+          </label>
+
+          <button id="btnResetModal" class="p-1.5 px-2.5 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Resetar capturas">
+            <span>🗑️</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Pokédex Progress Bar Section (Hero Stats) -->
+  <section class="max-w-7xl w-full mx-auto px-4 pt-3 pb-1">
+    <div class="bg-gradient-to-r from-slate-900/90 via-[#0d1527] to-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 shadow-lg">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        
+        <!-- Global Pokédex Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+              <span>📖</span> Progresso da Pokédex (Luminescent)
+            </span>
+            <span class="font-mono font-bold text-cyan-400" id="globalPokedexCount">0 / 434 (0%)</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+            <div id="globalPokedexBar" class="bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Current Route Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5 truncate max-w-[280px]">
+              <span>📍</span> <span id="routeProgressLabel">Nesta Rota: Todas as Rotas</span>
+            </span>
+            <span class="font-mono font-bold text-emerald-400" id="routePokedexCount">0 / 0 (0%)</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+            <div id="routePokedexBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Controls Section -->
+  <section class="max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
+    
+    <!-- Time of Day & Fast Toggles -->
+    <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      
+      <!-- Time of Day Radio/Pill Group -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+        <span class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Ciclo:</span>
+        <button data-tod="all" class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
+          <span>🌐</span> Todos
+        </button>
+        <button data-tod="Morning" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
+          <span>☀️</span> Manhã <span class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
+        </button>
+        <button data-tod="Day" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
+          <span>🌤️</span> Dia <span class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
+        </button>
+        <button data-tod="Night" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
+          <span>🌙</span> Noite <span class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
+        </button>
+        
+        <!-- Button: Activate System Clock -->
+        <button id="btnSmartTime" class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1" title="Sincronizar com o horário do seu PC">
+          <span>🕒</span> <span class="hidden sm:inline">Usar Horário Atual</span>
+        </button>
+      </div>
+
+      <!-- Quick Method & Caught Filters -->
+      <div class="flex items-center gap-2 overflow-x-auto text-xs">
+        
+        <!-- Hide Caught Toggle -->
+        <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
+          <input type="checkbox" id="hideCaughtCheckbox" class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
+          <span class="text-xs font-medium">Ocultar Capturados</span>
+        </label>
+
+        <!-- Method Selector -->
+        <select id="methodSelect" class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+          <option value="all">🎯 Todos os Métodos</option>
+          <option value="Walking">🌿 Grama (Walking)</option>
+          <option value="Fishing">🎣 Pesca (Varas)</option>
+          <option value="Surfing">🌊 Surf</option>
+          <option value="Incense">🌸 Incense (Regionais)</option>
+          <option value="Radar">📡 Poké Radar</option>
+          <option value="Honey Tree">🍯 Árvore de Mel</option>
+          <option value="Static">⚡ Estático / Lendário</option>
+          <option value="Gift">🎁 Presentes / Iniciais</option>
+          <option value="Trade">🔄 Trocas In-Game</option>
+        </select>
+
+      </div>
+
+    </div>
+
+    <!-- Search Bar & Chronological Route Dropdown -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      
+      <!-- Pokemon Name Live Search -->
+      <div class="md:col-span-5 relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="Buscar Pokémon por nome ou nº (ex: Starly, 396, Rotom)..." 
+          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner"
+        >
+        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden">
+          ✕
+        </button>
+      </div>
+
+      <!-- Chronological Location Dropdown -->
+      <div class="md:col-span-5 relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </div>
+        <select 
+          id="locationSelect" 
+          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer"
+        >
+          <option value="all">🗺️ Todas as Rotas / Áreas (História de Sinnoh)</option>
+        </select>
+      </div>
+
+      <!-- Reset Filters Button -->
+      <div class="md:col-span-2 flex items-center">
+        <button id="btnResetFilters" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
+          <span>🔄</span>
+          <span>Limpar Filtros</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Active Filter Summary & Result Count -->
+    <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Exibindo <b id="countDisplay" class="text-white">0</b> de <span id="totalDisplay">0</span> encontros</span>
+      </div>
+      <div id="activeModeNotice" class="text-xs text-emerald-400 font-medium hidden flex items-center gap-1">
+        <span>⚡</span> Modo "Disponível Agora" Ativo
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Encounters Grid Section -->
+  <main class="max-w-7xl w-full mx-auto px-4 pb-16 flex-grow">
+    
+    <!-- Loading State -->
+    <div id="loadingState" class="flex flex-col items-center justify-center py-20 text-center space-y-3">
+      <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-slate-400 font-medium">Carregando base de dados do Luminescent Platinum...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
+      <div class="text-5xl">🔍</div>
+      <h3 class="text-lg font-bold text-white">Nenhum encontro localizado</h3>
+      <p class="text-xs text-slate-400 max-w-md">Nenhum Pokémon corresponde aos filtros ativos. Se você estiver no modo "Disponível Agora", todos os Pokémon deste horário e rota já podem ter sido capturados!</p>
+      <button onclick="resetAllFilters()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
+        Restaurar Filtros Padrão
+      </button>
+    </div>
+
+    <!-- Cards Grid -->
+    <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+      <!-- Cards rendered via JavaScript -->
+    </div>
+
+    <!-- Infinite Scroll / Load More Trigger -->
+    <div id="loadMoreContainer" class="py-6 text-center hidden">
+      <button id="btnLoadMore" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
+        Carregar Mais Encontros...
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Confirmation Modal: Reset Capturas -->
+  <div id="resetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+      <div class="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-800 flex items-center justify-center text-2xl mx-auto text-rose-400">
+        ⚠️
+      </div>
+      <div class="text-center space-y-1">
+        <h3 class="text-base font-bold text-white">Resetar Todas as Capturas?</h3>
+        <p class="text-xs text-slate-400">Esta ação removerá todas as marcações de Pokémon capturados do navegador. Recomendamos exportar um backup antes.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button id="btnCancelReset" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+          Cancelar
+        </button>
+        <button id="btnConfirmReset" class="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-lg shadow-rose-600/30">
+          Confirmar Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Floating Element -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900/95 border border-cyan-500/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <span id="toastIcon">✨</span>
+    <span id="toastMessage">Operação realizada com sucesso!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-[#0b1120] border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Dados de <b>Luminescent Platinum</b> • Sinnoh Pokémon Encounter Engine</p>
+      <p class="text-slate-600">Base: <span class="text-slate-400">luminescent_encounters.json</span></p>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // Storage Keys
+    const STORAGE_CAUGHT_KEY = 'lumi_caught_pokemon';
+    const STORAGE_PREFS_KEY = 'lumi_filter_preferences';
+
+    // State Store
+    let allEncounters = [];
+    let filteredEncounters = [];
+    let orderedLocations = [];
+    let allUniqueSpecies = new Set();
+    
+    // Playthrough Captured State (Set of Pokemon Names)
+    let caughtSet = new Set();
+
+    // Pagination limit
+    let displayLimit = 48;
+    const PAGE_CHUNK = 48;
+
+    // Filter states
+    const filters = {
+      search: '',
+      location: 'all',
+      timeOfDay: 'all',
+      method: 'all',
+      onlyAvailableNow: false,
+      hideCaught: false
+    };
+
+    // DOM Elements
+    const cardsGrid = document.getElementById('cardsGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const countDisplay = document.getElementById('countDisplay');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const locationSelect = document.getElementById('locationSelect');
+    const methodSelect = document.getElementById('methodSelect');
+    const hideCaughtCheckbox = document.getElementById('hideCaughtCheckbox');
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+    const btnLoadMore = document.getElementById('btnLoadMore');
+    const btnResetFilters = document.getElementById('btnResetFilters');
+    const btnAvailableNow = document.getElementById('btnAvailableNow');
+    const availableNowIcon = document.getElementById('availableNowIcon');
+    const availableNowBadge = document.getElementById('availableNowBadge');
+    const activeModeNotice = document.getElementById('activeModeNotice');
+    const btnSmartTime = document.getElementById('btnSmartTime');
+    const clockDisplay = document.getElementById('clockDisplay');
+    const periodDisplay = document.getElementById('periodDisplay');
+    const periodIcon = document.getElementById('periodIcon');
+    
+    // Progress Elements
+    const globalPokedexCount = document.getElementById('globalPokedexCount');
+    const globalPokedexBar = document.getElementById('globalPokedexBar');
+    const routeProgressLabel = document.getElementById('routeProgressLabel');
+    const routePokedexCount = document.getElementById('routePokedexCount');
+    const routePokedexBar = document.getElementById('routePokedexBar');
+
+    // Backup & Reset Elements
+    const btnExport = document.getElementById('btnExport');
+    const importFileInput = document.getElementById('importFileInput');
+    const btnResetModal = document.getElementById('btnResetModal');
+    const resetModal = document.getElementById('resetModal');
+    const btnCancelReset = document.getElementById('btnCancelReset');
+    const btnConfirmReset = document.getElementById('btnConfirmReset');
+    const toastNotification = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = document.getElementById('toastIcon');
+
+    // Method badge configuration
+    const METHOD_STYLES = {
+      'Walking': { label: '🌿 Grama', bg: 'bg-emerald-950/60', text: 'text-emerald-300', border: 'border-emerald-800/60' },
+      'Surfing': { label: '🌊 Surf', bg: 'bg-blue-950/60', text: 'text-blue-300', border: 'border-blue-800/60' },
+      'Old Rod': { label: '🎣 Old Rod', bg: 'bg-cyan-950/60', text: 'text-cyan-300', border: 'border-cyan-800/60' },
+      'Good Rod': { label: '🎣 Good Rod', bg: 'bg-teal-950/60', text: 'text-teal-300', border: 'border-teal-800/60' },
+      'Super Rod': { label: '🎣 Super Rod', bg: 'bg-sky-950/60', text: 'text-sky-300', border: 'border-sky-800/60' },
+      'Radar': { label: '📡 Radar', bg: 'bg-purple-950/60', text: 'text-purple-300', border: 'border-purple-800/60' },
+      'Incense': { label: '🌸 Incense', bg: 'bg-fuchsia-950/60', text: 'text-fuchsia-300', border: 'border-fuchsia-800/60' },
+      'Honey Tree': { label: '🍯 Árvore', bg: 'bg-amber-950/60', text: 'text-amber-300', border: 'border-amber-800/60' },
+      'Static': { label: '⚡ Estático', bg: 'bg-rose-950/60', text: 'text-rose-300', border: 'border-rose-800/60' },
+      'Gift': { label: '🎁 Presente', bg: 'bg-indigo-950/60', text: 'text-indigo-300', border: 'border-indigo-800/60' },
+      'Trade': { label: '🔄 Troca', bg: 'bg-slate-800/70', text: 'text-slate-300', border: 'border-slate-700' },
+    };
+
+    // Toast Notification Display Helper
+    let toastTimeout = null;
+    function showToast(msg, icon = '✨') {
+      toastMessage.textContent = msg;
+      toastIcon.textContent = icon;
+      toastNotification.classList.remove('translate-y-20', 'opacity-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastNotification.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // Determine Sinnoh in-game period (Gen 4 / BDSP rules)
+    function getSinnohPeriod(date = new Date()) {
+      const hours = date.getHours();
+      if (hours >= 4 && hours < 10) {
+        return { key: 'Morning', label: '☀️ Manhã (04h-10h)', icon: '☀️' };
+      } else if (hours >= 10 && hours < 20) {
+        return { key: 'Day', label: '🌤️ Dia (10h-20h)', icon: '🌤️' };
+      } else {
+        return { key: 'Night', label: '🌙 Noite (20h-04h)', icon: '🌙' };
+      }
+    }
+
+    // Update Live Clock in Header
+    function updateClock() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      clockDisplay.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      
+      const period = getSinnohPeriod(now);
+      periodDisplay.textContent = period.label;
+      periodIcon.textContent = period.icon;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Sprite URLs Generator
+    function getSpriteUrls(pokemonName, id) {
+      let slug = pokemonName.toLowerCase()
+        .replace("alolan ", "")
+        .replace("galarian ", "")
+        .replace("hisuian ", "")
+        .replace("clone ", "")
+        .replace("stitched ", "")
+        .replace("crystal ", "")
+        .replace(/[^a-z0-9]/g, "");
+
+      if (pokemonName.startsWith("Alolan ")) slug += "-alola";
+      else if (pokemonName.startsWith("Galarian ")) slug += "-galar";
+      else if (pokemonName.startsWith("Hisuian ")) slug += "-hisui";
+
+      const showdownUrl = `https://play.pokemonshowdown.com/sprites/gen5/${slug}.png`;
+      const pokeApiUrl = id ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` : '';
+      return { showdownUrl, pokeApiUrl };
+    }
+
+    // Persistence: Load Caught Set & Preferences
+    function loadSavedState() {
+      try {
+        const rawCaught = localStorage.getItem(STORAGE_CAUGHT_KEY);
+        if (rawCaught) {
+          const arr = JSON.parse(rawCaught);
+          caughtSet = new Set(arr);
+        }
+      } catch (e) {
+        console.error("Erro ao carregar estado de capturas:", e);
+      }
+
+      try {
+        const rawPrefs = localStorage.getItem(STORAGE_PREFS_KEY);
+        if (rawPrefs) {
+          const p = JSON.parse(rawPrefs);
+          if (p.search !== undefined) filters.search = p.search;
+          if (p.location !== undefined) filters.location = p.location;
+          if (p.timeOfDay !== undefined) filters.timeOfDay = p.timeOfDay;
+          if (p.method !== undefined) filters.method = p.method;
+          if (p.onlyAvailableNow !== undefined) filters.onlyAvailableNow = p.onlyAvailableNow;
+          if (p.hideCaught !== undefined) filters.hideCaught = p.hideCaught;
+        }
+      } catch (e) {
+        console.error("Erro ao carregar preferências de filtros:", e);
+      }
+    }
+
+    // Persistence: Save Preferences
+    function savePreferences() {
+      try {
+        localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filters));
+      } catch (e) {
+        console.error("Erro ao salvar preferências:", e);
+      }
+    }
+
+    // Persistence: Save Caught Set
+    function saveCaughtState() {
+      try {
+        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSet)));
+      } catch (e) {
+        console.error("Erro ao salvar estado de capturas:", e);
+      }
+    }
+
+    // Toggle Capture status for a Pokémon
+    window.toggleCatch = function(pokemonName) {
+      if (caughtSet.has(pokemonName)) {
+        caughtSet.delete(pokemonName);
+        showToast(`${pokemonName} desmarcado da Pokédex`, '○');
+      } else {
+        caughtSet.add(pokemonName);
+        showToast(`${pokemonName} registrado como Capturado!`, '✅');
+      }
+      saveCaughtState();
+      updateProgressCounters();
+      applyFilters();
+    };
+
+    // Update Global and Route Progress Bars
+    function updateProgressCounters() {
+      // 1. Global Pokédex Progress
+      const totalSpecies = allUniqueSpecies.size || 434;
+      let caughtCount = 0;
+      allUniqueSpecies.forEach(p => {
+        if (caughtSet.has(p)) caughtCount++;
+      });
+      const globalPct = totalSpecies > 0 ? ((caughtCount / totalSpecies) * 100).toFixed(1) : 0;
+      globalPokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
+      globalPokedexBar.style.width = `${globalPct}%`;
+
+      // 2. Current Route Progress
+      if (filters.location && filters.location !== 'all') {
+        const routeEncounters = allEncounters.filter(e => e.location === filters.location);
+        const routeSpecies = new Set(routeEncounters.map(e => e.pokemon));
+        let routeCaught = 0;
+        routeSpecies.forEach(p => {
+          if (caughtSet.has(p)) routeCaught++;
+        });
+        const routeTotal = routeSpecies.size;
+        const routePct = routeTotal > 0 ? ((routeCaught / routeTotal) * 100).toFixed(0) : 0;
+        
+        routeProgressLabel.textContent = `Nesta Rota: ${filters.location}`;
+        routePokedexCount.textContent = `${routeCaught} / ${routeTotal} (${routePct}%)`;
+        routePokedexBar.style.width = `${routePct}%`;
+      } else {
+        routeProgressLabel.textContent = `Nesta Rota: Todas as Rotas (${allUniqueSpecies.size} espécies)`;
+        routePokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
+        routePokedexBar.style.width = `${globalPct}%`;
+      }
+    }
+
+    // Apply Current UI Settings to Filter Elements
+    function syncFilterUI() {
+      searchInput.value = filters.search || '';
+      clearSearch.classList.toggle('hidden', !filters.search);
+      locationSelect.value = filters.location || 'all';
+      methodSelect.value = filters.method || 'all';
+      hideCaughtCheckbox.checked = filters.hideCaught || false;
+
+      // Time buttons
+      document.querySelectorAll('.tod-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm', 'shadow-cyan-500/20');
+        if (btn.dataset.tod === filters.timeOfDay) {
+          btn.classList.add('active', 'bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm', 'shadow-cyan-500/20');
+        }
+      });
+
+      // "Disponível Agora" state
+      syncAvailableNowUI();
+    }
+
+    function syncAvailableNowUI() {
+      if (filters.onlyAvailableNow) {
+        btnAvailableNow.classList.add('border-emerald-500', 'bg-emerald-950/60', 'text-emerald-300', 'shadow-emerald-500/20');
+        btnAvailableNow.classList.remove('border-slate-700', 'bg-slate-900', 'text-slate-300');
+        availableNowIcon.textContent = '⚡';
+        availableNowBadge.classList.remove('bg-slate-600');
+        availableNowBadge.classList.add('bg-emerald-400', 'animate-pulse');
+        activeModeNotice.classList.remove('hidden');
+      } else {
+        btnAvailableNow.classList.remove('border-emerald-500', 'bg-emerald-950/60', 'text-emerald-300', 'shadow-emerald-500/20');
+        btnAvailableNow.classList.add('border-slate-700', 'bg-slate-900', 'text-slate-300');
+        availableNowIcon.textContent = '⚡';
+        availableNowBadge.classList.add('bg-slate-600');
+        availableNowBadge.classList.remove('bg-emerald-400', 'animate-pulse');
+        activeModeNotice.classList.add('hidden');
+      }
+    }
+
+    // Populate Location Dropdown
+    function populateLocationsDropdown(locations) {
+      locationSelect.innerHTML = '<option value="all">🗺️ Todas as Rotas / Áreas (História de Sinnoh)</option>';
+      locations.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = `📍 ${loc}`;
+        locationSelect.appendChild(opt);
+      });
+      locationSelect.value = filters.location || 'all';
+    }
+
+    // Main Filtering Function
+    function applyFilters() {
+      displayLimit = PAGE_CHUNK;
+      savePreferences();
+      updateProgressCounters();
+
+      const currentPeriod = getSinnohPeriod().key;
+
+      filteredEncounters = allEncounters.filter(item => {
+        const isCaught = caughtSet.has(item.pokemon);
+
+        // Mode: "Disponível Agora" Logic
+        if (filters.onlyAvailableNow) {
+          // 1. Remove already caught
+          if (isCaught) return false;
+
+          // 2. Must be available in the current clock period
+          if (!item.time_of_day.includes(currentPeriod)) return false;
+        }
+
+        // Hide Caught checkbox
+        if (filters.hideCaught && isCaught) {
+          return false;
+        }
+
+        // Location Filter
+        if (filters.location !== 'all' && item.location !== filters.location) {
+          return false;
+        }
+
+        // Time of Day Filter (when not forced by Available Now)
+        if (!filters.onlyAvailableNow && filters.timeOfDay !== 'all') {
+          if (!item.time_of_day.includes(filters.timeOfDay)) {
+            return false;
+          }
+        }
+
+        // Method Filter
+        if (filters.method !== 'all') {
+          if (filters.method === 'Fishing') {
+            if (!item.method.includes('Rod')) return false;
+          } else if (filters.method === 'Static') {
+            if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
+          } else if (item.method !== filters.method) {
+            return false;
+          }
+        }
+
+        // Search Query (Pokemon name, Dex ID, or Location)
+        if (filters.search) {
+          const q = filters.search.toLowerCase();
+          const nameMatch = item.pokemon.toLowerCase().includes(q);
+          const idMatch = String(item.id).includes(q);
+          const locMatch = item.location.toLowerCase().includes(q);
+          if (!nameMatch && !idMatch && !locMatch) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      renderCards();
+    }
+
+    // Render Cards in Grid
+    function renderCards() {
+      countDisplay.textContent = filteredEncounters.length.toLocaleString();
+
+      if (filteredEncounters.length === 0) {
+        cardsGrid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        loadMoreContainer.classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      const itemsToShow = filteredEncounters.slice(0, displayLimit);
+      
+      let html = '';
+      itemsToShow.forEach(item => {
+        const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
+        const methodInfo = METHOD_STYLES[item.method] || { label: item.method, bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+        const isCaught = caughtSet.has(item.pokemon);
+
+        // Time of Day Badges
+        let todBadge = '';
+        if (item.time_of_day.length === 3) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="Disponível a qualquer horário (Manhã, Dia e Noite)">
+            <span>⏱️</span> <span>Qualquer Hora</span>
+          </span>`;
+        } else if (item.time_of_day.includes('Morning')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
+            <span>☀️</span> <span>Manhã</span>
+          </span>`;
+        } else if (item.time_of_day.includes('Day')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
+            <span>🌤️</span> <span>Dia</span>
+          </span>`;
+        } else if (item.time_of_day.includes('Night')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
+            <span>🌙</span> <span>Noite</span>
+          </span>`;
+        }
+
+        // Captured Checkbox / Button Badge
+        const catchBtnClass = isCaught
+          ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-emerald-500/30'
+          : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700';
+
+        const catchBtnText = isCaught
+          ? '<span>✓</span> <span>Capturado</span>'
+          : '<span>○</span> <span>Registrar</span>';
+
+        // Conditions note
+        const hasSpecialCond = item.conditions && item.conditions !== 'Nenhuma';
+        const condHtml = hasSpecialCond
+          ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${item.conditions}">
+              <span class="text-cyan-400 shrink-0">ℹ️</span>
+              <span class="leading-tight">${item.conditions}</span>
+            </div>`
+          : '';
+
+        html += `
+          <div class="pkm-card ${isCaught ? 'is-caught' : ''} bg-slate-900/85 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-3.5 flex flex-col justify-between shadow-md hover:shadow-cyan-950/20 group relative overflow-hidden">
+            
+            <!-- Top Card Header: ID, Location & Catch Toggle -->
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-400 pb-2 mb-2 border-b border-slate-800/60 gap-2">
+                <span class="font-mono text-[11px] text-slate-500 font-bold shrink-0">#${item.id ? String(item.id).padStart(3, '0') : '???'}</span>
+                <span class="font-medium text-slate-300 truncate text-[11px]" title="${item.location}">📍 ${item.location}</span>
+                
+                <!-- Quick Catch Toggle Button -->
+                <button 
+                  onclick="toggleCatch('${item.pokemon.replace(/'/g, "\\'")}')" 
+                  class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 ${catchBtnClass}"
+                  title="Marcar como capturado no Playthrough Tracker"
+                >
+                  ${catchBtnText}
+                </button>
+              </div>
+
+              <!-- Main Card Body: Sprite + Pokemon Name + Method/Time Badges -->
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 shrink-0 bg-slate-950/90 rounded-xl border border-slate-800 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-inner">
+                  <img 
+                    src="${showdownUrl}" 
+                    alt="${item.pokemon}" 
+                    class="sprite-img max-w-full max-h-full object-contain" 
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='${pokeApiUrl}'; if(!this.src) this.style.display='none';"
+                  />
+                </div>
+                <div class="flex-grow min-w-0">
+                  <h4 class="font-black text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
+                    ${item.pokemon}
+                  </h4>
+                  <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${methodInfo.bg} ${methodInfo.text} ${methodInfo.border}">
+                      ${methodInfo.label}
+                    </span>
+                    ${todBadge}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stats Highlights: Level & Rate -->
+              <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+                <div class="bg-slate-950/60 border border-slate-800 rounded-lg py-1 px-1.5">
+                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Nível</div>
+                  <div class="font-black text-xs text-blue-300">Nv. ${item.levels}</div>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 rounded-lg py-1 px-1.5">
+                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Raridade</div>
+                  <div class="font-black text-xs text-emerald-400">${item.rate}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Conditions / Notes -->
+            ${condHtml}
+
+          </div>
+        `;
+      });
+
+      cardsGrid.innerHTML = html;
+
+      // Toggle Load More button
+      if (displayLimit < filteredEncounters.length) {
+        loadMoreContainer.classList.remove('hidden');
+      } else {
+        loadMoreContainer.classList.add('hidden');
+      }
+    }
+
+    // Load More Items Button
+    btnLoadMore.addEventListener('click', () => {
+      displayLimit += PAGE_CHUNK;
+      renderCards();
+    });
+
+    // Reset All Filters Helper
+    window.resetAllFilters = function() {
+      filters.search = '';
+      filters.location = 'all';
+      filters.timeOfDay = 'all';
+      filters.method = 'all';
+      filters.onlyAvailableNow = false;
+      filters.hideCaught = false;
+
+      syncFilterUI();
+      applyFilters();
+      showToast("Filtros redefinidos", "🔄");
+    };
+    btnResetFilters.addEventListener('click', resetAllFilters);
+
+    // Toggle: "Disponível Agora" Mode
+    btnAvailableNow.addEventListener('click', () => {
+      filters.onlyAvailableNow = !filters.onlyAvailableNow;
+      syncAvailableNowUI();
+      applyFilters();
+      if (filters.onlyAvailableNow) {
+        showToast("Modo 'Disponível Agora' ativado!", "⚡");
+      } else {
+        showToast("Modo 'Disponível Agora' desativado", "🌐");
+      }
+    });
+
+    // Hide Caught Checkbox
+    hideCaughtCheckbox.addEventListener('change', (e) => {
+      filters.hideCaught = e.target.checked;
+      applyFilters();
+    });
+
+    // Smart Time Button
+    btnSmartTime.addEventListener('click', () => {
+      const current = getSinnohPeriod();
+      filters.timeOfDay = current.key;
+      syncFilterUI();
+      applyFilters();
+      showToast(`Ciclo sincronizado com o PC: ${current.label}`, current.icon);
+    });
+
+    // Time of Day Buttons
+    document.querySelectorAll('.tod-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filters.timeOfDay = btn.dataset.tod;
+        // If clicking a manual time, disable Available Now
+        if (filters.onlyAvailableNow) {
+          filters.onlyAvailableNow = false;
+          syncAvailableNowUI();
+        }
+        syncFilterUI();
+        applyFilters();
+      });
+    });
+
+    // Search Input with Debounce
+    let searchTimer = null;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      const val = e.target.value.trim();
+      clearSearch.classList.toggle('hidden', val.length === 0);
+      searchTimer = setTimeout(() => {
+        filters.search = val;
+        applyFilters();
+      }, 150);
+    });
+
+    clearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearch.classList.add('hidden');
+      filters.search = '';
+      applyFilters();
+    });
+
+    // Dropdown change events
+    locationSelect.addEventListener('change', (e) => {
+      filters.location = e.target.value;
+      applyFilters();
+    });
+
+    methodSelect.addEventListener('change', (e) => {
+      filters.method = e.target.value;
+      applyFilters();
+    });
+
+    // --- Backup, Import & Reset Functionality ---
+    
+    // 1. Export JSON Backup
+    btnExport.addEventListener('click', () => {
+      const backupData = {
+        app: "Luminescent Platinum Encounter Tracker",
+        version: "2.2F",
+        exportedAt: new Date().toISOString(),
+        totalCaught: caughtSet.size,
+        caughtPokemon: Array.from(caughtSet),
+        filterPreferences: filters
+      };
+      
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `playthrough_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast("Backup exportado com sucesso!", "💾");
+    });
+
+    // 2. Import JSON Backup
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported.caughtPokemon)) {
+            caughtSet = new Set(imported.caughtPokemon);
+            saveCaughtState();
+
+            if (imported.filterPreferences) {
+              Object.assign(filters, imported.filterPreferences);
+              syncFilterUI();
+            }
+
+            updateProgressCounters();
+            applyFilters();
+            showToast(`Backup carregado! ${caughtSet.size} capturas restauradas.`, "📂");
+          } else {
+            throw new Error("Formato de backup inválido.");
+          }
+        } catch (err) {
+          alert("Erro ao importar backup: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      importFileInput.value = ''; // Reset input
+    });
+
+    // 3. Reset Confirmation Modal
+    btnResetModal.addEventListener('click', () => {
+      resetModal.classList.remove('hidden');
+    });
+
+    btnCancelReset.addEventListener('click', () => {
+      resetModal.classList.add('hidden');
+    });
+
+    btnConfirmReset.addEventListener('click', () => {
+      caughtSet.clear();
+      saveCaughtState();
+      resetModal.classList.add('hidden');
+      updateProgressCounters();
+      applyFilters();
+      showToast("Todas as capturas foram resetadas", "🗑️");
+    });
+
+    // Initial Dashboard Setup
+    async function initDashboard() {
+      try {
+        loadSavedState();
+
+        // Fetch ordered locations list
+        const locRes = await fetch('./ordered_locations.json');
+        if (locRes.ok) {
+          orderedLocations = await locRes.json();
+          populateLocationsDropdown(orderedLocations);
+        }
+
+        // Fetch encounters database
+        const encRes = await fetch('./luminescent_encounters.json');
+        if (!encRes.ok) throw new Error("Falha ao carregar luminescent_encounters.json");
+        allEncounters = await encRes.json();
+
+        // Index all unique species in Luminescent
+        allEncounters.forEach(e => {
+          if (e.pokemon) allUniqueSpecies.add(e.pokemon);
+        });
+
+        totalDisplay.textContent = allEncounters.length.toLocaleString();
+        loadingState.classList.add('hidden');
+
+        syncFilterUI();
+        updateProgressCounters();
+        applyFilters();
+      } catch (err) {
+        console.error("Erro na inicialização:", err);
+        loadingState.innerHTML = `
+          <div class="text-rose-400 text-3xl">⚠️</div>
+          <h3 class="text-base font-bold text-white">Erro ao carregar os dados</h3>
+          <p class="text-xs text-slate-400">${err.message}</p>
+        `;
+      }
+    }
+
+    initDashboard();
+  </script>
+</body>
+</html>
