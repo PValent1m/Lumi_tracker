@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 server.py
-Servidor local HTTP de contingência para o Luminescent Platinum - Playthrough Tracker.
+Servidor local HTTP de contingência para o Lumi Tracker.
 Inicia um servidor HTTP na porta 8000 (ou na próxima porta disponível) e abre
 automaticamente o navegador padrão na URL correspondente.
 """
@@ -18,6 +18,10 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 # Força codificação UTF-8 no console Windows
 sys.stdout.reconfigure(encoding="utf-8")
 
+APP_NAME = "Lumi Tracker"
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8000
+
 
 def get_base_dir():
     """Retorna o diretório base dos arquivos da aplicação."""
@@ -26,12 +30,12 @@ def get_base_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def find_free_port(start_port=8000, max_attempts=30):
+def find_free_port(start_port=DEFAULT_PORT, max_attempts=30):
     """Encontra uma porta TCP livre começando em start_port."""
     for port in range(start_port, start_port + max_attempts):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
-                s.bind(("127.0.0.1", port))
+                sock.bind((DEFAULT_HOST, port))
                 return port
             except OSError:
                 continue
@@ -49,23 +53,23 @@ def main():
     base_dir = get_base_dir()
     os.chdir(base_dir)
 
-    port = find_free_port(8000)
-    server_address = ("127.0.0.1", port)
+    port = find_free_port(DEFAULT_PORT)
+    server_address = (DEFAULT_HOST, port)
     url = f"http://localhost:{port}"
 
-    class CustomHandler(SimpleHTTPRequestHandler):
-        def log_message(self, format, *args):
+    class TrackerHTTPHandler(SimpleHTTPRequestHandler):
+        def log_message(self, log_format, *args):
             # Mensagens de requisição mais limpas no terminal
-            sys.stdout.write(f"[{self.log_date_time_string()}] {format % args}\n")
+            sys.stdout.write(f"[{self.log_date_time_string()}] {log_format % args}\n")
 
     try:
-        httpd = ThreadingHTTPServer(server_address, CustomHandler)
+        httpd = ThreadingHTTPServer(server_address, TrackerHTTPHandler)
     except Exception as e:
         print(f"Erro ao iniciar servidor na porta {port}: {e}")
         sys.exit(1)
 
     print("=" * 60)
-    print("  LUMINESCENT PLATINUM - SERVIDOR LOCAL DE CONTINGÊNCIA")
+    print(f"  {APP_NAME.upper()} - SERVIDOR LOCAL DE CONTINGÊNCIA")
     print("=" * 60)
     print(f"  Diretório raiz : {base_dir}")
     print(f"  Endereço local : {url}")

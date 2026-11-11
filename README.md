@@ -1,4 +1,4 @@
-# Lumi tracker - An Pokémon encounter organizer
+# Lumi Tracker - A Pokémon Encounter Organizer
 
 Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémon by route/location (in campaign progression order), encounter method, and time of day, while keeping track of which mons you have already caught.
 
@@ -31,24 +31,24 @@ pip install -r requirements.txt
   ```bash
   python app.py
   ```
-  Or double-click `iniciar_app.bat` (which detects `.venv` / `venv`, installs `pywebview` if missing, and falls back to `server.py` if desktop mode fails).
+  Or double-click `launch_app.bat` (which detects `.venv` / `venv`, installs `pywebview` if missing, and falls back to `server.py` if desktop mode fails).
 
 * **Local Web Server (Default Browser):**
   ```bash
   python server.py
   ```
-  Or run `iniciar_servidor.bat`.
+  Or run `start_server.bat`.
 
 ## Building the Windows Executable (`.exe`)
 
-To build a standalone single-file executable (`dist/LuminescentTracker.exe`) on Windows:
+To build a standalone single-file executable (`dist/LumiTracker.exe`) on Windows:
 
 ```bash
 pip install -r requirements-dev.txt
 python build_exe.py
 ```
 
-Or run `compilar_exe.bat`.
+Or run `build_exe.bat`.
 
 > Official builds will be available soon under the **Releases** tab!!
 
@@ -74,7 +74,7 @@ Or run `compilar_exe.bat`.
 - `ordered_locations.json`: Campaign-ordered list of locations.
 - `parse_encounters.py`: Script to extract and normalize data from `lumi-repo/`.
 - `build_exe.py`: PyInstaller bundler for Windows.
-- `iniciar_app.bat`, `iniciar_servidor.bat`, `compilar_exe.bat`: Windows convenience launchers.
+- `launch_app.bat`, `start_server.bat`, `build_exe.bat`: Windows convenience launchers.
 
 ## Credits
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luminescent Platinum - Playthrough & Encontros Tracker</title>
+  <title>Lumi Tracker</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -65,9 +65,9 @@
         </div>
         <div>
           <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2">
-            LUMINESCENT <span class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">PLATINUM 2.2F</span>
+            LUMI TRACKER <span class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT 2.2F</span>
           </h1>
-          <p class="text-[11px] text-slate-400 font-medium">Guia de Encontros & Rastreador de Playthrough</p>
+          <p class="text-[11px] text-slate-400 font-medium">Guia de Encontros • Pokémon Luminescent Platinum</p>
         </div>
       </div>
 
@@ -321,14 +321,16 @@
   <!-- Footer -->
   <footer class="bg-[#0b1120] border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p>Dados de <b>Luminescent Platinum</b> • Sinnoh Pokémon Encounter Engine</p>
+      <p><b>Lumi Tracker</b> • Dados de <b>Luminescent Platinum</b></p>
       <p class="text-slate-600">Base: <span class="text-slate-400">luminescent_encounters.json</span></p>
     </div>
   </footer>
 
   <!-- Application Logic -->
   <script>
-    // Storage Keys
+    // Application Metadata & Storage Keys (kept compatible with existing saves)
+    const APP_NAME = 'Lumi Tracker';
+    const APP_DATA_VERSION = '2.2F';
     const STORAGE_CAUGHT_KEY = 'lumi_caught_pokemon';
     const STORAGE_PREFS_KEY = 'lumi_filter_preferences';
 
@@ -338,15 +340,15 @@
     let orderedLocations = [];
     let allUniqueSpecies = new Set();
     
-    // Playthrough Captured State (Set of Pokemon Names)
-    let caughtSet = new Set();
+    // Lumi Tracker Captured State (Set of Pokémon Names)
+    let caughtSpecies = new Set();
 
     // Pagination limit
     let displayLimit = 48;
     const PAGE_CHUNK = 48;
 
-    // Filter states
-    const filters = {
+    // Filter state
+    const filterState = {
       search: '',
       location: 'all',
       timeOfDay: 'all',
@@ -473,8 +475,10 @@
       try {
         const rawCaught = localStorage.getItem(STORAGE_CAUGHT_KEY);
         if (rawCaught) {
-          const arr = JSON.parse(rawCaught);
-          caughtSet = new Set(arr);
+          const parsedCaught = JSON.parse(rawCaught);
+          if (Array.isArray(parsedCaught)) {
+            caughtSpecies = new Set(parsedCaught);
+          }
         }
       } catch (e) {
         console.error("Erro ao carregar estado de capturas:", e);
@@ -483,13 +487,13 @@
       try {
         const rawPrefs = localStorage.getItem(STORAGE_PREFS_KEY);
         if (rawPrefs) {
-          const p = JSON.parse(rawPrefs);
-          if (p.search !== undefined) filters.search = p.search;
-          if (p.location !== undefined) filters.location = p.location;
-          if (p.timeOfDay !== undefined) filters.timeOfDay = p.timeOfDay;
-          if (p.method !== undefined) filters.method = p.method;
-          if (p.onlyAvailableNow !== undefined) filters.onlyAvailableNow = p.onlyAvailableNow;
-          if (p.hideCaught !== undefined) filters.hideCaught = p.hideCaught;
+          const parsedPrefs = JSON.parse(rawPrefs);
+          if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
+          if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
+          if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
+          if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
+          if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
+          if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
         }
       } catch (e) {
         console.error("Erro ao carregar preferências de filtros:", e);
@@ -499,7 +503,7 @@
     // Persistence: Save Preferences
     function savePreferences() {
       try {
-        localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filters));
+        localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
       } catch (e) {
         console.error("Erro ao salvar preferências:", e);
       }
@@ -508,7 +512,7 @@
     // Persistence: Save Caught Set
     function saveCaughtState() {
       try {
-        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSet)));
+        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSpecies)));
       } catch (e) {
         console.error("Erro ao salvar estado de capturas:", e);
       }
@@ -516,11 +520,11 @@
 
     // Toggle Capture status for a Pokémon
     window.toggleCatch = function(pokemonName) {
-      if (caughtSet.has(pokemonName)) {
-        caughtSet.delete(pokemonName);
+      if (caughtSpecies.has(pokemonName)) {
+        caughtSpecies.delete(pokemonName);
         showToast(`${pokemonName} desmarcado da Pokédex`, '○');
       } else {
-        caughtSet.add(pokemonName);
+        caughtSpecies.add(pokemonName);
         showToast(`${pokemonName} registrado como Capturado!`, '✅');
       }
       saveCaughtState();
@@ -533,25 +537,25 @@
       // 1. Global Pokédex Progress
       const totalSpecies = allUniqueSpecies.size || 434;
       let caughtCount = 0;
-      allUniqueSpecies.forEach(p => {
-        if (caughtSet.has(p)) caughtCount++;
+      allUniqueSpecies.forEach(species => {
+        if (caughtSpecies.has(species)) caughtCount++;
       });
       const globalPct = totalSpecies > 0 ? ((caughtCount / totalSpecies) * 100).toFixed(1) : 0;
       globalPokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
       globalPokedexBar.style.width = `${globalPct}%`;
 
       // 2. Current Route Progress
-      if (filters.location && filters.location !== 'all') {
-        const routeEncounters = allEncounters.filter(e => e.location === filters.location);
+      if (filterState.location && filterState.location !== 'all') {
+        const routeEncounters = allEncounters.filter(e => e.location === filterState.location);
         const routeSpecies = new Set(routeEncounters.map(e => e.pokemon));
         let routeCaught = 0;
-        routeSpecies.forEach(p => {
-          if (caughtSet.has(p)) routeCaught++;
+        routeSpecies.forEach(species => {
+          if (caughtSpecies.has(species)) routeCaught++;
         });
         const routeTotal = routeSpecies.size;
         const routePct = routeTotal > 0 ? ((routeCaught / routeTotal) * 100).toFixed(0) : 0;
         
-        routeProgressLabel.textContent = `Nesta Rota: ${filters.location}`;
+        routeProgressLabel.textContent = `Nesta Rota: ${filterState.location}`;
         routePokedexCount.textContent = `${routeCaught} / ${routeTotal} (${routePct}%)`;
         routePokedexBar.style.width = `${routePct}%`;
       } else {
@@ -563,16 +567,16 @@
 
     // Apply Current UI Settings to Filter Elements
     function syncFilterUI() {
-      searchInput.value = filters.search || '';
-      clearSearch.classList.toggle('hidden', !filters.search);
-      locationSelect.value = filters.location || 'all';
-      methodSelect.value = filters.method || 'all';
-      hideCaughtCheckbox.checked = filters.hideCaught || false;
+      searchInput.value = filterState.search || '';
+      clearSearch.classList.toggle('hidden', !filterState.search);
+      locationSelect.value = filterState.location || 'all';
+      methodSelect.value = filterState.method || 'all';
+      hideCaughtCheckbox.checked = filterState.hideCaught || false;
 
       // Time buttons
       document.querySelectorAll('.tod-btn').forEach(btn => {
         btn.classList.remove('active', 'bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm', 'shadow-cyan-500/20');
-        if (btn.dataset.tod === filters.timeOfDay) {
+        if (btn.dataset.tod === filterState.timeOfDay) {
           btn.classList.add('active', 'bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm', 'shadow-cyan-500/20');
         }
       });
@@ -582,7 +586,7 @@
     }
 
     function syncAvailableNowUI() {
-      if (filters.onlyAvailableNow) {
+      if (filterState.onlyAvailableNow) {
         btnAvailableNow.classList.add('border-emerald-500', 'bg-emerald-950/60', 'text-emerald-300', 'shadow-emerald-500/20');
         btnAvailableNow.classList.remove('border-slate-700', 'bg-slate-900', 'text-slate-300');
         availableNowIcon.textContent = '⚡';
@@ -608,7 +612,7 @@
         opt.textContent = `📍 ${loc}`;
         locationSelect.appendChild(opt);
       });
-      locationSelect.value = filters.location || 'all';
+      locationSelect.value = filterState.location || 'all';
     }
 
     // Main Filtering Function
@@ -620,10 +624,10 @@
       const currentPeriod = getSinnohPeriod().key;
 
       filteredEncounters = allEncounters.filter(item => {
-        const isCaught = caughtSet.has(item.pokemon);
+        const isCaught = caughtSpecies.has(item.pokemon);
 
         // Mode: "Disponível Agora" Logic
-        if (filters.onlyAvailableNow) {
+        if (filterState.onlyAvailableNow) {
           // 1. Remove already caught
           if (isCaught) return false;
 
@@ -632,39 +636,39 @@
         }
 
         // Hide Caught checkbox
-        if (filters.hideCaught && isCaught) {
+        if (filterState.hideCaught && isCaught) {
           return false;
         }
 
         // Location Filter
-        if (filters.location !== 'all' && item.location !== filters.location) {
+        if (filterState.location !== 'all' && item.location !== filterState.location) {
           return false;
         }
 
         // Time of Day Filter (when not forced by Available Now)
-        if (!filters.onlyAvailableNow && filters.timeOfDay !== 'all') {
-          if (!item.time_of_day.includes(filters.timeOfDay)) {
+        if (!filterState.onlyAvailableNow && filterState.timeOfDay !== 'all') {
+          if (!item.time_of_day.includes(filterState.timeOfDay)) {
             return false;
           }
         }
 
         // Method Filter
-        if (filters.method !== 'all') {
-          if (filters.method === 'Fishing') {
+        if (filterState.method !== 'all') {
+          if (filterState.method === 'Fishing') {
             if (!item.method.includes('Rod')) return false;
-          } else if (filters.method === 'Static') {
+          } else if (filterState.method === 'Static') {
             if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
-          } else if (item.method !== filters.method) {
+          } else if (item.method !== filterState.method) {
             return false;
           }
         }
 
         // Search Query (Pokemon name, Dex ID, or Location)
-        if (filters.search) {
-          const q = filters.search.toLowerCase();
-          const nameMatch = item.pokemon.toLowerCase().includes(q);
-          const idMatch = String(item.id).includes(q);
-          const locMatch = item.location.toLowerCase().includes(q);
+        if (filterState.search) {
+          const query = filterState.search.toLowerCase();
+          const nameMatch = item.pokemon.toLowerCase().includes(query);
+          const idMatch = String(item.id).includes(query);
+          const locMatch = item.location.toLowerCase().includes(query);
           if (!nameMatch && !idMatch && !locMatch) {
             return false;
           }
@@ -695,7 +699,7 @@
       itemsToShow.forEach(item => {
         const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
         const methodInfo = METHOD_STYLES[item.method] || { label: item.method, bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
-        const isCaught = caughtSet.has(item.pokemon);
+        const isCaught = caughtSpecies.has(item.pokemon);
 
         // Time of Day Badges
         let todBadge = '';
@@ -748,7 +752,7 @@
                 <button 
                   onclick="toggleCatch('${item.pokemon.replace(/'/g, "\\'")}')" 
                   class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 ${catchBtnClass}"
-                  title="Marcar como capturado no Playthrough Tracker"
+                  title="Marcar como capturado no Lumi Tracker"
                 >
                   ${catchBtnText}
                 </button>
@@ -816,12 +820,12 @@
 
     // Reset All Filters Helper
     window.resetAllFilters = function() {
-      filters.search = '';
-      filters.location = 'all';
-      filters.timeOfDay = 'all';
-      filters.method = 'all';
-      filters.onlyAvailableNow = false;
-      filters.hideCaught = false;
+      filterState.search = '';
+      filterState.location = 'all';
+      filterState.timeOfDay = 'all';
+      filterState.method = 'all';
+      filterState.onlyAvailableNow = false;
+      filterState.hideCaught = false;
 
       syncFilterUI();
       applyFilters();
@@ -831,10 +835,10 @@
 
     // Toggle: "Disponível Agora" Mode
     btnAvailableNow.addEventListener('click', () => {
-      filters.onlyAvailableNow = !filters.onlyAvailableNow;
+      filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
       syncAvailableNowUI();
       applyFilters();
-      if (filters.onlyAvailableNow) {
+      if (filterState.onlyAvailableNow) {
         showToast("Modo 'Disponível Agora' ativado!", "⚡");
       } else {
         showToast("Modo 'Disponível Agora' desativado", "🌐");
@@ -843,14 +847,14 @@
 
     // Hide Caught Checkbox
     hideCaughtCheckbox.addEventListener('change', (e) => {
-      filters.hideCaught = e.target.checked;
+      filterState.hideCaught = e.target.checked;
       applyFilters();
     });
 
     // Smart Time Button
     btnSmartTime.addEventListener('click', () => {
       const current = getSinnohPeriod();
-      filters.timeOfDay = current.key;
+      filterState.timeOfDay = current.key;
       syncFilterUI();
       applyFilters();
       showToast(`Ciclo sincronizado com o PC: ${current.label}`, current.icon);
@@ -859,10 +863,10 @@
     // Time of Day Buttons
     document.querySelectorAll('.tod-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        filters.timeOfDay = btn.dataset.tod;
+        filterState.timeOfDay = btn.dataset.tod;
         // If clicking a manual time, disable Available Now
-        if (filters.onlyAvailableNow) {
-          filters.onlyAvailableNow = false;
+        if (filterState.onlyAvailableNow) {
+          filterState.onlyAvailableNow = false;
           syncAvailableNowUI();
         }
         syncFilterUI();
@@ -877,7 +881,7 @@
       const val = e.target.value.trim();
       clearSearch.classList.toggle('hidden', val.length === 0);
       searchTimer = setTimeout(() => {
-        filters.search = val;
+        filterState.search = val;
         applyFilters();
       }, 150);
     });
@@ -885,18 +889,18 @@
     clearSearch.addEventListener('click', () => {
       searchInput.value = '';
       clearSearch.classList.add('hidden');
-      filters.search = '';
+      filterState.search = '';
       applyFilters();
     });
 
     // Dropdown change events
     locationSelect.addEventListener('change', (e) => {
-      filters.location = e.target.value;
+      filterState.location = e.target.value;
       applyFilters();
     });
 
     methodSelect.addEventListener('change', (e) => {
-      filters.method = e.target.value;
+      filterState.method = e.target.value;
       applyFilters();
     });
 
@@ -905,28 +909,28 @@
     // 1. Export JSON Backup
     btnExport.addEventListener('click', () => {
       const backupData = {
-        app: "Luminescent Platinum Encounter Tracker",
-        version: "2.2F",
+        app: APP_NAME,
+        version: APP_DATA_VERSION,
         exportedAt: new Date().toISOString(),
-        totalCaught: caughtSet.size,
-        caughtPokemon: Array.from(caughtSet),
-        filterPreferences: filters
+        totalCaught: caughtSpecies.size,
+        caughtPokemon: Array.from(caughtSpecies),
+        filterPreferences: filterState
       };
       
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `playthrough_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = `lumi_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
       URL.revokeObjectURL(url);
       
       showToast("Backup exportado com sucesso!", "💾");
     });
 
-    // 2. Import JSON Backup
+    // 2. Import JSON Backup (maintains compatibility with older backup exports)
     importFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -936,17 +940,17 @@
         try {
           const imported = JSON.parse(event.target.result);
           if (Array.isArray(imported.caughtPokemon)) {
-            caughtSet = new Set(imported.caughtPokemon);
+            caughtSpecies = new Set(imported.caughtPokemon);
             saveCaughtState();
 
             if (imported.filterPreferences) {
-              Object.assign(filters, imported.filterPreferences);
+              Object.assign(filterState, imported.filterPreferences);
               syncFilterUI();
             }
 
             updateProgressCounters();
             applyFilters();
-            showToast(`Backup carregado! ${caughtSet.size} capturas restauradas.`, "📂");
+            showToast(`Backup carregado! ${caughtSpecies.size} capturas restauradas.`, "📂");
           } else {
             throw new Error("Formato de backup inválido.");
           }
@@ -968,7 +972,7 @@
     });
 
     btnConfirmReset.addEventListener('click', () => {
-      caughtSet.clear();
+      caughtSpecies.clear();
       saveCaughtState();
       resetModal.classList.add('hidden');
       updateProgressCounters();
@@ -976,8 +980,8 @@
       showToast("Todas as capturas foram resetadas", "🗑️");
     });
 
-    // Initial Dashboard Setup
-    async function initDashboard() {
+    // Initial Tracker Setup
+    async function initTracker() {
       try {
         loadSavedState();
 
@@ -994,8 +998,8 @@
         allEncounters = await encRes.json();
 
         // Index all unique species in Luminescent
-        allEncounters.forEach(e => {
-          if (e.pokemon) allUniqueSpecies.add(e.pokemon);
+        allEncounters.forEach(encounter => {
+          if (encounter.pokemon) allUniqueSpecies.add(encounter.pokemon);
         });
 
         totalDisplay.textContent = allEncounters.length.toLocaleString();
@@ -1014,7 +1018,7 @@
       }
     }
 
-    initDashboard();
+    initTracker();
   </script>
 </body>
 </html>

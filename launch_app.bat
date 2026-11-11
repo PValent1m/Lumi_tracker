@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Luminescent Platinum Tracker - Diagnostico
+title Lumi Tracker - Diagnostico
 
 echo [1/3] Diretorio atual fixado em: %CD%
 

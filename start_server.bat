@@ -1,10 +1,10 @@
 @echo off
 chcp 65001 >nul
-title Luminescent Platinum - Servidor Local
+title Lumi Tracker - Servidor Local
 cd /d "%~dp0"
 
 echo ============================================================
-echo   Luminescent Platinum - Servidor Local de Contingência
+echo   Lumi Tracker - Servidor Local de Contingência
 echo ============================================================
 echo.
 
