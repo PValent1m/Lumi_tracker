@@ -1,6 +1,6 @@
 # Lumi tracker - An Pokémon encounter organizer
 
-Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémon by route/location (in campaign progression order), encounter method, and time of day, while keeping track of which species you have already caught.
+Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémon by route/location (in campaign progression order), encounter method, and time of day, while keeping track of which mons you have already caught.
 
 ## Features
 
