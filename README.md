@@ -1,23 +1,23 @@
 # Luminescent Platinum - Playthrough & Encounter Tracker
 
-Rastreador de encontros e progresso de playthrough para **Pokémon Luminescent Platinum**. Permite consultar Pokémon por rota/localização (na ordem da campanha), método de encontro, período do dia e controlar quais espécies já foram capturadas.
+Encounter and playthrough progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémon by route/location (in campaign progression order), encounter method, and time of day, while keeping track of which species you have already caught.
 
-## Funcionalidades
+## Features
 
-- **Filtro por ordem de progressão**: rotas ordenadas em `ordered_locations.json` combinadas com a base `luminescent_encounters.json`.
-- **Modo "Disponível Agora"**: filtra automaticamente os encontros considerando o horário atual do sistema (Manhã, Dia ou Noite), a rota selecionada e ocultando Pokémon já capturados.
-- **Progresso persistente**: salva as capturas e preferências no `localStorage` (em `%APPDATA%\LumiTracker` no modo desktop), com suporte a **Backup / Importação JSON**.
-- **Modo Desktop ou Navegador**: executa em janela nativa via `pywebview` (`app.py`) ou em servidor HTTP local de contingência (`server.py`).
+- **Progression-Ordered Route Filter**: Routes ordered in `ordered_locations.json` combined with the `luminescent_encounters.json` database.
+- **"Available Now" Mode**: Automatically filters encounters based on the current system time (Morning, Day, or Night) and the selected route, while hiding already-caught Pokémon.
+- **Persistent Progress**: Saves caught Pokémon and filter preferences in `localStorage` (stored in `%APPDATA%\LumiTracker` in desktop mode), with **JSON Backup / Import** support.
+- **Desktop or Browser Mode**: Runs in a native desktop window via `pywebview` (`app.py`) or through a local fallback HTTP server (`server.py`).
 
-## Pré-requisitos
+## Prerequisites
 
 - **Python 3.10+**
-- **Microsoft Edge WebView2** (já presente por padrão no Windows 10/11, necessário para o `pywebview` no modo desktop).
-- **Conexão com a internet**: a interface em `index.html` carrega o Tailwind CSS via CDN (`cdn.tailwindcss.com`) e sprites via Pokémon Showdown / PokéAPI.
+- **Microsoft Edge WebView2** (included by default on Windows 10/11, required by `pywebview` in desktop mode).
+- **Internet Connection**: The UI in `index.html` loads Tailwind CSS via CDN (`cdn.tailwindcss.com`) and sprites from Pokémon Showdown / PokéAPI.
 
-## Como Executar
+## Getting Started
 
-### 1. Instalar dependências
+### 1. Install Dependencies
 
 ```bash
 python -m venv .venv
@@ -25,59 +25,58 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 2. Iniciar o aplicativo
+### 2. Run the App
 
-* **App Desktop (recomendado):**
+* **Desktop App (Recommended):**
   ```bash
   python app.py
   ```
-  Ou clique duas vezes em `iniciar_app.bat` (que detecta `.venv` / `venv`, instala o `pywebview` se faltar e usa `server.py` caso o modo desktop falhe).
+  Or double-click `iniciar_app.bat` (which detects `.venv` / `venv`, installs `pywebview` if missing, and falls back to `server.py` if desktop mode fails).
 
-* **Servidor Web Local (navegador padrão):**
+* **Local Web Server (Default Browser):**
   ```bash
   python server.py
   ```
-  Ou execute `iniciar_servidor.bat`.
+  Or run `iniciar_servidor.bat`.
 
-## Compilação do Executável (`.exe`)
+## Building the Windows Executable (`.exe`)
 
-Para gerar o executável único (`dist/LuminescentTracker.exe`) no Windows:
+To build a standalone single-file executable (`dist/LuminescentTracker.exe`) on Windows:
 
 ```bash
 pip install -r requirements-dev.txt
 python build_exe.py
 ```
 
-Ou execute `compilar_exe.bat`.
+Or run `compilar_exe.bat`.
 
-> As compilações oficiais também são geradas automaticamente pelo GitHub Actions na aba **Releases** sempre que uma tag `v*` é publicada.
+> Official builds will be available soon under the **Releases** tab!!
 
-## Atualização da Base de Encontros
+## Updating the Encounter Database
 
-Os arquivos `luminescent_encounters.json` e `ordered_locations.json` já estão prontos para uso. Caso queira reprocessar os dados a partir do projeto oficial [TeamLumi/luminescent-team](https://github.com/TeamLumi/luminescent-team):
+`luminescent_encounters.json` and `ordered_locations.json` are already included and ready to use. If you want to re-extract the data from the official [TeamLumi/luminescent-team](https://github.com/TeamLumi/luminescent-team) repository:
 
-1. Clone o repositório de origem dentro da pasta `lumi-repo`:
+1. Clone the upstream repository into the `lumi-repo` folder:
    ```bash
    git clone https://github.com/TeamLumi/luminescent-team lumi-repo
    ```
-2. Execute o extrator:
+2. Run the parser script:
    ```bash
    python parse_encounters.py
    ```
 
-## Estrutura do Projeto
+## Project Structure
 
-- `app.py`: lançador desktop nativo usando `pywebview`.
-- `server.py`: servidor HTTP local de contingência (`localhost:8000+`).
-- `index.html`: interface web e lógica do tracker.
-- `luminescent_encounters.json`: base normalizada de encontros.
-- `ordered_locations.json`: lista ordenada de locais da campanha.
-- `parse_encounters.py`: script para extrair e normalizar dados de `lumi-repo/`.
-- `build_exe.py`: empacotador PyInstaller para Windows.
-- `iniciar_app.bat`, `iniciar_servidor.bat`, `compilar_exe.bat`: atalhos para Windows.
+- `app.py`: Native desktop launcher powered by `pywebview`.
+- `server.py`: Local fallback HTTP server (`localhost:8000+`).
+- `index.html`: Web interface and tracker logic.
+- `luminescent_encounters.json`: Normalized encounter database.
+- `ordered_locations.json`: Campaign-ordered list of locations.
+- `parse_encounters.py`: Script to extract and normalize data from `lumi-repo/`.
+- `build_exe.py`: PyInstaller bundler for Windows.
+- `iniciar_app.bat`, `iniciar_servidor.bat`, `compilar_exe.bat`: Windows convenience launchers.
 
-## Créditos
+## Credits
 
-- Dados de encontros e localizações baseados no projeto [Luminescent Platinum (TeamLumi/luminescent-team)](https://github.com/TeamLumi/luminescent-team).
-- Sprites carregados via [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/) e [PokéAPI](https://github.com/PokeAPI/sprites).
-
+- Encounter and location data based on [Luminescent Platinum (TeamLumi/luminescent-team)](https://github.com/TeamLumi/luminescent-team).
+- Sprites loaded from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/) and [PokéAPI](https://github.com/PokeAPI/sprites).
