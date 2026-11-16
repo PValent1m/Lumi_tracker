@@ -863,6 +863,24 @@
       }).catch(() => {});
     }
 
+    // Persist caught species and preferences to backend (pywebview API or server.py /api/state)
+    function syncStateToBackend(payload) {
+      try {
+        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.set_state === 'function') {
+          window.pywebview.api.set_state(payload);
+          return;
+        }
+      } catch (e) {
+        console.warn('pywebview set_state failed:', e);
+      }
+
+      fetch('./api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    }
+
     // Change active language immediately without reloading
     function setLanguage(lang, options = {}) {
       const normalized = normalizeLang(lang) || DEFAULT_LANG;
@@ -876,7 +894,7 @@
       } catch (e) {
         console.error('Error saving language:', e);
       }
-      savePreferences();
+      savePreferences(syncBackend);
 
       if (syncBackend) {
         syncLanguageToBackend(currentLang);
@@ -909,6 +927,57 @@
       return { showdownUrl, pokeApiUrl };
     }
 
+    function applyFilterPrefs(parsedPrefs) {
+      if (!parsedPrefs || typeof parsedPrefs !== 'object') return null;
+      if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
+      if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
+      if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
+      if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
+      if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
+      if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
+      return parsedPrefs.language !== undefined ? normalizeLang(parsedPrefs.language) : null;
+    }
+
+    function applyBackendState(backendState) {
+      if (!backendState || typeof backendState !== 'object') return;
+
+      const backendCaught = Array.isArray(backendState.caught) ? backendState.caught : [];
+      const hasBackendCaught = backendCaught.length > 0;
+      const hasBackendPrefs = Boolean(
+        backendState.exists &&
+        backendState.prefs &&
+        typeof backendState.prefs === 'object' &&
+        Object.keys(backendState.prefs).length > 0
+      );
+
+      if (hasBackendCaught) {
+        caughtSpecies = new Set(backendCaught);
+        try {
+          localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(backendCaught));
+        } catch (e) {}
+      } else if (caughtSpecies.size > 0) {
+        // Preserve local catches if backend state is empty or not created yet
+        syncStateToBackend({
+          caught: Array.from(caughtSpecies),
+          prefs: filterState
+        });
+      }
+
+      if (hasBackendPrefs) {
+        applyFilterPrefs(backendState.prefs);
+        filterState.language = currentLang;
+        try {
+          localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
+        } catch (e) {}
+      }
+
+      if (dataLoaded) {
+        syncFilterUI();
+        updateProgressCounters();
+        applyFilters(false);
+      }
+    }
+
     // Persistence: Load Caught Set, Preferences & Language
     function loadSavedState() {
       try {
@@ -927,14 +996,7 @@
       try {
         const rawPrefs = localStorage.getItem(STORAGE_PREFS_KEY);
         if (rawPrefs) {
-          const parsedPrefs = JSON.parse(rawPrefs);
-          if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
-          if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
-          if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
-          if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
-          if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
-          if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
-          if (parsedPrefs.language !== undefined) prefLang = normalizeLang(parsedPrefs.language);
+          prefLang = applyFilterPrefs(JSON.parse(rawPrefs));
         }
       } catch (e) {
         console.error('Error loading filter preferences:', e);
@@ -951,20 +1013,27 @@
     }
 
     // Persistence: Save Preferences
-    function savePreferences() {
+    function savePreferences(syncBackend = true) {
       try {
         localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
       } catch (e) {
         console.error('Error saving preferences:', e);
       }
+      if (syncBackend) {
+        syncStateToBackend({ prefs: filterState });
+      }
     }
 
     // Persistence: Save Caught Set
-    function saveCaughtState() {
+    function saveCaughtState(syncBackend = true) {
+      const caughtArray = Array.from(caughtSpecies);
       try {
-        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSpecies)));
+        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(caughtArray));
       } catch (e) {
         console.error('Error saving caught state:', e);
+      }
+      if (syncBackend) {
+        syncStateToBackend({ caught: caughtArray });
       }
     }
 
@@ -1074,9 +1143,11 @@
     }
 
     // Main Filtering Function
-    function applyFilters() {
+    function applyFilters(savePrefs = true) {
       displayLimit = PAGE_CHUNK;
-      savePreferences();
+      if (savePrefs) {
+        savePreferences();
+      }
       updateProgressCounters();
 
       const currentPeriod = getSinnohPeriod().key;
@@ -1287,19 +1358,25 @@
     // Listen for pywebview desktop bridge readiness
     window.addEventListener('pywebviewready', async () => {
       try {
-        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
-          const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
-          if (urlLang) {
-            setLanguage(urlLang, { syncBackend: true, notifyToast: false });
-          } else {
-            const backendLang = normalizeLang(await window.pywebview.api.get_lang());
-            if (backendLang && backendLang !== currentLang) {
-              setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+        if (window.pywebview && window.pywebview.api) {
+          if (typeof window.pywebview.api.get_state === 'function') {
+            const backendState = await window.pywebview.api.get_state();
+            applyBackendState(backendState);
+          }
+          if (typeof window.pywebview.api.get_lang === 'function') {
+            const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+            if (urlLang) {
+              setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+            } else {
+              const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+              if (backendLang && backendLang !== currentLang) {
+                setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+              }
             }
           }
         }
       } catch (e) {
-        console.warn('Could not sync initial language with pywebview:', e);
+        console.warn('Could not sync initial state/language with pywebview:', e);
       }
     });
 
@@ -1474,6 +1551,27 @@
       showToast(strings().toastCatchesReset, '🗑️');
     });
 
+    // Sync saved state from pywebview API or server.py /api/state
+    async function syncInitialStateFromServer() {
+      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_state === 'function') {
+        try {
+          const backendState = await window.pywebview.api.get_state();
+          applyBackendState(backendState);
+        } catch (e) {}
+        return;
+      }
+
+      try {
+        const res = await fetch('./api/state', { cache: 'no-store' });
+        if (res.ok) {
+          const backendState = await res.json();
+          applyBackendState(backendState);
+        }
+      } catch (e) {
+        // Static file server without /api/state (safe fallback to localStorage)
+      }
+    }
+
     // Sync language from server.py /api/lang if running outside pywebview
     async function syncInitialLangFromServer() {
       const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
@@ -1510,6 +1608,7 @@
     async function initTracker() {
       try {
         loadSavedState();
+        await syncInitialStateFromServer();
         applyTranslations();
         await syncInitialLangFromServer();
 
@@ -1537,7 +1636,7 @@
 
         syncFilterUI();
         updateProgressCounters();
-        applyFilters();
+        applyFilters(false);
       } catch (err) {
         console.error('Initialization error:', err);
         const s = strings();

@@ -18,9 +18,11 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from i18n_cli import (
     load_saved_lang,
+    load_saved_state,
     normalize_lang,
     resolve_cli_lang,
     save_lang,
+    save_state,
     t,
 )
 
@@ -88,6 +90,9 @@ def main():
             if clean_path == "/api/lang":
                 self._send_json(200, {"lang": load_saved_lang()})
                 return
+            if clean_path == "/api/state":
+                self._send_json(200, load_saved_state())
+                return
             super().do_GET()
 
         def do_POST(self):
@@ -104,6 +109,19 @@ def main():
                     saved_lang = save_lang(requested_lang)
                     print(t("server_lang_changed", saved_lang, lang_code=saved_lang.upper()))
                     self._send_json(200, {"ok": True, "lang": saved_lang})
+                except Exception as exc:
+                    self._send_json(400, {"ok": False, "error": str(exc)})
+                return
+            if clean_path == "/api/state":
+                try:
+                    content_length = int(self.headers.get("Content-Length", "0"))
+                    raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+                    data = json.loads(raw_body.decode("utf-8"))
+                    if not isinstance(data, dict):
+                        self._send_json(400, {"ok": False, "error": "Invalid state payload"})
+                        return
+                    saved = save_state(data)
+                    self._send_json(200, {"ok": True, **saved})
                 except Exception as exc:
                     self._send_json(400, {"ok": False, "error": str(exc)})
                 return
