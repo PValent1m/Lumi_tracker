@@ -56,9 +56,25 @@ if /i "%APP_LANG%"=="pt" (
 echo ============================================================
 echo.
 
-:: Check if Python is installed
-python --version >nul 2>&1
-if !errorlevel! neq 0 (
+:: Detect Python (local virtualenv, python, or py launcher)
+set "PY_CMD="
+if exist ".venv\Scripts\python.exe" (
+    set "PY_CMD=.venv\Scripts\python.exe"
+) else if exist "venv\Scripts\python.exe" (
+    set "PY_CMD=venv\Scripts\python.exe"
+) else (
+    where python >nul 2>nul
+    if !errorlevel! equ 0 (
+        set "PY_CMD=python"
+    ) else (
+        where py >nul 2>nul
+        if !errorlevel! equ 0 (
+            set "PY_CMD=py"
+        )
+    )
+)
+
+if not defined PY_CMD (
     if /i "%APP_LANG%"=="pt" (
         echo [ERRO] Python não foi encontrado no sistema.
         echo Por favor, instale o Python 3.10+ e adicione ao PATH.
@@ -77,7 +93,7 @@ if /i "%APP_LANG%"=="pt" (
     echo Starting local HTTP server and opening default browser...
 )
 echo.
-python server.py %*
+%PY_CMD% server.py %*
 
 if !errorlevel! neq 0 (
     echo.
