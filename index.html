@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,7 +67,7 @@
           <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2">
             LUMI TRACKER <span class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT 2.2F</span>
           </h1>
-          <p class="text-[11px] text-slate-400 font-medium">Guia de Encontros • Pokémon Luminescent Platinum</p>
+          <p id="headerSubtitle" class="text-[11px] text-slate-400 font-medium">Encounter Guide • Pokémon Luminescent Platinum</p>
         </div>
       </div>
 
@@ -79,33 +79,39 @@
           <span id="periodIcon" class="text-base">🕒</span>
           <div>
             <div id="clockDisplay" class="font-bold text-slate-200">--:--:--</div>
-            <div id="periodDisplay" class="text-[10px] text-cyan-400 font-sans tracking-wide uppercase font-semibold">Calculando...</div>
+            <div id="periodDisplay" class="text-[10px] text-cyan-400 font-sans tracking-wide uppercase font-semibold">Calculating...</div>
           </div>
         </div>
 
-        <!-- Mode: "Disponível Agora" Toggle Button -->
-        <button id="btnAvailableNow" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-500/50 text-slate-300 font-semibold flex items-center gap-1.5 transition-all active:scale-95 text-xs shadow-sm" title="Combina o horário atual, a rota selecionada e oculta os Pokémon já capturados">
+        <!-- Mode: "Available Now" Toggle Button -->
+        <button id="btnAvailableNow" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-500/50 text-slate-300 font-semibold flex items-center gap-1.5 transition-all active:scale-95 text-xs shadow-sm" title="Combines current time, selected route, and hides already caught Pokémon">
           <span id="availableNowIcon" class="text-slate-400">⚡</span>
-          <span>Disponível Agora</span>
+          <span id="availableNowLabel">Available Now</span>
           <span id="availableNowBadge" class="w-2 h-2 rounded-full bg-slate-600 ml-0.5"></span>
         </button>
 
         <!-- Backup & Import Actions -->
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
-          <button id="btnExport" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Exportar backup do progresso (JSON)">
+          <button id="btnExport" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Export progress backup (JSON)">
             <span>💾</span>
-            <span class="hidden sm:inline">Backup</span>
+            <span id="btnExportLabel" class="hidden sm:inline">Backup</span>
           </button>
           
-          <label class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px] cursor-pointer" title="Importar backup anteriormente salvo">
+          <label id="importLabel" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px] cursor-pointer" title="Import previously saved backup">
             <span>📂</span>
-            <span class="hidden sm:inline">Importar</span>
+            <span id="btnImportLabel" class="hidden sm:inline">Import</span>
             <input type="file" id="importFileInput" accept=".json" class="hidden">
           </label>
 
-          <button id="btnResetModal" class="p-1.5 px-2.5 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Resetar capturas">
+          <button id="btnResetModal" class="p-1.5 px-2.5 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Reset catches">
             <span>🗑️</span>
           </button>
+        </div>
+
+        <!-- Language Selector (Segmented EN | PT) -->
+        <div id="langSwitcher" class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-[11px] font-bold" title="Language / Idioma">
+          <button type="button" data-lang="en" class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">EN</button>
+          <button type="button" data-lang="pt" class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">PT</button>
         </div>
 
       </div>
@@ -122,7 +128,7 @@
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-xs">
             <span class="font-bold text-slate-300 flex items-center gap-1.5">
-              <span>📖</span> Progresso da Pokédex (Luminescent)
+              <span>📖</span> <span id="globalPokedexLabel">Pokédex Progress (Luminescent)</span>
             </span>
             <span class="font-mono font-bold text-cyan-400" id="globalPokedexCount">0 / 434 (0%)</span>
           </div>
@@ -135,7 +141,7 @@
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-xs">
             <span class="font-bold text-slate-300 flex items-center gap-1.5 truncate max-w-[280px]">
-              <span>📍</span> <span id="routeProgressLabel">Nesta Rota: Todas as Rotas</span>
+              <span>📍</span> <span id="routeProgressLabel">In This Route: All Routes</span>
             </span>
             <span class="font-mono font-bold text-emerald-400" id="routePokedexCount">0 / 0 (0%)</span>
           </div>
@@ -156,23 +162,23 @@
       
       <!-- Time of Day Radio/Pill Group -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-        <span class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Ciclo:</span>
+        <span id="cycleLabel" class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Cycle:</span>
         <button data-tod="all" class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
-          <span>🌐</span> Todos
+          <span>🌐</span> <span id="todAllLabel">All</span>
         </button>
         <button data-tod="Morning" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
-          <span>☀️</span> Manhã <span class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
+          <span>☀️</span> <span id="todMorningLabel">Morning</span> <span class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
         </button>
         <button data-tod="Day" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
-          <span>🌤️</span> Dia <span class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
+          <span>🌤️</span> <span id="todDayLabel">Day</span> <span class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
         </button>
         <button data-tod="Night" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
-          <span>🌙</span> Noite <span class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
+          <span>🌙</span> <span id="todNightLabel">Night</span> <span class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
         </button>
         
         <!-- Button: Activate System Clock -->
-        <button id="btnSmartTime" class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1" title="Sincronizar com o horário do seu PC">
-          <span>🕒</span> <span class="hidden sm:inline">Usar Horário Atual</span>
+        <button id="btnSmartTime" class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1" title="Sync with your PC clock">
+          <span>🕒</span> <span id="smartTimeLabel" class="hidden sm:inline">Use Current Time</span>
         </button>
       </div>
 
@@ -182,21 +188,21 @@
         <!-- Hide Caught Toggle -->
         <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
           <input type="checkbox" id="hideCaughtCheckbox" class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
-          <span class="text-xs font-medium">Ocultar Capturados</span>
+          <span id="hideCaughtLabel" class="text-xs font-medium">Hide Caught</span>
         </label>
 
         <!-- Method Selector -->
         <select id="methodSelect" class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
-          <option value="all">🎯 Todos os Métodos</option>
-          <option value="Walking">🌿 Grama (Walking)</option>
-          <option value="Fishing">🎣 Pesca (Varas)</option>
+          <option value="all">🎯 All Methods</option>
+          <option value="Walking">🌿 Grass (Walking)</option>
+          <option value="Fishing">🎣 Fishing (Rods)</option>
           <option value="Surfing">🌊 Surf</option>
-          <option value="Incense">🌸 Incense (Regionais)</option>
+          <option value="Incense">🌸 Incense (Regionals)</option>
           <option value="Radar">📡 Poké Radar</option>
-          <option value="Honey Tree">🍯 Árvore de Mel</option>
-          <option value="Static">⚡ Estático / Lendário</option>
-          <option value="Gift">🎁 Presentes / Iniciais</option>
-          <option value="Trade">🔄 Trocas In-Game</option>
+          <option value="Honey Tree">🍯 Honey Tree</option>
+          <option value="Static">⚡ Static / Legendary</option>
+          <option value="Gift">🎁 Gifts / Starters</option>
+          <option value="Trade">🔄 In-Game Trades</option>
         </select>
 
       </div>
@@ -214,10 +220,10 @@
         <input 
           id="searchInput" 
           type="text" 
-          placeholder="Buscar Pokémon por nome ou nº (ex: Starly, 396, Rotom)..." 
+          placeholder="Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)..." 
           class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner"
         >
-        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden">
+        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden" title="Clear search">
           ✕
         </button>
       </div>
@@ -231,7 +237,7 @@
           id="locationSelect" 
           class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer"
         >
-          <option value="all">🗺️ Todas as Rotas / Áreas (História de Sinnoh)</option>
+          <option value="all">🗺️ All Routes / Areas (Sinnoh Story Order)</option>
         </select>
       </div>
 
@@ -239,7 +245,7 @@
       <div class="md:col-span-2 flex items-center">
         <button id="btnResetFilters" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
           <span>🔄</span>
-          <span>Limpar Filtros</span>
+          <span id="btnResetFiltersLabel">Reset Filters</span>
         </button>
       </div>
 
@@ -249,10 +255,16 @@
     <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
       <div class="flex items-center gap-2">
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>Exibindo <b id="countDisplay" class="text-white">0</b> de <span id="totalDisplay">0</span> encontros</span>
+        <span>
+          <span id="showingPrefix">Showing</span>
+          <b id="countDisplay" class="text-white">0</b>
+          <span id="showingOf">of</span>
+          <span id="totalDisplay">0</span>
+          <span id="showingSuffix">encounters</span>
+        </span>
       </div>
       <div id="activeModeNotice" class="text-xs text-emerald-400 font-medium hidden flex items-center gap-1">
-        <span>⚡</span> Modo "Disponível Agora" Ativo
+        <span>⚡</span> <span id="activeModeNoticeText">"Available Now" Mode Active</span>
       </div>
     </div>
 
@@ -264,16 +276,16 @@
     <!-- Loading State -->
     <div id="loadingState" class="flex flex-col items-center justify-center py-20 text-center space-y-3">
       <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-sm text-slate-400 font-medium">Carregando base de dados do Luminescent Platinum...</p>
+      <p id="loadingText" class="text-sm text-slate-400 font-medium">Loading Luminescent Platinum database...</p>
     </div>
 
     <!-- Empty State -->
     <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
       <div class="text-5xl">🔍</div>
-      <h3 class="text-lg font-bold text-white">Nenhum encontro localizado</h3>
-      <p class="text-xs text-slate-400 max-w-md">Nenhum Pokémon corresponde aos filtros ativos. Se você estiver no modo "Disponível Agora", todos os Pokémon deste horário e rota já podem ter sido capturados!</p>
-      <button onclick="resetAllFilters()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
-        Restaurar Filtros Padrão
+      <h3 id="emptyTitle" class="text-lg font-bold text-white">No encounters found</h3>
+      <p id="emptyDesc" class="text-xs text-slate-400 max-w-md">No Pokémon match the active filters. If you are in "Available Now" mode, all Pokémon for this time and route may already be caught!</p>
+      <button id="emptyResetBtn" onclick="resetAllFilters()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
+        Restore Default Filters
       </button>
     </div>
 
@@ -285,28 +297,28 @@
     <!-- Infinite Scroll / Load More Trigger -->
     <div id="loadMoreContainer" class="py-6 text-center hidden">
       <button id="btnLoadMore" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
-        Carregar Mais Encontros...
+        Load More Encounters...
       </button>
     </div>
 
   </main>
 
-  <!-- Confirmation Modal: Reset Capturas -->
+  <!-- Confirmation Modal: Reset Catches -->
   <div id="resetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <div class="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-800 flex items-center justify-center text-2xl mx-auto text-rose-400">
         ⚠️
       </div>
       <div class="text-center space-y-1">
-        <h3 class="text-base font-bold text-white">Resetar Todas as Capturas?</h3>
-        <p class="text-xs text-slate-400">Esta ação removerá todas as marcações de Pokémon capturados do navegador. Recomendamos exportar um backup antes.</p>
+        <h3 id="resetModalTitle" class="text-base font-bold text-white">Reset All Catches?</h3>
+        <p id="resetModalDesc" class="text-xs text-slate-400">This action will remove all caught Pokémon marks from this browser. We recommend exporting a backup first.</p>
       </div>
       <div class="grid grid-cols-2 gap-3 pt-2">
         <button id="btnCancelReset" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
-          Cancelar
+          Cancel
         </button>
         <button id="btnConfirmReset" class="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-lg shadow-rose-600/30">
-          Confirmar Reset
+          Confirm Reset
         </button>
       </div>
     </div>
@@ -315,14 +327,14 @@
   <!-- Toast Notification Floating Element -->
   <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900/95 border border-cyan-500/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
     <span id="toastIcon">✨</span>
-    <span id="toastMessage">Operação realizada com sucesso!</span>
+    <span id="toastMessage">Operation completed successfully!</span>
   </div>
 
   <!-- Footer -->
   <footer class="bg-[#0b1120] border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p><b>Lumi Tracker</b> • Dados de <b>Luminescent Platinum</b></p>
-      <p class="text-slate-600">Base: <span class="text-slate-400">luminescent_encounters.json</span></p>
+      <p id="footerTitle"><b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b></p>
+      <p id="footerSource" class="text-slate-600">Database: <span class="text-slate-400">luminescent_encounters.json</span></p>
     </div>
   </footer>
 
@@ -333,13 +345,217 @@
     const APP_DATA_VERSION = '2.2F';
     const STORAGE_CAUGHT_KEY = 'lumi_caught_pokemon';
     const STORAGE_PREFS_KEY = 'lumi_filter_preferences';
+    const STORAGE_LANG_KEY = 'lumi_language';
+    const DEFAULT_LANG = 'en';
+
+    // Bilingual UI Strings Dictionary
+    const UI_STRINGS = {
+      en: {
+        htmlLang: 'en',
+        headerSubtitle: 'Encounter Guide • Pokémon Luminescent Platinum',
+        calculating: 'Calculating...',
+        periodMorning: '☀️ Morning (04h-10h)',
+        periodDay: '🌤️ Day (10h-20h)',
+        periodNight: '🌙 Night (20h-04h)',
+        availableNowLabel: 'Available Now',
+        availableNowTitle: 'Combines current time, selected route, and hides already caught Pokémon',
+        backupLabel: 'Backup',
+        backupTitle: 'Export progress backup (JSON)',
+        importLabel: 'Import',
+        importTitle: 'Import previously saved backup',
+        resetTitle: 'Reset catches',
+        langSwitcherTitle: 'Language / Idioma',
+        globalPokedexLabel: 'Pokédex Progress (Luminescent)',
+        routeAllLabel: (count) => `In This Route: All Routes (${count} species)`,
+        routeSingleLabel: (loc) => `In This Route: ${loc}`,
+        cycleLabel: 'Cycle:',
+        todAll: 'All',
+        todMorning: 'Morning',
+        todDay: 'Day',
+        todNight: 'Night',
+        smartTimeLabel: 'Use Current Time',
+        smartTimeTitle: 'Sync with your PC clock',
+        hideCaughtLabel: 'Hide Caught',
+        methodOptions: {
+          all: '🎯 All Methods',
+          Walking: '🌿 Grass (Walking)',
+          Fishing: '🎣 Fishing (Rods)',
+          Surfing: '🌊 Surf',
+          Incense: '🌸 Incense (Regionals)',
+          Radar: '📡 Poké Radar',
+          'Honey Tree': '🍯 Honey Tree',
+          Static: '⚡ Static / Legendary',
+          Gift: '🎁 Gifts / Starters',
+          Trade: '🔄 In-Game Trades',
+        },
+        searchPlaceholder: 'Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)...',
+        clearSearchTitle: 'Clear search',
+        locationAllOption: '🗺️ All Routes / Areas (Sinnoh Story Order)',
+        resetFiltersLabel: 'Reset Filters',
+        showingPrefix: 'Showing',
+        showingOf: 'of',
+        showingSuffix: 'encounters',
+        activeModeNoticeText: '"Available Now" Mode Active',
+        loadingText: 'Loading Luminescent Platinum database...',
+        errorLoadingTitle: 'Error loading data',
+        errorFetchEncounters: 'Failed to load luminescent_encounters.json',
+        emptyTitle: 'No encounters found',
+        emptyDesc: 'No Pokémon match the active filters. If you are in "Available Now" mode, all Pokémon for this time and route may already be caught!',
+        emptyResetBtn: 'Restore Default Filters',
+        loadMoreBtn: 'Load More Encounters...',
+        resetModalTitle: 'Reset All Catches?',
+        resetModalDesc: 'This action will remove all caught Pokémon marks from this browser. We recommend exporting a backup first.',
+        btnCancelReset: 'Cancel',
+        btnConfirmReset: 'Confirm Reset',
+        footerTitle: '<b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b>',
+        footerSource: 'Database: <span class="text-slate-400">luminescent_encounters.json</span>',
+        cardTodAny: 'Any Time',
+        cardTodAnyTitle: 'Available at any time (Morning, Day, and Night)',
+        cardTodMorning: 'Morning',
+        cardTodDay: 'Day',
+        cardTodNight: 'Night',
+        cardCaught: 'Caught',
+        cardCatch: 'Catch',
+        cardCatchTitle: 'Mark as caught in Lumi Tracker',
+        cardLevelLabel: 'Level',
+        cardLevelPrefix: 'Lv.',
+        cardRarityLabel: 'Rarity',
+        methods: {
+          'Walking': '🌿 Grass',
+          'Surfing': '🌊 Surf',
+          'Old Rod': '🎣 Old Rod',
+          'Good Rod': '🎣 Good Rod',
+          'Super Rod': '🎣 Super Rod',
+          'Radar': '📡 Radar',
+          'Incense': '🌸 Incense',
+          'Honey Tree': '🍯 Honey Tree',
+          'Static': '⚡ Static',
+          'Gift': '🎁 Gift',
+          'Trade': '🔄 Trade',
+        },
+        toastDefault: 'Operation completed successfully!',
+        toastUnmarked: (name) => `${name} unmarked from Pokédex`,
+        toastCaught: (name) => `${name} registered as Caught!`,
+        toastFiltersReset: 'Filters reset',
+        toastAvailableNowOn: '"Available Now" mode enabled!',
+        toastAvailableNowOff: '"Available Now" mode disabled',
+        toastCycleSynced: (label) => `Cycle synced with PC: ${label}`,
+        toastBackupExported: 'Backup exported successfully!',
+        toastBackupLoaded: (count) => `Backup loaded! ${count} catches restored.`,
+        errorInvalidBackup: 'Invalid backup format.',
+        alertImportError: 'Error importing backup: ',
+        toastCatchesReset: 'All catches have been reset',
+        toastLangChanged: 'Language changed to English',
+      },
+      pt: {
+        htmlLang: 'pt-BR',
+        headerSubtitle: 'Guia de Encontros • Pokémon Luminescent Platinum',
+        calculating: 'Calculando...',
+        periodMorning: '☀️ Manhã (04h-10h)',
+        periodDay: '🌤️ Dia (10h-20h)',
+        periodNight: '🌙 Noite (20h-04h)',
+        availableNowLabel: 'Disponível Agora',
+        availableNowTitle: 'Combina o horário atual, a rota selecionada e oculta os Pokémon já capturados',
+        backupLabel: 'Backup',
+        backupTitle: 'Exportar backup do progresso (JSON)',
+        importLabel: 'Importar',
+        importTitle: 'Importar backup anteriormente salvo',
+        resetTitle: 'Resetar capturas',
+        langSwitcherTitle: 'Idioma / Language',
+        globalPokedexLabel: 'Progresso da Pokédex (Luminescent)',
+        routeAllLabel: (count) => `Nesta Rota: Todas as Rotas (${count} espécies)`,
+        routeSingleLabel: (loc) => `Nesta Rota: ${loc}`,
+        cycleLabel: 'Ciclo:',
+        todAll: 'Todos',
+        todMorning: 'Manhã',
+        todDay: 'Dia',
+        todNight: 'Noite',
+        smartTimeLabel: 'Usar Horário Atual',
+        smartTimeTitle: 'Sincronizar com o horário do seu PC',
+        hideCaughtLabel: 'Ocultar Capturados',
+        methodOptions: {
+          all: '🎯 Todos os Métodos',
+          Walking: '🌿 Grama (Walking)',
+          Fishing: '🎣 Pesca (Varas)',
+          Surfing: '🌊 Surf',
+          Incense: '🌸 Incense (Regionais)',
+          Radar: '📡 Poké Radar',
+          'Honey Tree': '🍯 Árvore de Mel',
+          Static: '⚡ Estático / Lendário',
+          Gift: '🎁 Presentes / Iniciais',
+          Trade: '🔄 Trocas In-Game',
+        },
+        searchPlaceholder: 'Buscar Pokémon por nome, nº ou rota (ex: Starly, 396, Rotom)...',
+        clearSearchTitle: 'Limpar busca',
+        locationAllOption: '🗺️ Todas as Rotas / Áreas (História de Sinnoh)',
+        resetFiltersLabel: 'Limpar Filtros',
+        showingPrefix: 'Exibindo',
+        showingOf: 'de',
+        showingSuffix: 'encontros',
+        activeModeNoticeText: 'Modo "Disponível Agora" Ativo',
+        loadingText: 'Carregando base de dados do Luminescent Platinum...',
+        errorLoadingTitle: 'Erro ao carregar os dados',
+        errorFetchEncounters: 'Falha ao carregar luminescent_encounters.json',
+        emptyTitle: 'Nenhum encontro localizado',
+        emptyDesc: 'Nenhum Pokémon corresponde aos filtros ativos. Se você estiver no modo "Disponível Agora", todos os Pokémon deste horário e rota já podem ter sido capturados!',
+        emptyResetBtn: 'Restaurar Filtros Padrão',
+        loadMoreBtn: 'Carregar Mais Encontros...',
+        resetModalTitle: 'Resetar Todas as Capturas?',
+        resetModalDesc: 'Esta ação removerá todas as marcações de Pokémon capturados do navegador. Recomendamos exportar um backup antes.',
+        btnCancelReset: 'Cancelar',
+        btnConfirmReset: 'Confirmar Reset',
+        footerTitle: '<b>Lumi Tracker</b> • Dados de <b>Luminescent Platinum</b>',
+        footerSource: 'Base: <span class="text-slate-400">luminescent_encounters.json</span>',
+        cardTodAny: 'Qualquer Hora',
+        cardTodAnyTitle: 'Disponível a qualquer horário (Manhã, Dia e Noite)',
+        cardTodMorning: 'Manhã',
+        cardTodDay: 'Dia',
+        cardTodNight: 'Noite',
+        cardCaught: 'Capturado',
+        cardCatch: 'Registrar',
+        cardCatchTitle: 'Marcar como capturado no Lumi Tracker',
+        cardLevelLabel: 'Nível',
+        cardLevelPrefix: 'Nv.',
+        cardRarityLabel: 'Raridade',
+        methods: {
+          'Walking': '🌿 Grama',
+          'Surfing': '🌊 Surf',
+          'Old Rod': '🎣 Old Rod',
+          'Good Rod': '🎣 Good Rod',
+          'Super Rod': '🎣 Super Rod',
+          'Radar': '📡 Radar',
+          'Incense': '🌸 Incense',
+          'Honey Tree': '🍯 Árvore',
+          'Static': '⚡ Estático',
+          'Gift': '🎁 Presente',
+          'Trade': '🔄 Troca',
+        },
+        toastDefault: 'Operação realizada com sucesso!',
+        toastUnmarked: (name) => `${name} desmarcado da Pokédex`,
+        toastCaught: (name) => `${name} registrado como Capturado!`,
+        toastFiltersReset: 'Filtros redefinidos',
+        toastAvailableNowOn: "Modo 'Disponível Agora' ativado!",
+        toastAvailableNowOff: "Modo 'Disponível Agora' desativado",
+        toastCycleSynced: (label) => `Ciclo sincronizado com o PC: ${label}`,
+        toastBackupExported: 'Backup exportado com sucesso!',
+        toastBackupLoaded: (count) => `Backup carregado! ${count} capturas restauradas.`,
+        errorInvalidBackup: 'Formato de backup inválido.',
+        alertImportError: 'Erro ao importar backup: ',
+        toastCatchesReset: 'Todas as capturas foram resetadas',
+        toastLangChanged: 'Idioma alterado para Português',
+      },
+    };
+
+    // Active Language State
+    let currentLang = DEFAULT_LANG;
 
     // State Store
     let allEncounters = [];
     let filteredEncounters = [];
     let orderedLocations = [];
     let allUniqueSpecies = new Set();
-    
+    let dataLoaded = false;
+
     // Lumi Tracker Captured State (Set of Pokémon Names)
     let caughtSpecies = new Set();
 
@@ -354,10 +570,39 @@
       timeOfDay: 'all',
       method: 'all',
       onlyAvailableNow: false,
-      hideCaught: false
+      hideCaught: false,
+      language: DEFAULT_LANG
     };
 
     // DOM Elements
+    const headerSubtitle = document.getElementById('headerSubtitle');
+    const availableNowLabel = document.getElementById('availableNowLabel');
+    const btnExportLabel = document.getElementById('btnExportLabel');
+    const importLabel = document.getElementById('importLabel');
+    const btnImportLabel = document.getElementById('btnImportLabel');
+    const langSwitcher = document.getElementById('langSwitcher');
+    const globalPokedexLabel = document.getElementById('globalPokedexLabel');
+    const cycleLabel = document.getElementById('cycleLabel');
+    const todAllLabel = document.getElementById('todAllLabel');
+    const todMorningLabel = document.getElementById('todMorningLabel');
+    const todDayLabel = document.getElementById('todDayLabel');
+    const todNightLabel = document.getElementById('todNightLabel');
+    const smartTimeLabel = document.getElementById('smartTimeLabel');
+    const hideCaughtLabel = document.getElementById('hideCaughtLabel');
+    const btnResetFiltersLabel = document.getElementById('btnResetFiltersLabel');
+    const showingPrefix = document.getElementById('showingPrefix');
+    const showingOf = document.getElementById('showingOf');
+    const showingSuffix = document.getElementById('showingSuffix');
+    const activeModeNoticeText = document.getElementById('activeModeNoticeText');
+    const loadingText = document.getElementById('loadingText');
+    const emptyTitle = document.getElementById('emptyTitle');
+    const emptyDesc = document.getElementById('emptyDesc');
+    const emptyResetBtn = document.getElementById('emptyResetBtn');
+    const resetModalTitle = document.getElementById('resetModalTitle');
+    const resetModalDesc = document.getElementById('resetModalDesc');
+    const footerTitle = document.getElementById('footerTitle');
+    const footerSource = document.getElementById('footerSource');
+
     const cardsGrid = document.getElementById('cardsGrid');
     const loadingState = document.getElementById('loadingState');
     const emptyState = document.getElementById('emptyState');
@@ -379,7 +624,7 @@
     const clockDisplay = document.getElementById('clockDisplay');
     const periodDisplay = document.getElementById('periodDisplay');
     const periodIcon = document.getElementById('periodIcon');
-    
+
     // Progress Elements
     const globalPokedexCount = document.getElementById('globalPokedexCount');
     const globalPokedexBar = document.getElementById('globalPokedexBar');
@@ -398,20 +643,87 @@
     const toastMessage = document.getElementById('toastMessage');
     const toastIcon = document.getElementById('toastIcon');
 
-    // Method badge configuration
-    const METHOD_STYLES = {
-      'Walking': { label: '🌿 Grama', bg: 'bg-emerald-950/60', text: 'text-emerald-300', border: 'border-emerald-800/60' },
-      'Surfing': { label: '🌊 Surf', bg: 'bg-blue-950/60', text: 'text-blue-300', border: 'border-blue-800/60' },
-      'Old Rod': { label: '🎣 Old Rod', bg: 'bg-cyan-950/60', text: 'text-cyan-300', border: 'border-cyan-800/60' },
-      'Good Rod': { label: '🎣 Good Rod', bg: 'bg-teal-950/60', text: 'text-teal-300', border: 'border-teal-800/60' },
-      'Super Rod': { label: '🎣 Super Rod', bg: 'bg-sky-950/60', text: 'text-sky-300', border: 'border-sky-800/60' },
-      'Radar': { label: '📡 Radar', bg: 'bg-purple-950/60', text: 'text-purple-300', border: 'border-purple-800/60' },
-      'Incense': { label: '🌸 Incense', bg: 'bg-fuchsia-950/60', text: 'text-fuchsia-300', border: 'border-fuchsia-800/60' },
-      'Honey Tree': { label: '🍯 Árvore', bg: 'bg-amber-950/60', text: 'text-amber-300', border: 'border-amber-800/60' },
-      'Static': { label: '⚡ Estático', bg: 'bg-rose-950/60', text: 'text-rose-300', border: 'border-rose-800/60' },
-      'Gift': { label: '🎁 Presente', bg: 'bg-indigo-950/60', text: 'text-indigo-300', border: 'border-indigo-800/60' },
-      'Trade': { label: '🔄 Troca', bg: 'bg-slate-800/70', text: 'text-slate-300', border: 'border-slate-700' },
+    // Method badge visual theme configuration (labels localized via UI_STRINGS)
+    const METHOD_THEME = {
+      'Walking': { bg: 'bg-emerald-950/60', text: 'text-emerald-300', border: 'border-emerald-800/60' },
+      'Surfing': { bg: 'bg-blue-950/60', text: 'text-blue-300', border: 'border-blue-800/60' },
+      'Old Rod': { bg: 'bg-cyan-950/60', text: 'text-cyan-300', border: 'border-cyan-800/60' },
+      'Good Rod': { bg: 'bg-teal-950/60', text: 'text-teal-300', border: 'border-teal-800/60' },
+      'Super Rod': { bg: 'bg-sky-950/60', text: 'text-sky-300', border: 'border-sky-800/60' },
+      'Radar': { bg: 'bg-purple-950/60', text: 'text-purple-300', border: 'border-purple-800/60' },
+      'Incense': { bg: 'bg-fuchsia-950/60', text: 'text-fuchsia-300', border: 'border-fuchsia-800/60' },
+      'Honey Tree': { bg: 'bg-amber-950/60', text: 'text-amber-300', border: 'border-amber-800/60' },
+      'Static': { bg: 'bg-rose-950/60', text: 'text-rose-300', border: 'border-rose-800/60' },
+      'Gift': { bg: 'bg-indigo-950/60', text: 'text-indigo-300', border: 'border-indigo-800/60' },
+      'Trade': { bg: 'bg-slate-800/70', text: 'text-slate-300', border: 'border-slate-700' },
     };
+
+    function strings() {
+      return UI_STRINGS[currentLang] || UI_STRINGS[DEFAULT_LANG];
+    }
+
+    function normalizeLang(val) {
+      if (!val || typeof val !== 'string') return null;
+      const cleaned = val.trim().toLowerCase().replace('_', '-');
+      if (cleaned === 'en' || cleaned.startsWith('en-')) return 'en';
+      if (cleaned === 'pt' || cleaned.startsWith('pt-')) return 'pt';
+      return null;
+    }
+
+    function escapeAttr(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // Keep proper location names in English as in the ROM, translating only qualifiers in PT mode
+    function formatLocationName(loc, lang = currentLang) {
+      if (!loc || lang !== 'pt') return loc;
+
+      return loc
+        .replace(/\(Before\)/g, '(Antes)')
+        .replace(/\(After\)/g, '(Depois)')
+        .replace(/\(South\)/g, '(Sul)')
+        .replace(/\(North\)/g, '(Norte)')
+        .replace(/\(East\)/g, '(Leste)')
+        .replace(/\(West\)/g, '(Oeste)')
+        .replace(/\(Outside\)/g, '(Exterior)')
+        .replace(/\(Interior\)/g, '(Interior)')
+        .replace(/\(Summit\)/g, '(Topo)')
+        .replace(/ - Summit\b/g, ' - Topo')
+        .replace(/\(TV Station\)/g, '(Estação de TV)')
+        .replace(/\(Trainer School\)/g, '(Escola de Treinadores)')
+        .replace(/\(Museum\)/g, '(Museu)')
+        .replace(/\(Steven's House\)/g, '(Casa do Steven)')
+        .replace(/\(Galactic Building\)/g, '(Prédio Galactic)')
+        .replace(/ - Main Area\b/g, ' - Área Principal')
+        .replace(/ - Secret Area\b/g, ' - Área Secreta')
+        .replace(/ - Snow Area\b/g, ' - Área de Neve')
+        .replace(/ - Tunnel to Route 211 Entrance\b/g, ' - Túnel para a Entrada da Route 211')
+        .replace(/ - Route (\d+) Entrance\b/g, ' - Entrada da Route $1')
+        .replace(/ - Entrance\b/g, ' - Entrada')
+        .replace(/\(Entrance\)/g, '(Entrada)')
+        .replace(/\(Towards Spear Pillar\)/g, '(Rumo ao Spear Pillar)')
+        .replace(/\(Waterfall\)/g, '(Cachoeira)')
+        .replace(/\bDead End\b/g, 'Sem Saída')
+        .replace(/ - Large\b/g, ' - Grande')
+        .replace(/ - Small\b/g, ' - Pequena')
+        .replace(/ - Area (\d+)\b/g, ' - Área $1')
+        .replace(/\bB1F Left\b/g, 'B1F Esquerda')
+        .replace(/\bB1F Right\b/g, 'B1F Direita')
+        .replace(/\bB2F Left \(Riley's Room\)/g, 'B2F Esquerda (Sala do Riley)')
+        .replace(/\bB2F Right\b/g, 'B2F Direita')
+        .replace(/\b1F Back \(214 Exit\)/g, '1F Fundos (Saída 214)')
+        .replace(/\b1F Back \(Entrance\)/g, '1F Fundos (Entrada)')
+        .replace(/\b1F Back \(Marley\)/g, '1F Fundos (Marley)')
+        .replace(/ - 2F Hallway\b/g, ' - Corredor 2F')
+        .replace(/ - 2F Small Rooms\b/g, ' - Salas Pequenas 2F')
+        .replace(/ - Dining Room\b/g, ' - Sala de Jantar')
+        .replace(/ - Hallway Room (\d+)\b/g, ' - Sala do Corredor $1')
+        .replace(/ - Lobby\b/g, ' - Saguão');
+    }
 
     // Toast Notification Display Helper
     let toastTimeout = null;
@@ -426,14 +738,15 @@
     }
 
     // Determine Sinnoh in-game period (Gen 4 / BDSP rules)
-    function getSinnohPeriod(date = new Date()) {
+    function getSinnohPeriod(date = new Date(), lang = currentLang) {
+      const s = UI_STRINGS[lang] || UI_STRINGS[DEFAULT_LANG];
       const hours = date.getHours();
       if (hours >= 4 && hours < 10) {
-        return { key: 'Morning', label: '☀️ Manhã (04h-10h)', icon: '☀️' };
+        return { key: 'Morning', label: s.periodMorning, icon: '☀️' };
       } else if (hours >= 10 && hours < 20) {
-        return { key: 'Day', label: '🌤️ Dia (10h-20h)', icon: '🌤️' };
+        return { key: 'Day', label: s.periodDay, icon: '🌤️' };
       } else {
-        return { key: 'Night', label: '🌙 Noite (20h-04h)', icon: '🌙' };
+        return { key: 'Night', label: s.periodNight, icon: '🌙' };
       }
     }
 
@@ -442,13 +755,139 @@
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       clockDisplay.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      
-      const period = getSinnohPeriod(now);
+
+      const period = getSinnohPeriod(now, currentLang);
       periodDisplay.textContent = period.label;
       periodIcon.textContent = period.icon;
     }
     setInterval(updateClock, 1000);
-    updateClock();
+
+    // Sync segmented language toggle buttons
+    function syncLangButtonsUI() {
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        const isActive = btn.dataset.lang === currentLang;
+        btn.classList.toggle('bg-cyan-500/20', isActive);
+        btn.classList.toggle('text-cyan-300', isActive);
+        btn.classList.toggle('border-cyan-500/40', isActive);
+        btn.classList.toggle('shadow-sm', isActive);
+
+        btn.classList.toggle('text-slate-400', !isActive);
+        btn.classList.toggle('hover:text-slate-200', !isActive);
+        btn.classList.toggle('border-transparent', !isActive);
+      });
+    }
+
+    // Apply all UI translations for the active language
+    function applyTranslations() {
+      const s = strings();
+      document.documentElement.lang = s.htmlLang;
+
+      headerSubtitle.textContent = s.headerSubtitle;
+      availableNowLabel.textContent = s.availableNowLabel;
+      btnAvailableNow.title = s.availableNowTitle;
+      btnExportLabel.textContent = s.backupLabel;
+      btnExport.title = s.backupTitle;
+      btnImportLabel.textContent = s.importLabel;
+      importLabel.title = s.importTitle;
+      btnResetModal.title = s.resetTitle;
+      langSwitcher.title = s.langSwitcherTitle;
+
+      globalPokedexLabel.textContent = s.globalPokedexLabel;
+
+      cycleLabel.textContent = s.cycleLabel;
+      todAllLabel.textContent = s.todAll;
+      todMorningLabel.textContent = s.todMorning;
+      todDayLabel.textContent = s.todDay;
+      todNightLabel.textContent = s.todNight;
+      smartTimeLabel.textContent = s.smartTimeLabel;
+      btnSmartTime.title = s.smartTimeTitle;
+      hideCaughtLabel.textContent = s.hideCaughtLabel;
+
+      Array.from(methodSelect.options).forEach(opt => {
+        if (s.methodOptions[opt.value]) {
+          opt.textContent = s.methodOptions[opt.value];
+        }
+      });
+
+      searchInput.placeholder = s.searchPlaceholder;
+      clearSearch.title = s.clearSearchTitle;
+      btnResetFiltersLabel.textContent = s.resetFiltersLabel;
+
+      showingPrefix.textContent = s.showingPrefix;
+      showingOf.textContent = s.showingOf;
+      showingSuffix.textContent = s.showingSuffix;
+      activeModeNoticeText.textContent = s.activeModeNoticeText;
+
+      loadingText.textContent = s.loadingText;
+      emptyTitle.textContent = s.emptyTitle;
+      emptyDesc.textContent = s.emptyDesc;
+      emptyResetBtn.textContent = s.emptyResetBtn;
+      btnLoadMore.textContent = s.loadMoreBtn;
+
+      resetModalTitle.textContent = s.resetModalTitle;
+      resetModalDesc.textContent = s.resetModalDesc;
+      btnCancelReset.textContent = s.btnCancelReset;
+      btnConfirmReset.textContent = s.btnConfirmReset;
+
+      footerTitle.innerHTML = s.footerTitle;
+      footerSource.innerHTML = s.footerSource;
+
+      syncLangButtonsUI();
+      updateClock();
+
+      if (dataLoaded) {
+        const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+        totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
+        populateLocationsDropdown(orderedLocations);
+        syncFilterUI();
+        updateProgressCounters();
+        renderCards();
+      }
+    }
+
+    // Persist language to backend (pywebview API or server.py /api/lang)
+    function syncLanguageToBackend(lang) {
+      try {
+        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.set_lang === 'function') {
+          window.pywebview.api.set_lang(lang);
+          return;
+        }
+      } catch (e) {
+        console.warn('pywebview set_lang failed:', e);
+      }
+
+      fetch('./api/lang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang })
+      }).catch(() => {});
+    }
+
+    // Change active language immediately without reloading
+    function setLanguage(lang, options = {}) {
+      const normalized = normalizeLang(lang) || DEFAULT_LANG;
+      const { syncBackend = true, notifyToast = false } = options;
+
+      currentLang = normalized;
+      filterState.language = currentLang;
+
+      try {
+        localStorage.setItem(STORAGE_LANG_KEY, currentLang);
+      } catch (e) {
+        console.error('Error saving language:', e);
+      }
+      savePreferences();
+
+      if (syncBackend) {
+        syncLanguageToBackend(currentLang);
+      }
+
+      applyTranslations();
+
+      if (notifyToast) {
+        showToast(strings().toastLangChanged, '🌐');
+      }
+    }
 
     // Sprite URLs Generator
     function getSpriteUrls(pokemonName, id) {
@@ -470,7 +909,7 @@
       return { showdownUrl, pokeApiUrl };
     }
 
-    // Persistence: Load Caught Set & Preferences
+    // Persistence: Load Caught Set, Preferences & Language
     function loadSavedState() {
       try {
         const rawCaught = localStorage.getItem(STORAGE_CAUGHT_KEY);
@@ -481,9 +920,10 @@
           }
         }
       } catch (e) {
-        console.error("Erro ao carregar estado de capturas:", e);
+        console.error('Error loading caught state:', e);
       }
 
+      let prefLang = null;
       try {
         const rawPrefs = localStorage.getItem(STORAGE_PREFS_KEY);
         if (rawPrefs) {
@@ -494,10 +934,20 @@
           if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
           if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
           if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
+          if (parsedPrefs.language !== undefined) prefLang = normalizeLang(parsedPrefs.language);
         }
       } catch (e) {
-        console.error("Erro ao carregar preferências de filtros:", e);
+        console.error('Error loading filter preferences:', e);
       }
+
+      let storedLang = null;
+      try {
+        storedLang = normalizeLang(localStorage.getItem(STORAGE_LANG_KEY));
+      } catch (e) {}
+
+      const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+      currentLang = urlLang || storedLang || prefLang || DEFAULT_LANG;
+      filterState.language = currentLang;
     }
 
     // Persistence: Save Preferences
@@ -505,7 +955,7 @@
       try {
         localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
       } catch (e) {
-        console.error("Erro ao salvar preferências:", e);
+        console.error('Error saving preferences:', e);
       }
     }
 
@@ -514,18 +964,19 @@
       try {
         localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSpecies)));
       } catch (e) {
-        console.error("Erro ao salvar estado de capturas:", e);
+        console.error('Error saving caught state:', e);
       }
     }
 
     // Toggle Capture status for a Pokémon
     window.toggleCatch = function(pokemonName) {
+      const s = strings();
       if (caughtSpecies.has(pokemonName)) {
         caughtSpecies.delete(pokemonName);
-        showToast(`${pokemonName} desmarcado da Pokédex`, '○');
+        showToast(s.toastUnmarked(pokemonName), '○');
       } else {
         caughtSpecies.add(pokemonName);
-        showToast(`${pokemonName} registrado como Capturado!`, '✅');
+        showToast(s.toastCaught(pokemonName), '✅');
       }
       saveCaughtState();
       updateProgressCounters();
@@ -534,6 +985,7 @@
 
     // Update Global and Route Progress Bars
     function updateProgressCounters() {
+      const s = strings();
       // 1. Global Pokédex Progress
       const totalSpecies = allUniqueSpecies.size || 434;
       let caughtCount = 0;
@@ -554,12 +1006,12 @@
         });
         const routeTotal = routeSpecies.size;
         const routePct = routeTotal > 0 ? ((routeCaught / routeTotal) * 100).toFixed(0) : 0;
-        
-        routeProgressLabel.textContent = `Nesta Rota: ${filterState.location}`;
+
+        routeProgressLabel.textContent = s.routeSingleLabel(formatLocationName(filterState.location, currentLang));
         routePokedexCount.textContent = `${routeCaught} / ${routeTotal} (${routePct}%)`;
         routePokedexBar.style.width = `${routePct}%`;
       } else {
-        routeProgressLabel.textContent = `Nesta Rota: Todas as Rotas (${allUniqueSpecies.size} espécies)`;
+        routeProgressLabel.textContent = s.routeAllLabel(allUniqueSpecies.size);
         routePokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
         routePokedexBar.style.width = `${globalPct}%`;
       }
@@ -581,7 +1033,6 @@
         }
       });
 
-      // "Disponível Agora" state
       syncAvailableNowUI();
     }
 
@@ -603,13 +1054,20 @@
       }
     }
 
-    // Populate Location Dropdown
+    // Populate Location Dropdown (keeping canonical EN value, displaying localized label)
     function populateLocationsDropdown(locations) {
-      locationSelect.innerHTML = '<option value="all">🗺️ Todas as Rotas / Áreas (História de Sinnoh)</option>';
+      const s = strings();
+      locationSelect.innerHTML = '';
+
+      const allOpt = document.createElement('option');
+      allOpt.value = 'all';
+      allOpt.textContent = s.locationAllOption;
+      locationSelect.appendChild(allOpt);
+
       locations.forEach(loc => {
         const opt = document.createElement('option');
         opt.value = loc;
-        opt.textContent = `📍 ${loc}`;
+        opt.textContent = `📍 ${formatLocationName(loc, currentLang)}`;
         locationSelect.appendChild(opt);
       });
       locationSelect.value = filterState.location || 'all';
@@ -626,12 +1084,9 @@
       filteredEncounters = allEncounters.filter(item => {
         const isCaught = caughtSpecies.has(item.pokemon);
 
-        // Mode: "Disponível Agora" Logic
+        // Mode: "Available Now" Logic
         if (filterState.onlyAvailableNow) {
-          // 1. Remove already caught
           if (isCaught) return false;
-
-          // 2. Must be available in the current clock period
           if (!item.time_of_day.includes(currentPeriod)) return false;
         }
 
@@ -663,12 +1118,13 @@
           }
         }
 
-        // Search Query (Pokemon name, Dex ID, or Location)
+        // Search Query (Pokemon name, Dex ID, or Location in EN/PT)
         if (filterState.search) {
           const query = filterState.search.toLowerCase();
           const nameMatch = item.pokemon.toLowerCase().includes(query);
           const idMatch = String(item.id).includes(query);
-          const locMatch = item.location.toLowerCase().includes(query);
+          const locMatch = item.location.toLowerCase().includes(query) ||
+            formatLocationName(item.location, 'pt').toLowerCase().includes(query);
           if (!nameMatch && !idMatch && !locMatch) {
             return false;
           }
@@ -682,7 +1138,9 @@
 
     // Render Cards in Grid
     function renderCards() {
-      countDisplay.textContent = filteredEncounters.length.toLocaleString();
+      const s = strings();
+      const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+      countDisplay.textContent = filteredEncounters.length.toLocaleString(locale);
 
       if (filteredEncounters.length === 0) {
         cardsGrid.innerHTML = '';
@@ -694,30 +1152,32 @@
       emptyState.classList.add('hidden');
 
       const itemsToShow = filteredEncounters.slice(0, displayLimit);
-      
+
       let html = '';
       itemsToShow.forEach(item => {
         const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
-        const methodInfo = METHOD_STYLES[item.method] || { label: item.method, bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+        const theme = METHOD_THEME[item.method] || { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+        const methodLabel = s.methods[item.method] || item.method;
         const isCaught = caughtSpecies.has(item.pokemon);
+        const displayLocation = formatLocationName(item.location, currentLang);
 
         // Time of Day Badges
         let todBadge = '';
         if (item.time_of_day.length === 3) {
-          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="Disponível a qualquer horário (Manhã, Dia e Noite)">
-            <span>⏱️</span> <span>Qualquer Hora</span>
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="${escapeAttr(s.cardTodAnyTitle)}">
+            <span>⏱️</span> <span>${s.cardTodAny}</span>
           </span>`;
         } else if (item.time_of_day.includes('Morning')) {
           todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
-            <span>☀️</span> <span>Manhã</span>
+            <span>☀️</span> <span>${s.cardTodMorning}</span>
           </span>`;
         } else if (item.time_of_day.includes('Day')) {
           todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
-            <span>🌤️</span> <span>Dia</span>
+            <span>🌤️</span> <span>${s.cardTodDay}</span>
           </span>`;
         } else if (item.time_of_day.includes('Night')) {
           todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
-            <span>🌙</span> <span>Noite</span>
+            <span>🌙</span> <span>${s.cardTodNight}</span>
           </span>`;
         }
 
@@ -727,15 +1187,18 @@
           : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700';
 
         const catchBtnText = isCaught
-          ? '<span>✓</span> <span>Capturado</span>'
-          : '<span>○</span> <span>Registrar</span>';
+          ? `<span>✓</span> <span>${s.cardCaught}</span>`
+          : `<span>○</span> <span>${s.cardCatch}</span>`;
 
-        // Conditions note
-        const hasSpecialCond = item.conditions && item.conditions !== 'Nenhuma';
+        // Bilingual conditions note
+        const condText = currentLang === 'pt'
+          ? (item.conditions_pt || item.conditions)
+          : item.conditions;
+        const hasSpecialCond = condText && condText !== 'None' && condText !== 'Nenhuma';
         const condHtml = hasSpecialCond
-          ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${item.conditions}">
+          ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${escapeAttr(condText)}">
               <span class="text-cyan-400 shrink-0">ℹ️</span>
-              <span class="leading-tight">${item.conditions}</span>
+              <span class="leading-tight">${condText}</span>
             </div>`
           : '';
 
@@ -746,13 +1209,13 @@
             <div>
               <div class="flex items-center justify-between text-xs text-slate-400 pb-2 mb-2 border-b border-slate-800/60 gap-2">
                 <span class="font-mono text-[11px] text-slate-500 font-bold shrink-0">#${item.id ? String(item.id).padStart(3, '0') : '???'}</span>
-                <span class="font-medium text-slate-300 truncate text-[11px]" title="${item.location}">📍 ${item.location}</span>
+                <span class="font-medium text-slate-300 truncate text-[11px]" title="${escapeAttr(displayLocation)}">📍 ${displayLocation}</span>
                 
                 <!-- Quick Catch Toggle Button -->
                 <button 
                   onclick="toggleCatch('${item.pokemon.replace(/'/g, "\\'")}')" 
                   class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 ${catchBtnClass}"
-                  title="Marcar como capturado no Lumi Tracker"
+                  title="${escapeAttr(s.cardCatchTitle)}"
                 >
                   ${catchBtnText}
                 </button>
@@ -763,7 +1226,7 @@
                 <div class="w-14 h-14 shrink-0 bg-slate-950/90 rounded-xl border border-slate-800 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-inner">
                   <img 
                     src="${showdownUrl}" 
-                    alt="${item.pokemon}" 
+                    alt="${escapeAttr(item.pokemon)}" 
                     class="sprite-img max-w-full max-h-full object-contain" 
                     loading="lazy"
                     onerror="this.onerror=null; this.src='${pokeApiUrl}'; if(!this.src) this.style.display='none';"
@@ -774,8 +1237,8 @@
                     ${item.pokemon}
                   </h4>
                   <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${methodInfo.bg} ${methodInfo.text} ${methodInfo.border}">
-                      ${methodInfo.label}
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${theme.bg} ${theme.text} ${theme.border}">
+                      ${methodLabel}
                     </span>
                     ${todBadge}
                   </div>
@@ -785,11 +1248,11 @@
               <!-- Stats Highlights: Level & Rate -->
               <div class="grid grid-cols-2 gap-2 mt-3 text-center">
                 <div class="bg-slate-950/60 border border-slate-800 rounded-lg py-1 px-1.5">
-                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Nível</div>
-                  <div class="font-black text-xs text-blue-300">Nv. ${item.levels}</div>
+                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">${s.cardLevelLabel}</div>
+                  <div class="font-black text-xs text-blue-300">${s.cardLevelPrefix} ${item.levels}</div>
                 </div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-lg py-1 px-1.5">
-                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Raridade</div>
+                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">${s.cardRarityLabel}</div>
                   <div class="font-black text-xs text-emerald-400">${item.rate}</div>
                 </div>
               </div>
@@ -797,7 +1260,6 @@
 
             <!-- Conditions / Notes -->
             ${condHtml}
-
           </div>
         `;
       });
@@ -811,6 +1273,35 @@
         loadMoreContainer.classList.add('hidden');
       }
     }
+
+    // Language switcher click handlers
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selectedLang = normalizeLang(btn.dataset.lang);
+        if (selectedLang && selectedLang !== currentLang) {
+          setLanguage(selectedLang, { syncBackend: true, notifyToast: true });
+        }
+      });
+    });
+
+    // Listen for pywebview desktop bridge readiness
+    window.addEventListener('pywebviewready', async () => {
+      try {
+        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
+          const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+          if (urlLang) {
+            setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+          } else {
+            const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+            if (backendLang && backendLang !== currentLang) {
+              setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Could not sync initial language with pywebview:', e);
+      }
+    });
 
     // Load More Items Button
     btnLoadMore.addEventListener('click', () => {
@@ -829,19 +1320,19 @@
 
       syncFilterUI();
       applyFilters();
-      showToast("Filtros redefinidos", "🔄");
+      showToast(strings().toastFiltersReset, '🔄');
     };
     btnResetFilters.addEventListener('click', resetAllFilters);
 
-    // Toggle: "Disponível Agora" Mode
+    // Toggle: "Available Now" Mode
     btnAvailableNow.addEventListener('click', () => {
       filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
       syncAvailableNowUI();
       applyFilters();
       if (filterState.onlyAvailableNow) {
-        showToast("Modo 'Disponível Agora' ativado!", "⚡");
+        showToast(strings().toastAvailableNowOn, '⚡');
       } else {
-        showToast("Modo 'Disponível Agora' desativado", "🌐");
+        showToast(strings().toastAvailableNowOff, '🌐');
       }
     });
 
@@ -853,18 +1344,17 @@
 
     // Smart Time Button
     btnSmartTime.addEventListener('click', () => {
-      const current = getSinnohPeriod();
+      const current = getSinnohPeriod(new Date(), currentLang);
       filterState.timeOfDay = current.key;
       syncFilterUI();
       applyFilters();
-      showToast(`Ciclo sincronizado com o PC: ${current.label}`, current.icon);
+      showToast(strings().toastCycleSynced(current.label), current.icon);
     });
 
     // Time of Day Buttons
     document.querySelectorAll('.tod-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         filterState.timeOfDay = btn.dataset.tod;
-        // If clicking a manual time, disable Available Now
         if (filterState.onlyAvailableNow) {
           filterState.onlyAvailableNow = false;
           syncAvailableNowUI();
@@ -905,7 +1395,7 @@
     });
 
     // --- Backup, Import & Reset Functionality ---
-    
+
     // 1. Export JSON Backup
     btnExport.addEventListener('click', () => {
       const backupData = {
@@ -916,7 +1406,7 @@
         caughtPokemon: Array.from(caughtSpecies),
         filterPreferences: filterState
       };
-      
+
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const downloadLink = document.createElement('a');
@@ -926,8 +1416,8 @@
       downloadLink.click();
       document.body.removeChild(downloadLink);
       URL.revokeObjectURL(url);
-      
-      showToast("Backup exportado com sucesso!", "💾");
+
+      showToast(strings().toastBackupExported, '💾');
     });
 
     // 2. Import JSON Backup (maintains compatibility with older backup exports)
@@ -945,21 +1435,25 @@
 
             if (imported.filterPreferences) {
               Object.assign(filterState, imported.filterPreferences);
+              const importedLang = normalizeLang(imported.filterPreferences.language);
+              if (importedLang) {
+                setLanguage(importedLang, { syncBackend: true, notifyToast: false });
+              }
               syncFilterUI();
             }
 
             updateProgressCounters();
             applyFilters();
-            showToast(`Backup carregado! ${caughtSpecies.size} capturas restauradas.`, "📂");
+            showToast(strings().toastBackupLoaded(caughtSpecies.size), '📂');
           } else {
-            throw new Error("Formato de backup inválido.");
+            throw new Error(strings().errorInvalidBackup);
           }
         } catch (err) {
-          alert("Erro ao importar backup: " + err.message);
+          alert(strings().alertImportError + err.message);
         }
       };
       reader.readAsText(file);
-      importFileInput.value = ''; // Reset input
+      importFileInput.value = '';
     });
 
     // 3. Reset Confirmation Modal
@@ -977,13 +1471,47 @@
       resetModal.classList.add('hidden');
       updateProgressCounters();
       applyFilters();
-      showToast("Todas as capturas foram resetadas", "🗑️");
+      showToast(strings().toastCatchesReset, '🗑️');
     });
+
+    // Sync language from server.py /api/lang if running outside pywebview
+    async function syncInitialLangFromServer() {
+      const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+      if (urlLang) {
+        setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
+        try {
+          const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+          if (backendLang && backendLang !== currentLang) {
+            setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+          }
+        } catch (e) {}
+        return;
+      }
+
+      try {
+        const res = await fetch('./api/lang', { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          const serverLang = normalizeLang(payload.lang);
+          if (serverLang && serverLang !== currentLang) {
+            setLanguage(serverLang, { syncBackend: false, notifyToast: false });
+          }
+        }
+      } catch (e) {
+        // Static file server without /api/lang (safe fallback to localStorage / EN)
+      }
+    }
 
     // Initial Tracker Setup
     async function initTracker() {
       try {
         loadSavedState();
+        applyTranslations();
+        await syncInitialLangFromServer();
 
         // Fetch ordered locations list
         const locRes = await fetch('./ordered_locations.json');
@@ -994,25 +1522,28 @@
 
         // Fetch encounters database
         const encRes = await fetch('./luminescent_encounters.json');
-        if (!encRes.ok) throw new Error("Falha ao carregar luminescent_encounters.json");
+        if (!encRes.ok) throw new Error(strings().errorFetchEncounters);
         allEncounters = await encRes.json();
+        dataLoaded = true;
 
         // Index all unique species in Luminescent
         allEncounters.forEach(encounter => {
           if (encounter.pokemon) allUniqueSpecies.add(encounter.pokemon);
         });
 
-        totalDisplay.textContent = allEncounters.length.toLocaleString();
+        const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+        totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
         loadingState.classList.add('hidden');
 
         syncFilterUI();
         updateProgressCounters();
         applyFilters();
       } catch (err) {
-        console.error("Erro na inicialização:", err);
+        console.error('Initialization error:', err);
+        const s = strings();
         loadingState.innerHTML = `
           <div class="text-rose-400 text-3xl">⚠️</div>
-          <h3 class="text-base font-bold text-white">Erro ao carregar os dados</h3>
+          <h3 class="text-base font-bold text-white">${s.errorLoadingTitle}</h3>
           <p class="text-xs text-slate-400">${err.message}</p>
         `;
       }

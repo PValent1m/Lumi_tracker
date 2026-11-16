@@ -35,7 +35,7 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path "dist/LumiTracker.exe")) {
-            Write-Error "LumiTracker.exe nao foi gerado."
+            Write-Error "LumiTracker.exe was not generated."
             exit 1
           }
 

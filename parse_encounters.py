@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 parse_encounters.py
-Script de extração, normalização e exportação da base de dados de encontros
-do projeto Luminescent Platinum (https://github.com/TeamLumi/luminescent-team).
+Extraction, normalization, and export script for the encounter database
+of Luminescent Platinum (https://github.com/TeamLumi/luminescent-team).
 
-Exporta para:
+Exports to:
 - luminescent_encounters.json
 - luminescent_encounters.csv
 """
@@ -17,10 +17,14 @@ import sys
 import json
 from collections import Counter
 
-# Assegura stdout em utf-8 no console Windows
-sys.stdout.reconfigure(encoding='utf-8')
+from conditions_i18n import normalize_bilingual_condition
+from i18n_cli import resolve_cli_lang, t
 
-# Caminhos base dos dados
+# Ensure UTF-8 stdout on Windows console
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Base data paths
 GAMEDATA_DIR = os.path.join("lumi-repo", "__gamedata", "gamedata2.0")
 DOCS_SPECIAL_DIR = os.path.join("lumi-repo", "docs", "special-events")
 MONS_NAME_FILE = os.path.join(GAMEDATA_DIR, "english_ss_monsname.json")
@@ -33,7 +37,7 @@ OUTPUT_CSV = "luminescent_encounters.csv"
 
 
 def load_dex_id_mapper():
-    """Carrega tabela de correspondência Nome do Pokémon -> National Dex ID."""
+    """Load Pokémon Name -> National Dex ID mapping table."""
     base_map = {}
     if os.path.exists(MONS_NAME_FILE):
         with open(MONS_NAME_FILE, "r", encoding="utf-8") as f:
@@ -44,7 +48,7 @@ def load_dex_id_mapper():
             if name and name not in base_map:
                 base_map[name] = idx
 
-    # Adições específicas da Pokédex expandida e formas regionais/clones
+    # Expanded Pokédex additions and regional/clone forms
     extra_dex = {
         "Litwick": 607,
         "Lampent": 608,
@@ -74,7 +78,7 @@ def load_dex_id_mapper():
         if name in base_map:
             return base_map[name]
 
-        # Tratamento de prefixos de formas
+        # Handle form prefixes/suffixes
         clean = re.sub(
             r"^(Alolan|Galarian|Hisuian|Clone|Stitched|Crystal|Spiky-eared)\s+",
             "",
@@ -97,7 +101,7 @@ def load_dex_id_mapper():
 
 
 def load_level_ranges():
-    """Mapeia (routeName, pokemonName) -> (minLevel, maxLevel) a partir do RomFS."""
+    """Map (routeName, pokemonName) -> (minLevel, maxLevel) from RomFS."""
     ranges = {}
     if os.path.exists(ENCOUNTER_LOC_JSON):
         with open(ENCOUNTER_LOC_JSON, "r", encoding="utf-8") as f:
@@ -119,7 +123,7 @@ def load_level_ranges():
 
 
 def parse_mdx_special_events():
-    """Extrai instruções e condições dos arquivos MDX em docs/special-events/."""
+    """Extract instructions and conditions from MDX files in docs/special-events/."""
     conditions = {}
     mdx_files = [
         "static.mdx",
@@ -170,15 +174,13 @@ def parse_mdx_special_events():
 
 
 def main():
+    lang = resolve_cli_lang()
+
     if not os.path.exists(GAMEDATA_DIR):
-        print(
-            f"[ERRO] Diretório de dados não encontrado: '{GAMEDATA_DIR}'.\n"
-            "Clone o repositório do Luminescent Platinum em './lumi-repo' "
-            "(https://github.com/TeamLumi/luminescent-team) antes de executar este script."
-        )
+        print(t("parse_missing_dir", lang, dir=GAMEDATA_DIR))
         sys.exit(1)
 
-    print("Iniciando extração e normalização de encontros...")
+    print(t("parse_starting", lang))
 
     get_dex_id = load_dex_id_mapper()
     level_ranges = load_level_ranges()
@@ -186,7 +188,7 @@ def main():
 
     records = []
 
-    # 1. Processar encontros de rotas selvagens (pokemon_locations.txt)
+    # 1. Process wild route encounters (pokemon_locations.txt)
     if os.path.exists(POKEMON_LOC_TXT):
         with open(POKEMON_LOC_TXT, "r", encoding="utf-8") as f:
             for line in f:
@@ -207,7 +209,7 @@ def main():
                     raw_level = locs[i + 2]
                     raw_rate = locs[i + 3]
 
-                    # Determinar níveis (respeitando faixas se min != max)
+                    # Determine level range
                     key = (route_name, mon_name)
                     if key in level_ranges:
                         min_lvl, max_lvl = level_ranges[key]
@@ -215,50 +217,52 @@ def main():
                     else:
                         levels_str = str(raw_level)
 
-                    # Determinar method padronizado
-                    conditions = "Nenhuma"
+                    # Standardized method & default English condition
+                    conditions_raw = "None"
                     if raw_method in ("Grass", "Morning", "day", "night", "Daily Trophy Garden"):
                         method = "Walking"
                         if raw_method == "Daily Trophy Garden":
-                            conditions = "Trophy Garden Diário"
+                            conditions_raw = "Daily Trophy Garden"
                     elif raw_method == "Swarm":
                         method = "Walking"
-                        conditions = "Enxame Diário (Swarm)"
+                        conditions_raw = "Daily Swarm"
                     elif raw_method == "Surfing":
                         method = "Surfing"
-                        conditions = "Requer Surf (HM03)"
+                        conditions_raw = "Requires Surf (HM03)"
                     elif raw_method in ("Incense", "Surfing Incense"):
                         method = "Incense"
                         if raw_method == "Surfing Incense":
-                            conditions = "Requer Incense Burner na água"
+                            conditions_raw = "Requires Incense Burner on water"
                         else:
-                            conditions = "Requer Incense Burner"
+                            conditions_raw = "Requires Incense Burner"
                     elif raw_method in ("Old Rod", "Good Rod", "Super Rod", "Radar", "Honey Tree"):
                         method = raw_method
                         if raw_method == "Radar":
-                            conditions = "Requer Poké Radar"
+                            conditions_raw = "Requires Poké Radar"
                         elif "Rod" in raw_method:
-                            conditions = f"Requer {raw_method}"
+                            conditions_raw = f"Requires {raw_method}"
                         elif raw_method == "Honey Tree":
-                            conditions = "Árvore de Mel"
+                            conditions_raw = "Honey Tree"
                     else:
                         method = raw_method
 
-                    # Determinar time_of_day
+                    # Determine time_of_day
                     if raw_method == "Morning":
                         time_of_day = ["Morning"]
-                        if conditions == "Nenhuma":
-                            conditions = "Disponível apenas pela manhã (04:00 - 09:59)"
+                        if conditions_raw == "None":
+                            conditions_raw = "Available only in the morning (04:00 - 09:59)"
                     elif raw_method == "day":
                         time_of_day = ["Day"]
-                        if conditions == "Nenhuma":
-                            conditions = "Disponível apenas durante o dia (10:00 - 19:59)"
+                        if conditions_raw == "None":
+                            conditions_raw = "Available only during the day (10:00 - 19:59)"
                     elif raw_method == "night":
                         time_of_day = ["Night"]
-                        if conditions == "Nenhuma":
-                            conditions = "Disponível apenas à noite (20:00 - 03:59)"
+                        if conditions_raw == "None":
+                            conditions_raw = "Available only at night (20:00 - 03:59)"
                     else:
                         time_of_day = ["Morning", "Day", "Night"]
+
+                    cond_en, cond_pt = normalize_bilingual_condition(conditions_raw)
 
                     records.append({
                         "id": get_dex_id(mon_name),
@@ -269,10 +273,11 @@ def main():
                         "levels": levels_str,
                         "time_of_day": time_of_day,
                         "version": "All",
-                        "conditions": conditions,
+                        "conditions": cond_en,
+                        "conditions_pt": cond_pt,
                     })
 
-    # 2. Processar eventos especiais (static_pokemon_locations.json + MDX)
+    # 2. Process special events (static_pokemon_locations.json + MDX)
     if os.path.exists(STATIC_LOC_JSON):
         with open(STATIC_LOC_JSON, "r", encoding="utf-8") as f:
             static_data = json.load(f)
@@ -293,7 +298,6 @@ def main():
                 else:
                     levels_str = "???"
 
-                # Determinar método padronizado
                 if enc_type in ("Gifts", "Starter"):
                     method = "Gift"
                 elif enc_type in ("Static", "Legendaries"):
@@ -305,7 +309,7 @@ def main():
                 else:
                     method = enc_type
 
-                # Buscar condições ricas nos arquivos MDX via link ou nome
+                # Lookup detailed conditions in MDX files via link anchor or name
                 condition_text = None
                 if link and "#" in link:
                     anchor = link.split("#")[-1].lower()
@@ -316,17 +320,19 @@ def main():
 
                 if not condition_text:
                     if enc_type == "Starter":
-                        condition_text = "Escolha de Pokémon inicial"
+                        condition_text = "Starter Pokémon choice"
                     elif enc_type == "Legendaries":
-                        condition_text = "Encontro com Pokémon Lendário"
+                        condition_text = "Legendary Pokémon encounter"
                     elif enc_type == "Trade":
-                        condition_text = "Troca in-game com NPC"
+                        condition_text = "In-game trade with NPC"
                     elif enc_type == "Gifts":
-                        condition_text = "Presente de NPC / Ovo recebido"
+                        condition_text = "NPC Gift / Received Egg"
                     elif enc_type == "Static":
-                        condition_text = "Encontro fixo no mapa / Interação única"
+                        condition_text = "Static overworld encounter / One-time interaction"
                     else:
-                        condition_text = "Nenhuma"
+                        condition_text = "None"
+
+                cond_en, cond_pt = normalize_bilingual_condition(condition_text)
 
                 records.append({
                     "id": get_dex_id(mon_name),
@@ -337,18 +343,19 @@ def main():
                     "levels": levels_str,
                     "time_of_day": ["Morning", "Day", "Night"],
                     "version": "All",
-                    "conditions": condition_text,
+                    "conditions": cond_en,
+                    "conditions_pt": cond_pt,
                 })
 
     if not records:
-        print("[ERRO] Nenhum registro extraído. Abortando para não sobrescrever os arquivos de saída.")
+        print(t("parse_no_records", lang))
         sys.exit(1)
 
-    # Exportar JSON
+    # Export JSON
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(records, f, indent=2, ensure_ascii=False)
 
-    # Exportar CSV
+    # Export CSV
     fieldnames = [
         "id",
         "pokemon",
@@ -359,17 +366,17 @@ def main():
         "time_of_day",
         "version",
         "conditions",
+        "conditions_pt",
     ]
     with open(OUTPUT_CSV, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in records:
-            # Serializa time_of_day como string JSON no CSV
             row = dict(r)
             row["time_of_day"] = json.dumps(r["time_of_day"], ensure_ascii=False)
             writer.writerow(row)
 
-    # Estatísticas e Relatórios
+    # Statistics and Reports
     total_records = len(records)
     time_of_day_counter = Counter()
     null_report = []
@@ -377,17 +384,16 @@ def main():
     for idx, record in enumerate(records):
         tod = tuple(record["time_of_day"])
         if tod == ("Morning",):
-            time_of_day_counter["Exclusivo Manhã"] += 1
+            time_of_day_counter[t("parse_tod_morning", lang)] += 1
         elif tod == ("Day",):
-            time_of_day_counter["Exclusivo Dia"] += 1
+            time_of_day_counter[t("parse_tod_day", lang)] += 1
         elif tod == ("Night",):
-            time_of_day_counter["Exclusivo Noite"] += 1
+            time_of_day_counter[t("parse_tod_night", lang)] += 1
         elif len(tod) == 3:
-            time_of_day_counter["Qualquer Horário (Manhã, Dia, Noite)"] += 1
+            time_of_day_counter[t("parse_tod_any", lang)] += 1
         else:
-            time_of_day_counter[f"Outro período ({tod})"] += 1
+            time_of_day_counter[t("parse_tod_other", lang, tod=tod)] += 1
 
-        # Verificação de campos nulos ou sem horário
         null_fields = [key for key, value in record.items() if value is None or value == ""]
         if not record.get("time_of_day"):
             null_fields.append("time_of_day")
@@ -396,31 +402,40 @@ def main():
             null_report.append((idx, record.get("pokemon"), record.get("location"), null_fields))
 
     print("\n" + "=" * 60)
-    print("RELATÓRIO DE EXTRAÇÃO E EXPORTAÇÃO")
+    print(t("parse_report_title", lang))
     print("=" * 60)
-    print(f"Total de registros exportados: {total_records}")
-    print(f"Arquivos salvos:")
+    print(t("parse_total_exported", lang, total=total_records))
+    print(t("parse_files_saved", lang))
     print(f"  - JSON: {OUTPUT_JSON}")
     print(f"  - CSV:  {OUTPUT_CSV}")
 
-    print("\n--- Contagem de Encontros por Período ---")
+    print(t("parse_tod_section", lang))
     for period, count in time_of_day_counter.items():
         pct = (count / total_records) * 100
         print(f"  {period:<40}: {count:>5} ({pct:>5.1f}%)")
 
-    print("\n--- Métodos de Encontro Padronizados ---")
+    print(t("parse_methods_section", lang))
     method_counter = Counter(record["method"] for record in records)
     for method_name, method_count in method_counter.most_common():
         print(f"  {method_name:<20}: {method_count:>5}")
 
-    print("\n--- Relatório de Validação e Integridade ---")
+    print(t("parse_validation_section", lang))
     if not null_report:
-        print("  [OK] Nenhuma entrada sem horário encontrada.")
-        print("  [OK] Todos os registros possuem campos válidos (sem valores nulos).")
+        print(t("parse_validation_ok_time", lang))
+        print(t("parse_validation_ok_nulls", lang))
     else:
-        print(f"  [ALERTA] Encontrados {len(null_report)} registros com campos ausentes:")
+        print(t("parse_validation_warn", lang, count=len(null_report)))
         for entry in null_report[:10]:
-            print(f"    - Registro {entry[0]}: Pokémon={entry[1]}, Local={entry[2]}, Campos Ausentes={entry[3]}")
+            print(
+                t(
+                    "parse_validation_entry",
+                    lang,
+                    idx=entry[0],
+                    pokemon=entry[1],
+                    location=entry[2],
+                    fields=entry[3],
+                )
+            )
     print("=" * 60 + "\n")
 
 
