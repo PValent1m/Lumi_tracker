@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,62 +30,78 @@
       width: 8px;
       height: 8px;
     }
+
     ::-webkit-scrollbar-track {
       background: #080c14;
     }
+
     ::-webkit-scrollbar-thumb {
       background: #1e293b;
       border-radius: 4px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: #334155;
     }
+
     .sprite-img {
       image-rendering: pixelated;
     }
+
     /* Smooth card transitions */
     .pkm-card {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .pkm-card.is-caught {
       background: rgba(15, 23, 42, 0.65);
       border-color: rgba(16, 185, 129, 0.35);
     }
   </style>
 </head>
-<body class="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
+
+<body
+  class="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
 
   <!-- Top Sticky Header -->
   <header class="sticky top-0 z-40 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-xl px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-      
+
       <!-- Brand & Project Title -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20">
           <span class="text-xl">✨</span>
         </div>
         <div>
           <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2">
-            LUMI TRACKER <span class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT 2.2F</span>
+            LUMI TRACKER <span
+              class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT
+              2.2F</span>
           </h1>
-          <p id="headerSubtitle" class="text-[11px] text-slate-400 font-medium">Encounter Guide • Pokémon Luminescent Platinum</p>
+          <p id="headerSubtitle" class="text-[11px] text-slate-400 font-medium">Encounter Guide • Pokémon Luminescent
+            Platinum</p>
         </div>
       </div>
 
       <!-- Live Clock & Mode Controls -->
       <div class="flex flex-wrap items-center gap-2 text-xs">
-        
+
         <!-- Live Clock & Sinnoh Period Tracker -->
-        <div id="clockBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono shadow-inner">
+        <div id="clockBadge"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono shadow-inner">
           <span id="periodIcon" class="text-base">🕒</span>
           <div>
             <div id="clockDisplay" class="font-bold text-slate-200">--:--:--</div>
-            <div id="periodDisplay" class="text-[10px] text-cyan-400 font-sans tracking-wide uppercase font-semibold">Calculating...</div>
+            <div id="periodDisplay" class="text-[10px] text-cyan-400 font-sans tracking-wide uppercase font-semibold">
+              Calculating...</div>
           </div>
         </div>
 
         <!-- Mode: "Available Now" Toggle Button -->
-        <button id="btnAvailableNow" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-500/50 text-slate-300 font-semibold flex items-center gap-1.5 transition-all active:scale-95 text-xs shadow-sm" title="Combines current time, selected route, and hides already caught Pokémon">
+        <button id="btnAvailableNow"
+          class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-500/50 text-slate-300 font-semibold flex items-center gap-1.5 transition-all active:scale-95 text-xs shadow-sm"
+          title="Combines current time, selected route, and hides already caught Pokémon">
           <span id="availableNowIcon" class="text-slate-400">⚡</span>
           <span id="availableNowLabel">Available Now</span>
           <span id="availableNowBadge" class="w-2 h-2 rounded-full bg-slate-600 ml-0.5"></span>
@@ -92,26 +109,36 @@
 
         <!-- Backup & Import Actions -->
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
-          <button id="btnExport" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Export progress backup (JSON)">
+          <button id="btnExport"
+            class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px]"
+            title="Export progress backup (JSON)">
             <span>💾</span>
             <span id="btnExportLabel" class="hidden sm:inline">Backup</span>
           </button>
-          
-          <label id="importLabel" class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px] cursor-pointer" title="Import previously saved backup">
+
+          <label id="importLabel"
+            class="p-1.5 px-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-cyan-400 font-medium transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
+            title="Import previously saved backup">
             <span>📂</span>
             <span id="btnImportLabel" class="hidden sm:inline">Import</span>
             <input type="file" id="importFileInput" accept=".json" class="hidden">
           </label>
 
-          <button id="btnResetModal" class="p-1.5 px-2.5 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1 text-[11px]" title="Reset catches">
+          <button id="btnResetModal"
+            class="p-1.5 px-2.5 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1 text-[11px]"
+            title="Reset catches">
             <span>🗑️</span>
           </button>
         </div>
 
         <!-- Language Selector (Segmented EN | PT) -->
-        <div id="langSwitcher" class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-[11px] font-bold" title="Language / Idioma">
-          <button type="button" data-lang="en" class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">EN</button>
-          <button type="button" data-lang="pt" class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">PT</button>
+        <div id="langSwitcher"
+          class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-[11px] font-bold"
+          title="Language / Idioma">
+          <button type="button" data-lang="en"
+            class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">EN</button>
+          <button type="button" data-lang="pt"
+            class="lang-btn px-2 py-1 rounded-lg transition-all cursor-pointer border">PT</button>
         </div>
 
       </div>
@@ -121,9 +148,10 @@
 
   <!-- Pokédex Progress Bar Section (Hero Stats) -->
   <section class="max-w-7xl w-full mx-auto px-4 pt-3 pb-1">
-    <div class="bg-gradient-to-r from-slate-900/90 via-[#0d1527] to-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 shadow-lg">
+    <div
+      class="bg-gradient-to-r from-slate-900/90 via-[#0d1527] to-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 shadow-lg">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-        
+
         <!-- Global Pokédex Progress -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-xs">
@@ -133,7 +161,9 @@
             <span class="font-mono font-bold text-cyan-400" id="globalPokedexCount">0 / 434 (0%)</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
-            <div id="globalPokedexBar" class="bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            <div id="globalPokedexBar"
+              class="bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500"
+              style="width: 0%"></div>
           </div>
         </div>
 
@@ -146,7 +176,9 @@
             <span class="font-mono font-bold text-emerald-400" id="routePokedexCount">0 / 0 (0%)</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
-            <div id="routePokedexBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            <div id="routePokedexBar"
+              class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+              style="width: 0%"></div>
           </div>
         </div>
 
@@ -156,43 +188,57 @@
 
   <!-- Filter Controls Section -->
   <section class="max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
-    
+
     <!-- Time of Day & Fast Toggles -->
-    <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-      
+    <div
+      class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+
       <!-- Time of Day Radio/Pill Group -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-        <span id="cycleLabel" class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Cycle:</span>
-        <button data-tod="all" class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
+        <span id="cycleLabel"
+          class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Cycle:</span>
+        <button data-tod="all"
+          class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
           <span>🌐</span> <span id="todAllLabel">All</span>
         </button>
-        <button data-tod="Morning" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
-          <span>☀️</span> <span id="todMorningLabel">Morning</span> <span class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
+        <button data-tod="Morning"
+          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
+          <span>☀️</span> <span id="todMorningLabel">Morning</span> <span
+            class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
         </button>
-        <button data-tod="Day" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
-          <span>🌤️</span> <span id="todDayLabel">Day</span> <span class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
+        <button data-tod="Day"
+          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
+          <span>🌤️</span> <span id="todDayLabel">Day</span> <span
+            class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
         </button>
-        <button data-tod="Night" class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
-          <span>🌙</span> <span id="todNightLabel">Night</span> <span class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
+        <button data-tod="Night"
+          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
+          <span>🌙</span> <span id="todNightLabel">Night</span> <span
+            class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
         </button>
-        
+
         <!-- Button: Activate System Clock -->
-        <button id="btnSmartTime" class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1" title="Sync with your PC clock">
+        <button id="btnSmartTime"
+          class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1"
+          title="Sync with your PC clock">
           <span>🕒</span> <span id="smartTimeLabel" class="hidden sm:inline">Use Current Time</span>
         </button>
       </div>
 
       <!-- Quick Method & Caught Filters -->
       <div class="flex items-center gap-2 overflow-x-auto text-xs">
-        
+
         <!-- Hide Caught Toggle -->
-        <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
-          <input type="checkbox" id="hideCaughtCheckbox" class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
+        <label
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
+          <input type="checkbox" id="hideCaughtCheckbox"
+            class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
           <span id="hideCaughtLabel" class="text-xs font-medium">Hide Caught</span>
         </label>
 
         <!-- Method Selector -->
-        <select id="methodSelect" class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+        <select id="methodSelect"
+          class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
           <option value="all">🎯 All Methods</option>
           <option value="Walking">🌿 Grass (Walking)</option>
           <option value="Fishing">🎣 Fishing (Rods)</option>
@@ -211,39 +257,84 @@
 
     <!-- Search Bar & Chronological Route Dropdown -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-      
+
       <!-- Pokemon Name Live Search -->
       <div class="md:col-span-5 relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
         </div>
-        <input 
-          id="searchInput" 
-          type="text" 
-          placeholder="Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)..." 
-          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner"
-        >
-        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden" title="Clear search">
+        <input id="searchInput" type="text"
+          placeholder="Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)..."
+          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner">
+        <button id="clearSearch"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden"
+          title="Clear search">
           ✕
         </button>
       </div>
 
-      <!-- Chronological Location Dropdown -->
-      <div class="md:col-span-5 relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      <!-- Chronological Location Combobox with Search -->
+      <div id="locationCombobox" class="md:col-span-5 relative">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <button type="button" id="locationSelectBtn" aria-haspopup="listbox" aria-expanded="false"
+            aria-controls="locationOptionsList"
+            class="w-full pl-9 pr-14 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer flex items-center text-left">
+            <span id="locationSelectedLabel" class="truncate block w-full">🗺️ All Routes / Areas (Sinnoh Story Order)</span>
+          </button>
+          <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
+            <button type="button" id="clearLocationBtn"
+              class="p-1 text-slate-400 hover:text-white rounded-md transition-colors hidden text-xs leading-none"
+              title="Clear location filter">
+              ✕
+            </button>
+            <span id="locationChevron"
+              class="pointer-events-none text-slate-400 transition-transform duration-150 flex items-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </span>
+          </div>
         </div>
-        <select 
-          id="locationSelect" 
-          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer"
-        >
-          <option value="all">🗺️ All Routes / Areas (Sinnoh Story Order)</option>
-        </select>
+
+        <!-- Dropdown Panel -->
+        <div id="locationDropdown"
+          class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-slate-900 border border-slate-700/90 rounded-xl shadow-2xl shadow-black/70 overflow-hidden">
+          <div class="p-2 border-b border-slate-800 bg-slate-950/70">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input id="locationSearchInput" type="text" autocomplete="off" placeholder="Search route or area..."
+                class="w-full pl-8 pr-7 py-1.5 bg-slate-900 border border-slate-700/80 rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all">
+              <button type="button" id="clearLocationSearchBtn"
+                class="hidden absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-white text-xs"
+                title="Clear search">
+                ✕
+              </button>
+            </div>
+          </div>
+          <div id="locationOptionsList" role="listbox" class="max-h-72 overflow-y-auto py-1"></div>
+        </div>
       </div>
 
       <!-- Reset Filters Button -->
       <div class="md:col-span-2 flex items-center">
-        <button id="btnResetFilters" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
+        <button id="btnResetFilters"
+          class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
           <span>🔄</span>
           <span id="btnResetFiltersLabel">Reset Filters</span>
         </button>
@@ -251,28 +342,28 @@
 
     </div>
 
-    <!-- Active Filter Summary & Result Count -->
-    <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>
-          <span id="showingPrefix">Showing</span>
-          <b id="countDisplay" class="text-white">0</b>
-          <span id="showingOf">of</span>
-          <span id="totalDisplay">0</span>
-          <span id="showingSuffix">encounters</span>
-        </span>
+      <!-- Active Filter Summary & Result Count -->
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>
+            <span id="showingPrefix">Showing</span>
+            <b id="countDisplay" class="text-white">0</b>
+            <span id="showingOf">of</span>
+            <span id="totalDisplay">0</span>
+            <span id="showingSuffix">encounters</span>
+          </span>
+        </div>
+        <div id="activeModeNotice" class="text-xs text-emerald-400 font-medium hidden flex items-center gap-1">
+          <span>⚡</span> <span id="activeModeNoticeText">"Available Now" Mode Active</span>
+        </div>
       </div>
-      <div id="activeModeNotice" class="text-xs text-emerald-400 font-medium hidden flex items-center gap-1">
-        <span>⚡</span> <span id="activeModeNoticeText">"Available Now" Mode Active</span>
-      </div>
-    </div>
 
   </section>
 
   <!-- Encounters Grid Section -->
   <main class="max-w-7xl w-full mx-auto px-4 pb-16 flex-grow">
-    
+
     <!-- Loading State -->
     <div id="loadingState" class="flex flex-col items-center justify-center py-20 text-center space-y-3">
       <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
@@ -283,8 +374,10 @@
     <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
       <div class="text-5xl">🔍</div>
       <h3 id="emptyTitle" class="text-lg font-bold text-white">No encounters found</h3>
-      <p id="emptyDesc" class="text-xs text-slate-400 max-w-md">No Pokémon match the active filters. If you are in "Available Now" mode, all Pokémon for this time and route may already be caught!</p>
-      <button id="emptyResetBtn" onclick="resetAllFilters()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
+      <p id="emptyDesc" class="text-xs text-slate-400 max-w-md">No Pokémon match the active filters. If you are in
+        "Available Now" mode, all Pokémon for this time and route may already be caught!</p>
+      <button id="emptyResetBtn" onclick="resetAllFilters()"
+        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
         Restore Default Filters
       </button>
     </div>
@@ -296,7 +389,8 @@
 
     <!-- Infinite Scroll / Load More Trigger -->
     <div id="loadMoreContainer" class="py-6 text-center hidden">
-      <button id="btnLoadMore" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
+      <button id="btnLoadMore"
+        class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
         Load More Encounters...
       </button>
     </div>
@@ -304,20 +398,25 @@
   </main>
 
   <!-- Confirmation Modal: Reset Catches -->
-  <div id="resetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div id="resetModal"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-      <div class="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-800 flex items-center justify-center text-2xl mx-auto text-rose-400">
+      <div
+        class="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-800 flex items-center justify-center text-2xl mx-auto text-rose-400">
         ⚠️
       </div>
       <div class="text-center space-y-1">
         <h3 id="resetModalTitle" class="text-base font-bold text-white">Reset All Catches?</h3>
-        <p id="resetModalDesc" class="text-xs text-slate-400">This action will remove all caught Pokémon marks from this browser. We recommend exporting a backup first.</p>
+        <p id="resetModalDesc" class="text-xs text-slate-400">This action will remove all caught Pokémon marks from this
+          browser. We recommend exporting a backup first.</p>
       </div>
       <div class="grid grid-cols-2 gap-3 pt-2">
-        <button id="btnCancelReset" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+        <button id="btnCancelReset"
+          class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
           Cancel
         </button>
-        <button id="btnConfirmReset" class="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-lg shadow-rose-600/30">
+        <button id="btnConfirmReset"
+          class="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-lg shadow-rose-600/30">
           Confirm Reset
         </button>
       </div>
@@ -325,7 +424,8 @@
   </div>
 
   <!-- Toast Notification Floating Element -->
-  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900/95 border border-cyan-500/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+  <div id="toastNotification"
+    class="fixed bottom-5 right-5 z-50 bg-slate-900/95 border border-cyan-500/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
     <span id="toastIcon">✨</span>
     <span id="toastMessage">Operation completed successfully!</span>
   </div>
@@ -334,7 +434,8 @@
   <footer class="bg-[#0b1120] border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
       <p id="footerTitle"><b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b></p>
-      <p id="footerSource" class="text-slate-600">Database: <span class="text-slate-400">luminescent_encounters.json</span></p>
+      <p id="footerSource" class="text-slate-600">Database: <span
+          class="text-slate-400">luminescent_encounters.json</span></p>
     </div>
   </footer>
 
@@ -391,6 +492,9 @@
         searchPlaceholder: 'Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)...',
         clearSearchTitle: 'Clear search',
         locationAllOption: '🗺️ All Routes / Areas (Sinnoh Story Order)',
+        locationSearchPlaceholder: 'Search route or area...',
+        locationClearTitle: 'Clear location filter',
+        locationSearchEmpty: 'No locations found',
         resetFiltersLabel: 'Reset Filters',
         showingPrefix: 'Showing',
         showingOf: 'of',
@@ -488,6 +592,9 @@
         searchPlaceholder: 'Buscar Pokémon por nome, nº ou rota (ex: Starly, 396, Rotom)...',
         clearSearchTitle: 'Limpar busca',
         locationAllOption: '🗺️ Todas as Rotas / Áreas (História de Sinnoh)',
+        locationSearchPlaceholder: 'Buscar rota ou área...',
+        locationClearTitle: 'Limpar filtro de localização',
+        locationSearchEmpty: 'Nenhuma localização encontrada',
         resetFiltersLabel: 'Limpar Filtros',
         showingPrefix: 'Exibindo',
         showingOf: 'de',
@@ -610,7 +717,15 @@
     const totalDisplay = document.getElementById('totalDisplay');
     const searchInput = document.getElementById('searchInput');
     const clearSearch = document.getElementById('clearSearch');
-    const locationSelect = document.getElementById('locationSelect');
+    const locationCombobox = document.getElementById('locationCombobox');
+    const locationSelectBtn = document.getElementById('locationSelectBtn');
+    const locationSelectedLabel = document.getElementById('locationSelectedLabel');
+    const clearLocationBtn = document.getElementById('clearLocationBtn');
+    const locationChevron = document.getElementById('locationChevron');
+    const locationDropdown = document.getElementById('locationDropdown');
+    const locationSearchInput = document.getElementById('locationSearchInput');
+    const clearLocationSearchBtn = document.getElementById('clearLocationSearchBtn');
+    const locationOptionsList = document.getElementById('locationOptionsList');
     const methodSelect = document.getElementById('methodSelect');
     const hideCaughtCheckbox = document.getElementById('hideCaughtCheckbox');
     const loadMoreContainer = document.getElementById('loadMoreContainer');
@@ -811,6 +926,9 @@
 
       searchInput.placeholder = s.searchPlaceholder;
       clearSearch.title = s.clearSearchTitle;
+      locationSearchInput.placeholder = s.locationSearchPlaceholder;
+      clearLocationSearchBtn.title = s.clearSearchTitle;
+      clearLocationBtn.title = s.locationClearTitle;
       btnResetFiltersLabel.textContent = s.resetFiltersLabel;
 
       showingPrefix.textContent = s.showingPrefix;
@@ -860,7 +978,25 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lang })
-      }).catch(() => {});
+      }).catch(() => { });
+    }
+
+    // Persist caught species and preferences to backend (pywebview API or server.py /api/state)
+    function syncStateToBackend(payload) {
+      try {
+        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.set_state === 'function') {
+          window.pywebview.api.set_state(payload);
+          return;
+        }
+      } catch (e) {
+        console.warn('pywebview set_state failed:', e);
+      }
+
+      fetch('./api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(() => { });
     }
 
     // Change active language immediately without reloading
@@ -876,7 +1012,7 @@
       } catch (e) {
         console.error('Error saving language:', e);
       }
-      savePreferences();
+      savePreferences(syncBackend);
 
       if (syncBackend) {
         syncLanguageToBackend(currentLang);
@@ -909,6 +1045,57 @@
       return { showdownUrl, pokeApiUrl };
     }
 
+    function applyFilterPrefs(parsedPrefs) {
+      if (!parsedPrefs || typeof parsedPrefs !== 'object') return null;
+      if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
+      if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
+      if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
+      if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
+      if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
+      if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
+      return parsedPrefs.language !== undefined ? normalizeLang(parsedPrefs.language) : null;
+    }
+
+    function applyBackendState(backendState) {
+      if (!backendState || typeof backendState !== 'object') return;
+
+      const backendCaught = Array.isArray(backendState.caught) ? backendState.caught : [];
+      const hasBackendCaught = backendCaught.length > 0;
+      const hasBackendPrefs = Boolean(
+        backendState.exists &&
+        backendState.prefs &&
+        typeof backendState.prefs === 'object' &&
+        Object.keys(backendState.prefs).length > 0
+      );
+
+      if (hasBackendCaught) {
+        caughtSpecies = new Set(backendCaught);
+        try {
+          localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(backendCaught));
+        } catch (e) { }
+      } else if (caughtSpecies.size > 0) {
+        // Preserve local catches if backend state is empty or not created yet
+        syncStateToBackend({
+          caught: Array.from(caughtSpecies),
+          prefs: filterState
+        });
+      }
+
+      if (hasBackendPrefs) {
+        applyFilterPrefs(backendState.prefs);
+        filterState.language = currentLang;
+        try {
+          localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
+        } catch (e) { }
+      }
+
+      if (dataLoaded) {
+        syncFilterUI();
+        updateProgressCounters();
+        applyFilters(false);
+      }
+    }
+
     // Persistence: Load Caught Set, Preferences & Language
     function loadSavedState() {
       try {
@@ -927,14 +1114,7 @@
       try {
         const rawPrefs = localStorage.getItem(STORAGE_PREFS_KEY);
         if (rawPrefs) {
-          const parsedPrefs = JSON.parse(rawPrefs);
-          if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
-          if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
-          if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
-          if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
-          if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
-          if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
-          if (parsedPrefs.language !== undefined) prefLang = normalizeLang(parsedPrefs.language);
+          prefLang = applyFilterPrefs(JSON.parse(rawPrefs));
         }
       } catch (e) {
         console.error('Error loading filter preferences:', e);
@@ -943,7 +1123,7 @@
       let storedLang = null;
       try {
         storedLang = normalizeLang(localStorage.getItem(STORAGE_LANG_KEY));
-      } catch (e) {}
+      } catch (e) { }
 
       const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
       currentLang = urlLang || storedLang || prefLang || DEFAULT_LANG;
@@ -951,25 +1131,32 @@
     }
 
     // Persistence: Save Preferences
-    function savePreferences() {
+    function savePreferences(syncBackend = true) {
       try {
         localStorage.setItem(STORAGE_PREFS_KEY, JSON.stringify(filterState));
       } catch (e) {
         console.error('Error saving preferences:', e);
       }
+      if (syncBackend) {
+        syncStateToBackend({ prefs: filterState });
+      }
     }
 
     // Persistence: Save Caught Set
-    function saveCaughtState() {
+    function saveCaughtState(syncBackend = true) {
+      const caughtArray = Array.from(caughtSpecies);
       try {
-        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(Array.from(caughtSpecies)));
+        localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(caughtArray));
       } catch (e) {
         console.error('Error saving caught state:', e);
+      }
+      if (syncBackend) {
+        syncStateToBackend({ caught: caughtArray });
       }
     }
 
     // Toggle Capture status for a Pokémon
-    window.toggleCatch = function(pokemonName) {
+    window.toggleCatch = function (pokemonName) {
       const s = strings();
       if (caughtSpecies.has(pokemonName)) {
         caughtSpecies.delete(pokemonName);
@@ -1021,7 +1208,7 @@
     function syncFilterUI() {
       searchInput.value = filterState.search || '';
       clearSearch.classList.toggle('hidden', !filterState.search);
-      locationSelect.value = filterState.location || 'all';
+      syncLocationSelectUI();
       methodSelect.value = filterState.method || 'all';
       hideCaughtCheckbox.checked = filterState.hideCaught || false;
 
@@ -1054,155 +1241,319 @@
       }
     }
 
+    // Location Combobox State & Helpers (preserves Sinnoh Story Order)
+    let isLocationDropdownOpen = false;
+    let locationActiveIndex = -1;
+    let visibleLocationOptions = [];
+
+    function normalizeLocationSearchText(str) {
+      return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+    }
+
+    function syncLocationSelectUI() {
+      const s = strings();
+      const selected = filterState.location || 'all';
+      if (selected === 'all') {
+        locationSelectedLabel.textContent = s.locationAllOption;
+        clearLocationBtn.classList.add('hidden');
+      } else {
+        locationSelectedLabel.textContent = `📍 ${formatLocationName(selected, currentLang)}`;
+        clearLocationBtn.classList.remove('hidden');
+      }
+      if (isLocationDropdownOpen) {
+        renderLocationOptions();
+      }
+    }
+
+    function getFilteredLocationOptions() {
+      const s = strings();
+      const rawQuery = locationSearchInput.value.trim();
+      const normQuery = normalizeLocationSearchText(rawQuery);
+      const options = [];
+
+      if (!normQuery) {
+        options.push({ value: 'all', label: s.locationAllOption });
+      }
+
+      orderedLocations.forEach(loc => {
+        const enMatch = !normQuery || normalizeLocationSearchText(loc).includes(normQuery);
+        const ptMatch = !normQuery || normalizeLocationSearchText(formatLocationName(loc, 'pt')).includes(normQuery);
+        if (enMatch || ptMatch) {
+          options.push({
+            value: loc,
+            label: `📍 ${formatLocationName(loc, currentLang)}`
+          });
+        }
+      });
+
+      return options;
+    }
+
+    function getLocationOptionClass(isSelected, isActive) {
+            let cls = 'w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ';
+            if (isSelected) {
+              cls += 'bg-cyan-500/20 text-cyan-300 font-semibold ';
+              if (isActive) cls += 'ring-1 ring-inset ring-cyan-400/60 ';
+            } else if (isActive) {
+              cls += 'bg-slate-800 text-white ';
+            } else {
+              cls += 'text-slate-200 hover:bg-slate-800/80 hover:text-white ';
+            }
+            return cls;
+          }
+
+    function renderLocationOptions() {
+            const s = strings();
+            visibleLocationOptions = getFilteredLocationOptions();
+            locationOptionsList.innerHTML = '';
+
+            if (visibleLocationOptions.length === 0) {
+              locationActiveIndex = -1;
+              const emptyEl = document.createElement('div');
+              emptyEl.className = 'px-3 py-4 text-center text-xs text-slate-400';
+              emptyEl.textContent = s.locationSearchEmpty;
+              locationOptionsList.appendChild(emptyEl);
+              return;
+            }
+
+            if (locationActiveIndex >= visibleLocationOptions.length) {
+              locationActiveIndex = visibleLocationOptions.length - 1;
+            }
+
+            const currentVal = filterState.location || 'all';
+
+            visibleLocationOptions.forEach((opt, idx) => {
+              const isSelected = opt.value === currentVal;
+              const isActive = idx === locationActiveIndex;
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.setAttribute('role', 'option');
+              btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+              btn.dataset.value = opt.value;
+              btn.dataset.index = String(idx);
+              btn.className = getLocationOptionClass(isSelected, isActive);
+
+              const labelSpan = document.createElement('span');
+              labelSpan.className = 'truncate';
+              labelSpan.textContent = opt.label;
+              btn.appendChild(labelSpan);
+
+              if (isSelected) {
+                const checkSpan = document.createElement('span');
+                checkSpan.className = 'text-cyan-400 shrink-0 text-[11px] font-bold';
+                checkSpan.textContent = '✓';
+                btn.appendChild(checkSpan);
+              }
+
+              btn.addEventListener('click', () => {
+                selectLocation(opt.value);
+              });
+
+              locationOptionsList.appendChild(btn);
+            });
+          }
+
+    function updateLocationOptionHighlight(scrollBlock = 'nearest') {
+            const optionEls = locationOptionsList.querySelectorAll('[role="option"]');
+            const currentVal = filterState.location || 'all';
+            optionEls.forEach((el, idx) => {
+              const isSelected = el.dataset.value === currentVal;
+              const isActive = idx === locationActiveIndex;
+              el.className = getLocationOptionClass(isSelected, isActive);
+              if (isActive) {
+                el.scrollIntoView({ block: scrollBlock });
+              }
+            });
+          }
+
+    function highlightSelectedLocationOption(scrollBlock = 'nearest') {
+            const selectedIdx = visibleLocationOptions.findIndex(o => o.value === (filterState.location || 'all'));
+            if (selectedIdx >= 0) {
+              locationActiveIndex = selectedIdx;
+              updateLocationOptionHighlight(scrollBlock);
+            }
+          }
+
+    function openLocationDropdown() {
+            if (isLocationDropdownOpen) return;
+            isLocationDropdownOpen = true;
+            locationDropdown.classList.remove('hidden');
+            locationSelectBtn.setAttribute('aria-expanded', 'true');
+            locationChevron.classList.add('rotate-180');
+
+            locationSearchInput.value = '';
+            clearLocationSearchBtn.classList.add('hidden');
+            locationActiveIndex = -1;
+            renderLocationOptions();
+            highlightSelectedLocationOption('center');
+
+            requestAnimationFrame(() => {
+              locationSearchInput.focus();
+            });
+          }
+
+    function closeLocationDropdown(restoreFocus = false) {
+            if (!isLocationDropdownOpen) return;
+            isLocationDropdownOpen = false;
+            locationDropdown.classList.add('hidden');
+            locationSelectBtn.setAttribute('aria-expanded', 'false');
+            locationChevron.classList.remove('rotate-180');
+            locationSearchInput.value = '';
+            clearLocationSearchBtn.classList.add('hidden');
+            locationActiveIndex = -1;
+            if (restoreFocus) {
+              locationSelectBtn.focus();
+            }
+          }
+
+    function selectLocation(value) {
+            filterState.location = value || 'all';
+            closeLocationDropdown(false);
+            syncLocationSelectUI();
+            applyFilters();
+          }
+
     // Populate Location Dropdown (keeping canonical EN value, displaying localized label)
     function populateLocationsDropdown(locations) {
-      const s = strings();
-      locationSelect.innerHTML = '';
-
-      const allOpt = document.createElement('option');
-      allOpt.value = 'all';
-      allOpt.textContent = s.locationAllOption;
-      locationSelect.appendChild(allOpt);
-
-      locations.forEach(loc => {
-        const opt = document.createElement('option');
-        opt.value = loc;
-        opt.textContent = `📍 ${formatLocationName(loc, currentLang)}`;
-        locationSelect.appendChild(opt);
-      });
-      locationSelect.value = filterState.location || 'all';
-    }
+            syncLocationSelectUI();
+          }
 
     // Main Filtering Function
-    function applyFilters() {
-      displayLimit = PAGE_CHUNK;
-      savePreferences();
-      updateProgressCounters();
+    function applyFilters(savePrefs = true) {
+            displayLimit = PAGE_CHUNK;
+            if (savePrefs) {
+              savePreferences();
+            }
+            updateProgressCounters();
 
-      const currentPeriod = getSinnohPeriod().key;
+            const currentPeriod = getSinnohPeriod().key;
 
-      filteredEncounters = allEncounters.filter(item => {
-        const isCaught = caughtSpecies.has(item.pokemon);
+            filteredEncounters = allEncounters.filter(item => {
+              const isCaught = caughtSpecies.has(item.pokemon);
 
-        // Mode: "Available Now" Logic
-        if (filterState.onlyAvailableNow) {
-          if (isCaught) return false;
-          if (!item.time_of_day.includes(currentPeriod)) return false;
-        }
+              // Mode: "Available Now" Logic
+              if (filterState.onlyAvailableNow) {
+                if (isCaught) return false;
+                if (!item.time_of_day.includes(currentPeriod)) return false;
+              }
 
-        // Hide Caught checkbox
-        if (filterState.hideCaught && isCaught) {
-          return false;
-        }
+              // Hide Caught checkbox
+              if (filterState.hideCaught && isCaught) {
+                return false;
+              }
 
-        // Location Filter
-        if (filterState.location !== 'all' && item.location !== filterState.location) {
-          return false;
-        }
+              // Location Filter
+              if (filterState.location !== 'all' && item.location !== filterState.location) {
+                return false;
+              }
 
-        // Time of Day Filter (when not forced by Available Now)
-        if (!filterState.onlyAvailableNow && filterState.timeOfDay !== 'all') {
-          if (!item.time_of_day.includes(filterState.timeOfDay)) {
-            return false;
+              // Time of Day Filter (when not forced by Available Now)
+              if (!filterState.onlyAvailableNow && filterState.timeOfDay !== 'all') {
+                if (!item.time_of_day.includes(filterState.timeOfDay)) {
+                  return false;
+                }
+              }
+
+              // Method Filter
+              if (filterState.method !== 'all') {
+                if (filterState.method === 'Fishing') {
+                  if (!item.method.includes('Rod')) return false;
+                } else if (filterState.method === 'Static') {
+                  if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
+                } else if (item.method !== filterState.method) {
+                  return false;
+                }
+              }
+
+              // Search Query (Pokemon name, Dex ID, or Location in EN/PT)
+              if (filterState.search) {
+                const query = filterState.search.toLowerCase();
+                const nameMatch = item.pokemon.toLowerCase().includes(query);
+                const idMatch = String(item.id).includes(query);
+                const locMatch = item.location.toLowerCase().includes(query) ||
+                  formatLocationName(item.location, 'pt').toLowerCase().includes(query);
+                if (!nameMatch && !idMatch && !locMatch) {
+                  return false;
+                }
+              }
+
+              return true;
+            });
+
+            renderCards();
           }
-        }
-
-        // Method Filter
-        if (filterState.method !== 'all') {
-          if (filterState.method === 'Fishing') {
-            if (!item.method.includes('Rod')) return false;
-          } else if (filterState.method === 'Static') {
-            if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
-          } else if (item.method !== filterState.method) {
-            return false;
-          }
-        }
-
-        // Search Query (Pokemon name, Dex ID, or Location in EN/PT)
-        if (filterState.search) {
-          const query = filterState.search.toLowerCase();
-          const nameMatch = item.pokemon.toLowerCase().includes(query);
-          const idMatch = String(item.id).includes(query);
-          const locMatch = item.location.toLowerCase().includes(query) ||
-            formatLocationName(item.location, 'pt').toLowerCase().includes(query);
-          if (!nameMatch && !idMatch && !locMatch) {
-            return false;
-          }
-        }
-
-        return true;
-      });
-
-      renderCards();
-    }
 
     // Render Cards in Grid
     function renderCards() {
-      const s = strings();
-      const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
-      countDisplay.textContent = filteredEncounters.length.toLocaleString(locale);
+            const s = strings();
+            const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+            countDisplay.textContent = filteredEncounters.length.toLocaleString(locale);
 
-      if (filteredEncounters.length === 0) {
-        cardsGrid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        loadMoreContainer.classList.add('hidden');
-        return;
-      }
+            if (filteredEncounters.length === 0) {
+              cardsGrid.innerHTML = '';
+              emptyState.classList.remove('hidden');
+              loadMoreContainer.classList.add('hidden');
+              return;
+            }
 
-      emptyState.classList.add('hidden');
+            emptyState.classList.add('hidden');
 
-      const itemsToShow = filteredEncounters.slice(0, displayLimit);
+            const itemsToShow = filteredEncounters.slice(0, displayLimit);
 
-      let html = '';
-      itemsToShow.forEach(item => {
-        const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
-        const theme = METHOD_THEME[item.method] || { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
-        const methodLabel = s.methods[item.method] || item.method;
-        const isCaught = caughtSpecies.has(item.pokemon);
-        const displayLocation = formatLocationName(item.location, currentLang);
+            let html = '';
+            itemsToShow.forEach(item => {
+              const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
+              const theme = METHOD_THEME[item.method] || { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+              const methodLabel = s.methods[item.method] || item.method;
+              const isCaught = caughtSpecies.has(item.pokemon);
+              const displayLocation = formatLocationName(item.location, currentLang);
 
-        // Time of Day Badges
-        let todBadge = '';
-        if (item.time_of_day.length === 3) {
-          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="${escapeAttr(s.cardTodAnyTitle)}">
+              // Time of Day Badges
+              let todBadge = '';
+              if (item.time_of_day.length === 3) {
+                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="${escapeAttr(s.cardTodAnyTitle)}">
             <span>⏱️</span> <span>${s.cardTodAny}</span>
           </span>`;
-        } else if (item.time_of_day.includes('Morning')) {
-          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
+              } else if (item.time_of_day.includes('Morning')) {
+                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
             <span>☀️</span> <span>${s.cardTodMorning}</span>
           </span>`;
-        } else if (item.time_of_day.includes('Day')) {
-          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
+              } else if (item.time_of_day.includes('Day')) {
+                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
             <span>🌤️</span> <span>${s.cardTodDay}</span>
           </span>`;
-        } else if (item.time_of_day.includes('Night')) {
-          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
+              } else if (item.time_of_day.includes('Night')) {
+                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
             <span>🌙</span> <span>${s.cardTodNight}</span>
           </span>`;
-        }
+              }
 
-        // Captured Checkbox / Button Badge
-        const catchBtnClass = isCaught
-          ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-emerald-500/30'
-          : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700';
+              // Captured Checkbox / Button Badge
+              const catchBtnClass = isCaught
+                ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-emerald-500/30'
+                : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700';
 
-        const catchBtnText = isCaught
-          ? `<span>✓</span> <span>${s.cardCaught}</span>`
-          : `<span>○</span> <span>${s.cardCatch}</span>`;
+              const catchBtnText = isCaught
+                ? `<span>✓</span> <span>${s.cardCaught}</span>`
+                : `<span>○</span> <span>${s.cardCatch}</span>`;
 
-        // Bilingual conditions note
-        const condText = currentLang === 'pt'
-          ? (item.conditions_pt || item.conditions)
-          : item.conditions;
-        const hasSpecialCond = condText && condText !== 'None' && condText !== 'Nenhuma';
-        const condHtml = hasSpecialCond
-          ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${escapeAttr(condText)}">
+              // Bilingual conditions note
+              const condText = currentLang === 'pt'
+                ? (item.conditions_pt || item.conditions)
+                : item.conditions;
+              const hasSpecialCond = condText && condText !== 'None' && condText !== 'Nenhuma';
+              const condHtml = hasSpecialCond
+                ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${escapeAttr(condText)}">
               <span class="text-cyan-400 shrink-0">ℹ️</span>
               <span class="leading-tight">${condText}</span>
             </div>`
-          : '';
+                : '';
 
-        html += `
+              html += `
           <div class="pkm-card ${isCaught ? 'is-caught' : ''} bg-slate-900/85 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-3.5 flex flex-col justify-between shadow-md hover:shadow-cyan-950/20 group relative overflow-hidden">
             
             <!-- Top Card Header: ID, Location & Catch Toggle -->
@@ -1262,294 +1613,396 @@
             ${condHtml}
           </div>
         `;
-      });
+            });
 
-      cardsGrid.innerHTML = html;
+            cardsGrid.innerHTML = html;
 
-      // Toggle Load More button
-      if (displayLimit < filteredEncounters.length) {
-        loadMoreContainer.classList.remove('hidden');
-      } else {
-        loadMoreContainer.classList.add('hidden');
-      }
-    }
+            // Toggle Load More button
+            if (displayLimit < filteredEncounters.length) {
+              loadMoreContainer.classList.remove('hidden');
+            } else {
+              loadMoreContainer.classList.add('hidden');
+            }
+          }
 
     // Language switcher click handlers
     document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const selectedLang = normalizeLang(btn.dataset.lang);
-        if (selectedLang && selectedLang !== currentLang) {
-          setLanguage(selectedLang, { syncBackend: true, notifyToast: true });
-        }
-      });
-    });
-
-    // Listen for pywebview desktop bridge readiness
-    window.addEventListener('pywebviewready', async () => {
-      try {
-        if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
-          const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
-          if (urlLang) {
-            setLanguage(urlLang, { syncBackend: true, notifyToast: false });
-          } else {
-            const backendLang = normalizeLang(await window.pywebview.api.get_lang());
-            if (backendLang && backendLang !== currentLang) {
-              setLanguage(backendLang, { syncBackend: false, notifyToast: false });
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Could not sync initial language with pywebview:', e);
-      }
-    });
-
-    // Load More Items Button
-    btnLoadMore.addEventListener('click', () => {
-      displayLimit += PAGE_CHUNK;
-      renderCards();
-    });
-
-    // Reset All Filters Helper
-    window.resetAllFilters = function() {
-      filterState.search = '';
-      filterState.location = 'all';
-      filterState.timeOfDay = 'all';
-      filterState.method = 'all';
-      filterState.onlyAvailableNow = false;
-      filterState.hideCaught = false;
-
-      syncFilterUI();
-      applyFilters();
-      showToast(strings().toastFiltersReset, '🔄');
-    };
-    btnResetFilters.addEventListener('click', resetAllFilters);
-
-    // Toggle: "Available Now" Mode
-    btnAvailableNow.addEventListener('click', () => {
-      filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
-      syncAvailableNowUI();
-      applyFilters();
-      if (filterState.onlyAvailableNow) {
-        showToast(strings().toastAvailableNowOn, '⚡');
-      } else {
-        showToast(strings().toastAvailableNowOff, '🌐');
-      }
-    });
-
-    // Hide Caught Checkbox
-    hideCaughtCheckbox.addEventListener('change', (e) => {
-      filterState.hideCaught = e.target.checked;
-      applyFilters();
-    });
-
-    // Smart Time Button
-    btnSmartTime.addEventListener('click', () => {
-      const current = getSinnohPeriod(new Date(), currentLang);
-      filterState.timeOfDay = current.key;
-      syncFilterUI();
-      applyFilters();
-      showToast(strings().toastCycleSynced(current.label), current.icon);
-    });
-
-    // Time of Day Buttons
-    document.querySelectorAll('.tod-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterState.timeOfDay = btn.dataset.tod;
-        if (filterState.onlyAvailableNow) {
-          filterState.onlyAvailableNow = false;
-          syncAvailableNowUI();
-        }
-        syncFilterUI();
-        applyFilters();
-      });
-    });
-
-    // Search Input with Debounce
-    let searchTimer = null;
-    searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchTimer);
-      const val = e.target.value.trim();
-      clearSearch.classList.toggle('hidden', val.length === 0);
-      searchTimer = setTimeout(() => {
-        filterState.search = val;
-        applyFilters();
-      }, 150);
-    });
-
-    clearSearch.addEventListener('click', () => {
-      searchInput.value = '';
-      clearSearch.classList.add('hidden');
-      filterState.search = '';
-      applyFilters();
-    });
-
-    // Dropdown change events
-    locationSelect.addEventListener('change', (e) => {
-      filterState.location = e.target.value;
-      applyFilters();
-    });
-
-    methodSelect.addEventListener('change', (e) => {
-      filterState.method = e.target.value;
-      applyFilters();
-    });
-
-    // --- Backup, Import & Reset Functionality ---
-
-    // 1. Export JSON Backup
-    btnExport.addEventListener('click', () => {
-      const backupData = {
-        app: APP_NAME,
-        version: APP_DATA_VERSION,
-        exportedAt: new Date().toISOString(),
-        totalCaught: caughtSpecies.size,
-        caughtPokemon: Array.from(caughtSpecies),
-        filterPreferences: filterState
-      };
-
-      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = `lumi_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
-
-      showToast(strings().toastBackupExported, '💾');
-    });
-
-    // 2. Import JSON Backup (maintains compatibility with older backup exports)
-    importFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const imported = JSON.parse(event.target.result);
-          if (Array.isArray(imported.caughtPokemon)) {
-            caughtSpecies = new Set(imported.caughtPokemon);
-            saveCaughtState();
-
-            if (imported.filterPreferences) {
-              Object.assign(filterState, imported.filterPreferences);
-              const importedLang = normalizeLang(imported.filterPreferences.language);
-              if (importedLang) {
-                setLanguage(importedLang, { syncBackend: true, notifyToast: false });
+            btn.addEventListener('click', () => {
+              const selectedLang = normalizeLang(btn.dataset.lang);
+              if (selectedLang && selectedLang !== currentLang) {
+                setLanguage(selectedLang, { syncBackend: true, notifyToast: true });
               }
-              syncFilterUI();
+            });
+          });
+
+        // Listen for pywebview desktop bridge readiness
+        window.addEventListener('pywebviewready', async () => {
+          try {
+            if (window.pywebview && window.pywebview.api) {
+              if (typeof window.pywebview.api.get_state === 'function') {
+                const backendState = await window.pywebview.api.get_state();
+                applyBackendState(backendState);
+              }
+              if (typeof window.pywebview.api.get_lang === 'function') {
+                const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+                if (urlLang) {
+                  setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+                } else {
+                  const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+                  if (backendLang && backendLang !== currentLang) {
+                    setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+                  }
+                }
+              }
             }
-
-            updateProgressCounters();
-            applyFilters();
-            showToast(strings().toastBackupLoaded(caughtSpecies.size), '📂');
-          } else {
-            throw new Error(strings().errorInvalidBackup);
+          } catch (e) {
+            console.warn('Could not sync initial state/language with pywebview:', e);
           }
-        } catch (err) {
-          alert(strings().alertImportError + err.message);
-        }
-      };
-      reader.readAsText(file);
-      importFileInput.value = '';
-    });
-
-    // 3. Reset Confirmation Modal
-    btnResetModal.addEventListener('click', () => {
-      resetModal.classList.remove('hidden');
-    });
-
-    btnCancelReset.addEventListener('click', () => {
-      resetModal.classList.add('hidden');
-    });
-
-    btnConfirmReset.addEventListener('click', () => {
-      caughtSpecies.clear();
-      saveCaughtState();
-      resetModal.classList.add('hidden');
-      updateProgressCounters();
-      applyFilters();
-      showToast(strings().toastCatchesReset, '🗑️');
-    });
-
-    // Sync language from server.py /api/lang if running outside pywebview
-    async function syncInitialLangFromServer() {
-      const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
-      if (urlLang) {
-        setLanguage(urlLang, { syncBackend: true, notifyToast: false });
-        return;
-      }
-
-      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
-        try {
-          const backendLang = normalizeLang(await window.pywebview.api.get_lang());
-          if (backendLang && backendLang !== currentLang) {
-            setLanguage(backendLang, { syncBackend: false, notifyToast: false });
-          }
-        } catch (e) {}
-        return;
-      }
-
-      try {
-        const res = await fetch('./api/lang', { cache: 'no-store' });
-        if (res.ok) {
-          const payload = await res.json();
-          const serverLang = normalizeLang(payload.lang);
-          if (serverLang && serverLang !== currentLang) {
-            setLanguage(serverLang, { syncBackend: false, notifyToast: false });
-          }
-        }
-      } catch (e) {
-        // Static file server without /api/lang (safe fallback to localStorage / EN)
-      }
-    }
-
-    // Initial Tracker Setup
-    async function initTracker() {
-      try {
-        loadSavedState();
-        applyTranslations();
-        await syncInitialLangFromServer();
-
-        // Fetch ordered locations list
-        const locRes = await fetch('./ordered_locations.json');
-        if (locRes.ok) {
-          orderedLocations = await locRes.json();
-          populateLocationsDropdown(orderedLocations);
-        }
-
-        // Fetch encounters database
-        const encRes = await fetch('./luminescent_encounters.json');
-        if (!encRes.ok) throw new Error(strings().errorFetchEncounters);
-        allEncounters = await encRes.json();
-        dataLoaded = true;
-
-        // Index all unique species in Luminescent
-        allEncounters.forEach(encounter => {
-          if (encounter.pokemon) allUniqueSpecies.add(encounter.pokemon);
         });
 
-        const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
-        totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
-        loadingState.classList.add('hidden');
+        // Load More Items Button
+        btnLoadMore.addEventListener('click', () => {
+          displayLimit += PAGE_CHUNK;
+          renderCards();
+        });
 
-        syncFilterUI();
-        updateProgressCounters();
-        applyFilters();
-      } catch (err) {
-        console.error('Initialization error:', err);
-        const s = strings();
-        loadingState.innerHTML = `
+        // Reset All Filters Helper
+        window.resetAllFilters = function () {
+          filterState.search = '';
+          filterState.location = 'all';
+          filterState.timeOfDay = 'all';
+          filterState.method = 'all';
+          filterState.onlyAvailableNow = false;
+          filterState.hideCaught = false;
+
+          closeLocationDropdown(false);
+          syncFilterUI();
+          applyFilters();
+          showToast(strings().toastFiltersReset, '🔄');
+        };
+        btnResetFilters.addEventListener('click', resetAllFilters);
+
+        // Toggle: "Available Now" Mode
+        btnAvailableNow.addEventListener('click', () => {
+          filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
+          syncAvailableNowUI();
+          applyFilters();
+          if (filterState.onlyAvailableNow) {
+            showToast(strings().toastAvailableNowOn, '⚡');
+          } else {
+            showToast(strings().toastAvailableNowOff, '🌐');
+          }
+        });
+
+        // Hide Caught Checkbox
+        hideCaughtCheckbox.addEventListener('change', (e) => {
+          filterState.hideCaught = e.target.checked;
+          applyFilters();
+        });
+
+        // Smart Time Button
+        btnSmartTime.addEventListener('click', () => {
+          const current = getSinnohPeriod(new Date(), currentLang);
+          filterState.timeOfDay = current.key;
+          syncFilterUI();
+          applyFilters();
+          showToast(strings().toastCycleSynced(current.label), current.icon);
+        });
+
+        // Time of Day Buttons
+        document.querySelectorAll('.tod-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterState.timeOfDay = btn.dataset.tod;
+            if (filterState.onlyAvailableNow) {
+              filterState.onlyAvailableNow = false;
+              syncAvailableNowUI();
+            }
+            syncFilterUI();
+            applyFilters();
+          });
+        });
+
+        // Search Input with Debounce
+        let searchTimer = null;
+        searchInput.addEventListener('input', (e) => {
+          clearTimeout(searchTimer);
+          const val = e.target.value.trim();
+          clearSearch.classList.toggle('hidden', val.length === 0);
+          searchTimer = setTimeout(() => {
+            filterState.search = val;
+            applyFilters();
+          }, 150);
+        });
+
+        clearSearch.addEventListener('click', () => {
+          searchInput.value = '';
+          clearSearch.classList.add('hidden');
+          filterState.search = '';
+          applyFilters();
+        });
+
+    // Location Combobox Events
+    locationSelectBtn.addEventListener('click', () => {
+            if (isLocationDropdownOpen) {
+              closeLocationDropdown(false);
+            } else {
+              openLocationDropdown();
+            }
+          });
+
+          locationSelectBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openLocationDropdown();
+            }
+          });
+
+          clearLocationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectLocation('all');
+          });
+
+          locationSearchInput.addEventListener('input', () => {
+            const hasText = locationSearchInput.value.trim().length > 0;
+            clearLocationSearchBtn.classList.toggle('hidden', !hasText);
+            locationActiveIndex = hasText ? 0 : -1;
+            renderLocationOptions();
+            if (!hasText) {
+              highlightSelectedLocationOption();
+            }
+          });
+
+          clearLocationSearchBtn.addEventListener('click', () => {
+            locationSearchInput.value = '';
+            clearLocationSearchBtn.classList.add('hidden');
+            locationActiveIndex = -1;
+            renderLocationOptions();
+            highlightSelectedLocationOption();
+            locationSearchInput.focus();
+          });
+
+          locationCombobox.addEventListener('keydown', (e) => {
+            if (!isLocationDropdownOpen) return;
+
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              closeLocationDropdown(true);
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              if (visibleLocationOptions.length > 0) {
+                locationActiveIndex = (locationActiveIndex + 1) % visibleLocationOptions.length;
+                updateLocationOptionHighlight();
+              }
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              if (visibleLocationOptions.length > 0) {
+                locationActiveIndex = locationActiveIndex <= 0
+                  ? visibleLocationOptions.length - 1
+                  : locationActiveIndex - 1;
+                updateLocationOptionHighlight();
+              }
+            } else if (e.key === 'Enter') {
+              if (document.activeElement === clearLocationSearchBtn) return;
+              e.preventDefault();
+              if (visibleLocationOptions.length > 0) {
+                const idx = locationActiveIndex >= 0 ? locationActiveIndex : 0;
+                selectLocation(visibleLocationOptions[idx].value);
+              }
+            } else if (e.key === 'Tab') {
+              closeLocationDropdown(false);
+            }
+          });
+
+          document.addEventListener('click', (e) => {
+            if (isLocationDropdownOpen && !locationCombobox.contains(e.target)) {
+              closeLocationDropdown(false);
+            }
+          });
+
+          methodSelect.addEventListener('change', (e) => {
+            filterState.method = e.target.value;
+            applyFilters();
+          });
+
+          // --- Backup, Import & Reset Functionality ---
+
+          // 1. Export JSON Backup
+          btnExport.addEventListener('click', () => {
+            const backupData = {
+              app: APP_NAME,
+              version: APP_DATA_VERSION,
+              exportedAt: new Date().toISOString(),
+              totalCaught: caughtSpecies.size,
+              caughtPokemon: Array.from(caughtSpecies),
+              filterPreferences: filterState
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = `lumi_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+
+            showToast(strings().toastBackupExported, '💾');
+          });
+
+          // 2. Import JSON Backup (maintains compatibility with older backup exports)
+          importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              try {
+                const imported = JSON.parse(event.target.result);
+                if (Array.isArray(imported.caughtPokemon)) {
+                  caughtSpecies = new Set(imported.caughtPokemon);
+                  saveCaughtState();
+
+                  if (imported.filterPreferences) {
+                    Object.assign(filterState, imported.filterPreferences);
+                    const importedLang = normalizeLang(imported.filterPreferences.language);
+                    if (importedLang) {
+                      setLanguage(importedLang, { syncBackend: true, notifyToast: false });
+                    }
+                    syncFilterUI();
+                  }
+
+                  updateProgressCounters();
+                  applyFilters();
+                  showToast(strings().toastBackupLoaded(caughtSpecies.size), '📂');
+                } else {
+                  throw new Error(strings().errorInvalidBackup);
+                }
+              } catch (err) {
+                alert(strings().alertImportError + err.message);
+              }
+            };
+            reader.readAsText(file);
+            importFileInput.value = '';
+          });
+
+          // 3. Reset Confirmation Modal
+          btnResetModal.addEventListener('click', () => {
+            resetModal.classList.remove('hidden');
+          });
+
+          btnCancelReset.addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+          });
+
+          btnConfirmReset.addEventListener('click', () => {
+            caughtSpecies.clear();
+            saveCaughtState();
+            resetModal.classList.add('hidden');
+            updateProgressCounters();
+            applyFilters();
+            showToast(strings().toastCatchesReset, '🗑️');
+          });
+
+          // Sync saved state from pywebview API or server.py /api/state
+          async function syncInitialStateFromServer() {
+            if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_state === 'function') {
+              try {
+                const backendState = await window.pywebview.api.get_state();
+                applyBackendState(backendState);
+              } catch (e) { }
+              return;
+            }
+
+            try {
+              const res = await fetch('./api/state', { cache: 'no-store' });
+              if (res.ok) {
+                const backendState = await res.json();
+                applyBackendState(backendState);
+              }
+            } catch (e) {
+              // Static file server without /api/state (safe fallback to localStorage)
+            }
+          }
+
+          // Sync language from server.py /api/lang if running outside pywebview
+          async function syncInitialLangFromServer() {
+            const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+            if (urlLang) {
+              setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+              return;
+            }
+
+            if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
+              try {
+                const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+                if (backendLang && backendLang !== currentLang) {
+                  setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+                }
+              } catch (e) { }
+              return;
+            }
+
+            try {
+              const res = await fetch('./api/lang', { cache: 'no-store' });
+              if (res.ok) {
+                const payload = await res.json();
+                const serverLang = normalizeLang(payload.lang);
+                if (serverLang && serverLang !== currentLang) {
+                  setLanguage(serverLang, { syncBackend: false, notifyToast: false });
+                }
+              }
+            } catch (e) {
+              // Static file server without /api/lang (safe fallback to localStorage / EN)
+            }
+          }
+
+          // Initial Tracker Setup
+          async function initTracker() {
+            try {
+              loadSavedState();
+              await syncInitialStateFromServer();
+              applyTranslations();
+              await syncInitialLangFromServer();
+
+              // Fetch ordered locations list
+              const locRes = await fetch('./ordered_locations.json');
+              if (locRes.ok) {
+                orderedLocations = await locRes.json();
+                populateLocationsDropdown(orderedLocations);
+              }
+
+              // Fetch encounters database
+              const encRes = await fetch('./luminescent_encounters.json');
+              if (!encRes.ok) throw new Error(strings().errorFetchEncounters);
+              allEncounters = await encRes.json();
+              dataLoaded = true;
+
+              // Index all unique species in Luminescent
+              allEncounters.forEach(encounter => {
+                if (encounter.pokemon) allUniqueSpecies.add(encounter.pokemon);
+              });
+
+              const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+              totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
+              loadingState.classList.add('hidden');
+
+              syncFilterUI();
+              updateProgressCounters();
+              applyFilters(false);
+            } catch (err) {
+              console.error('Initialization error:', err);
+              const s = strings();
+              loadingState.innerHTML = `
           <div class="text-rose-400 text-3xl">⚠️</div>
           <h3 class="text-base font-bold text-white">${s.errorLoadingTitle}</h3>
           <p class="text-xs text-slate-400">${err.message}</p>
         `;
-      }
-    }
+            }
+          }
 
-    initTracker();
+          initTracker();
   </script>
 </body>
+
 </html>

@@ -15,8 +15,10 @@ import webview
 from i18n_cli import (
     get_storage_dir,
     load_saved_lang,
+    load_saved_state,
     resolve_cli_lang,
     save_lang,
+    save_state,
     t,
 )
 
@@ -27,13 +29,19 @@ APP_TITLE = "Lumi Tracker"
 
 
 class LumiDesktopApi:
-    """JS API bridge exposed to index.html for unified language persistence."""
+    """JS API bridge exposed to index.html for unified language and state persistence."""
 
     def get_lang(self):
         return load_saved_lang()
 
     def set_lang(self, lang):
         return save_lang(lang)
+
+    def get_state(self):
+        return load_saved_state()
+
+    def set_state(self, state):
+        return save_state(state)
 
 
 def get_base_dir():

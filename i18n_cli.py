@@ -6,6 +6,7 @@ Shared internationalization and language persistence helpers for Lumi Tracker
 CLI scripts, desktop launcher, and local server.
 """
 
+import json
 import os
 import sys
 
@@ -13,6 +14,7 @@ DEFAULT_LANG = "en"
 SUPPORTED_LANGS = ("en", "pt")
 STORAGE_DIR_NAME = "LumiTracker"
 LANG_FILE_NAME = "lang.txt"
+STATE_FILE_NAME = "state.json"
 
 
 def get_storage_dir() -> str:
@@ -64,6 +66,50 @@ def save_lang(lang: str | None) -> str:
     except OSError:
         pass
     return normalized
+
+
+def get_state_file_path() -> str:
+    """Return the path to the persisted tracker state file."""
+    return os.path.join(get_storage_dir(), STATE_FILE_NAME)
+
+
+def load_saved_state() -> dict:
+    """Load persisted caught species and filter preferences from state.json."""
+    state_path = get_state_file_path()
+    if not os.path.exists(state_path):
+        return {"exists": False, "caught": [], "prefs": {}}
+    try:
+        with open(state_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return {"exists": False, "caught": [], "prefs": {}}
+        caught = [str(item) for item in data.get("caught", []) if isinstance(item, str)] if isinstance(data.get("caught"), list) else []
+        prefs = data.get("prefs") if isinstance(data.get("prefs"), dict) else {}
+        return {"exists": True, "caught": caught, "prefs": prefs}
+    except (OSError, ValueError):
+        return {"exists": False, "caught": [], "prefs": {}}
+
+
+def save_state(partial_state: dict | None) -> dict:
+    """Merge and persist caught species and/or filter preferences to state.json."""
+    current = load_saved_state()
+    caught = list(current["caught"])
+    prefs = dict(current["prefs"])
+
+    if isinstance(partial_state, dict):
+        if isinstance(partial_state.get("caught"), list):
+            caught = [str(item) for item in partial_state["caught"] if isinstance(item, str)]
+        if isinstance(partial_state.get("prefs"), dict):
+            prefs = dict(partial_state["prefs"])
+
+    payload = {"caught": caught, "prefs": prefs}
+    state_path = get_state_file_path()
+    try:
+        with open(state_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
+    return {"exists": True, **payload}
 
 
 def resolve_cli_lang(argv: list[str] | None = None) -> str:
