@@ -7,6 +7,7 @@ Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémo
 - **Progression-Ordered Route Filter**: Routes ordered in `ordered_locations.json` combined with the `luminescent_encounters.json` database.
 - **"Available Now" Mode**: Automatically filters encounters based on the current system time (Morning, Day, or Night) and the selected route, while hiding already-caught Pokémon.
 - **Persistent Progress**: Saves caught Pokémon and filter preferences in `localStorage` (stored in `%APPDATA%\LumiTracker` in desktop mode), with **JSON Backup / Import** support.
+- **Bilingual Support (EN / PT)**: Defaults to English with a compact `EN | PT` header toggle in the UI and unified language persistence (`%APPDATA%\LumiTracker\lang.txt` + `localStorage`). All CLI scripts and `.bat` launchers also support `--lang en|pt`.
 - **Desktop or Browser Mode**: Runs in a native desktop window via `pywebview` (`app.py`) or through a local fallback HTTP server (`server.py`).
 
 ## Prerequisites
@@ -39,6 +40,9 @@ pip install -r requirements.txt
   ```
   Or run `start_server.bat`.
 
+* **Language Override via CLI:**
+  Pass `--lang pt` or `--lang en` (or `-l pt` / `-l en`) to `app.py`, `server.py`, `build_exe.py`, `parse_encounters.py`, or any `.bat` launcher to switch and persist the active language.
+
 ## Building the Windows Executable (`.exe`)
 
 To build a standalone single-file executable (`dist/LumiTracker.exe`) on Windows:
@@ -69,6 +73,8 @@ Or run `build_exe.bat`.
 
 - `app.py`: Native desktop launcher powered by `pywebview`.
 - `server.py`: Local fallback HTTP server (`localhost:8000+`).
+- `i18n_cli.py`: Shared CLI language resolution, persistence, and translations (`en`/`pt`).
+- `conditions_i18n.py`: Bilingual condition translations for encounter notes.
 - `index.html`: Web interface and tracker logic.
 - `luminescent_encounters.json`: Normalized encounter database.
 - `ordered_locations.json`: Campaign-ordered list of locations.
