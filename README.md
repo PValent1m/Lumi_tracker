@@ -4,7 +4,7 @@ Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémo
 
 ## Features
 
-- **Dual Mode via Sidemenu (`Encontros / Rotas` & `Pokédex Completa`)**:
+- **Dual Mode via Sidemenu (`Encounters / Routes` & `Complete Pokédex`)**:
   - **Encounters / Routes**: Progression-ordered route guide (`ordered_locations.json` + `luminescent_encounters.json`) with catch-origin tracking (`Caught here` vs `In Dex ([Route])` + one-click transfer).
   - **Complete Pokédex**: Tracks all **559** obtainable Luminescent Platinum entries (513 base species + Regional forms + Lumi Special forms), including evolution-only and breeding-only Pokémon, interactive evolution chains, and an origin editor modal.
 - **"Available Now" Mode**: Automatically filters encounters based on the current system time (Morning, Day, or Night) and the selected route, while hiding already-caught Pokémon.
