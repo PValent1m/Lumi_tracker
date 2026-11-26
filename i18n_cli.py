@@ -73,36 +73,62 @@ def get_state_file_path() -> str:
     return os.path.join(get_storage_dir(), STATE_FILE_NAME)
 
 
+def _sanitize_origins(raw_origins) -> dict:
+    """Normalize persisted caught-origin metadata per Pokémon."""
+    if not isinstance(raw_origins, dict):
+        return {}
+    cleaned = {}
+    for mon, info in raw_origins.items():
+        if not isinstance(mon, str) or not mon.strip() or not isinstance(info, dict):
+            continue
+        entry = {}
+        for key in ("type", "location", "method", "note", "updatedAt"):
+            val = info.get(key)
+            if isinstance(val, str) and val.strip():
+                entry[key] = val.strip()
+        if entry:
+            cleaned[mon] = entry
+    return cleaned
+
+
 def load_saved_state() -> dict:
-    """Load persisted caught species and filter preferences from state.json."""
+    """Load persisted caught species, origins, and filter preferences from state.json."""
     state_path = get_state_file_path()
     if not os.path.exists(state_path):
-        return {"exists": False, "caught": [], "prefs": {}}
+        return {"exists": False, "caught": [], "origins": {}, "prefs": {}}
     try:
         with open(state_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, dict):
-            return {"exists": False, "caught": [], "prefs": {}}
+            return {"exists": False, "caught": [], "origins": {}, "prefs": {}}
         caught = [str(item) for item in data.get("caught", []) if isinstance(item, str)] if isinstance(data.get("caught"), list) else []
+        origins = _sanitize_origins(data.get("origins"))
         prefs = data.get("prefs") if isinstance(data.get("prefs"), dict) else {}
-        return {"exists": True, "caught": caught, "prefs": prefs}
+        return {"exists": True, "caught": caught, "origins": origins, "prefs": prefs}
     except (OSError, ValueError):
-        return {"exists": False, "caught": [], "prefs": {}}
+        return {"exists": False, "caught": [], "origins": {}, "prefs": {}}
 
 
 def save_state(partial_state: dict | None) -> dict:
-    """Merge and persist caught species and/or filter preferences to state.json."""
+    """Merge and persist caught species, origins, and/or filter preferences to state.json."""
     current = load_saved_state()
     caught = list(current["caught"])
+    origins = dict(current["origins"])
     prefs = dict(current["prefs"])
 
     if isinstance(partial_state, dict):
         if isinstance(partial_state.get("caught"), list):
             caught = [str(item) for item in partial_state["caught"] if isinstance(item, str)]
+        if isinstance(partial_state.get("origins"), dict):
+            origins = _sanitize_origins(partial_state["origins"])
         if isinstance(partial_state.get("prefs"), dict):
             prefs = dict(partial_state["prefs"])
 
-    payload = {"caught": caught, "prefs": prefs}
+    # Keep origins pruned to currently caught Pokémon only
+    caught_set = set(caught)
+    origins = {mon: info for mon, info in origins.items() if mon in caught_set}
+
+    payload = {"caught": caught, "origins": origins, "prefs": prefs}
     state_path = get_state_file_path()
     try:
         with open(state_path, "w", encoding="utf-8") as f:

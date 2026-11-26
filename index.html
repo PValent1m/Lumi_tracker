@@ -48,14 +48,18 @@
       image-rendering: pixelated;
     }
 
+    .sprite-img.smooth-art {
+      image-rendering: auto;
+    }
+
     /* Smooth card transitions */
     .pkm-card {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .pkm-card.is-caught {
-      background: rgba(15, 23, 42, 0.65);
-      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(15, 23, 42, 0.68);
+      border-color: rgba(16, 185, 129, 0.38);
     }
   </style>
 </head>
@@ -63,18 +67,130 @@
 <body
   class="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
 
+  <!-- Left Navigation Sidemenu (Backdrop + Drawer) -->
+  <div id="sidemenuBackdrop"
+    class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs opacity-0 pointer-events-none transition-opacity duration-200">
+  </div>
+
+  <aside id="sidemenuDrawer" aria-label="Main Navigation"
+    class="fixed top-0 left-0 bottom-0 z-50 w-72 max-w-[85vw] bg-[#0b1120] border-r border-slate-800 shadow-2xl transform -translate-x-full transition-transform duration-200 flex flex-col justify-between">
+
+    <div>
+      <!-- Drawer Header -->
+      <div class="px-4 py-3.5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-md shadow-cyan-500/20 ring-1 ring-white/20">
+            <span class="text-lg">✨</span>
+          </div>
+          <div>
+            <div class="text-sm font-black tracking-wide text-white">LUMI TRACKER</div>
+            <div id="sidemenuSubtitle" class="text-[11px] text-slate-400">Navigation</div>
+          </div>
+        </div>
+        <button id="btnCloseSidemenu" type="button"
+          class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          title="Close menu">
+          ✕
+        </button>
+      </div>
+
+      <!-- Primary View Switcher -->
+      <div class="p-3 space-y-2">
+        <div id="sidemenuSectionViews" class="px-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Tracker Modes
+        </div>
+
+        <button type="button" id="navBtnEncounters" data-view="encounters"
+          class="w-full p-3 rounded-xl border text-left transition-all flex items-start justify-between gap-2 cursor-pointer">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <span class="text-lg leading-none mt-0.5">🗺️</span>
+            <div class="min-w-0">
+              <div id="navEncountersTitle" class="text-xs font-bold text-white truncate">Encounters / Routes</div>
+              <div id="navEncountersDesc" class="text-[11px] text-slate-400 leading-snug mt-0.5">Catch locations by
+                route, cycle & method</div>
+            </div>
+          </div>
+          <span id="navEncountersBadge"
+            class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-emerald-400 border border-slate-700">0/434</span>
+        </button>
+
+        <button type="button" id="navBtnPokedex" data-view="pokedex"
+          class="w-full p-3 rounded-xl border text-left transition-all flex items-start justify-between gap-2 cursor-pointer">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <span class="text-lg leading-none mt-0.5">📖</span>
+            <div class="min-w-0">
+              <div id="navPokedexTitle" class="text-xs font-bold text-white truncate">Complete Pokédex</div>
+              <div id="navPokedexDesc" class="text-[11px] text-slate-400 leading-snug mt-0.5">All Pokémon, evolutions
+                & Lumi forms</div>
+            </div>
+          </div>
+          <span id="navPokedexBadge"
+            class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-cyan-400 border border-slate-700">0/559</span>
+        </button>
+      </div>
+
+      <!-- Quick Pokédex Shortcuts -->
+      <div class="px-3 pt-1 pb-3 space-y-1.5 border-t border-slate-800/80 mt-1">
+        <div id="sidemenuSectionShortcuts"
+          class="px-2 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Quick Filters
+        </div>
+        <button type="button" id="shortcutMissingEvo"
+          class="w-full px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-left text-xs text-slate-300 hover:text-white transition-colors flex items-center justify-between">
+          <span class="flex items-center gap-2 truncate"><span>🧬</span> <span id="shortcutMissingEvoLabel">Evolution /
+              Egg Only</span></span>
+          <span id="shortcutMissingEvoCount" class="font-mono text-[10px] text-purple-300">0/125</span>
+        </button>
+        <button type="button" id="shortcutRegionalForms"
+          class="w-full px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-left text-xs text-slate-300 hover:text-white transition-colors flex items-center justify-between">
+          <span class="flex items-center gap-2 truncate"><span>✨</span> <span id="shortcutRegionalFormsLabel">Regional &
+              Special Forms</span></span>
+          <span id="shortcutRegionalFormsCount" class="font-mono text-[10px] text-amber-300">0/46</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Drawer Bottom Breakdown -->
+    <div class="p-3.5 border-t border-slate-800 bg-slate-950/60 space-y-2 text-[11px]">
+      <div id="sidemenuSummaryTitle" class="font-bold text-slate-300 uppercase tracking-wider text-[10px]">Collection
+        Summary</div>
+      <div class="flex items-center justify-between text-slate-400">
+        <span id="summaryTotalLabel">Total Pokédex</span>
+        <span id="summaryTotalVal" class="font-mono font-bold text-cyan-400">0 / 559</span>
+      </div>
+      <div class="flex items-center justify-between text-slate-400">
+        <span id="summaryWildLabel">Route Catchable</span>
+        <span id="summaryWildVal" class="font-mono font-bold text-emerald-400">0 / 434</span>
+      </div>
+      <div class="flex items-center justify-between text-slate-400">
+        <span id="summaryEvoLabel">Evolution / Egg</span>
+        <span id="summaryEvoVal" class="font-mono font-bold text-purple-400">0 / 125</span>
+      </div>
+    </div>
+  </aside>
+
   <!-- Top Sticky Header -->
   <header class="sticky top-0 z-40 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-xl px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
 
-      <!-- Brand & Project Title -->
-      <div class="flex items-center gap-3">
+      <!-- Left: Sidemenu Button + Brand & Project Title -->
+      <div class="flex items-center gap-2.5">
+        <button id="btnOpenSidemenu" type="button" aria-label="Open navigation menu"
+          class="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 text-slate-200 transition-all flex items-center gap-2 shadow-sm active:scale-95 cursor-pointer"
+          title="Switch between Pokédex and Encounters">
+          <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <span id="activeViewChip" class="text-[11px] font-bold text-cyan-300 hidden sm:inline">🗺️ Routes</span>
+        </button>
+
         <div
-          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20">
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20 shrink-0">
           <span class="text-xl">✨</span>
         </div>
         <div>
-          <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2">
+          <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2 flex-wrap">
             LUMI TRACKER <span
               class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT
               2.2F</span>
@@ -146,19 +262,21 @@
     </div>
   </header>
 
-  <!-- Pokédex Progress Bar Section (Hero Stats) -->
+  <!-- Pokédex Progress Bar Section (Fixed Hero Stats across both views) -->
   <section class="max-w-7xl w-full mx-auto px-4 pt-3 pb-1">
     <div
       class="bg-gradient-to-r from-slate-900/90 via-[#0d1527] to-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 shadow-lg">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
 
-        <!-- Global Pokédex Progress -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+        <!-- 1st Bar: Global Pokédex Progress (All 559 Entries) -->
+        <div id="globalProgressCard"
+          class="space-y-1.5 cursor-pointer group rounded-xl p-1 -m-1 hover:bg-slate-800/30 transition-colors"
+          title="Click to open Complete Pokédex">
+          <div class="flex items-center justify-between text-xs gap-2">
+            <span class="font-bold text-slate-300 group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
               <span>📖</span> <span id="globalPokedexLabel">Pokédex Progress (Luminescent)</span>
             </span>
-            <span class="font-mono font-bold text-cyan-400" id="globalPokedexCount">0 / 434 (0%)</span>
+            <span class="font-mono font-bold text-cyan-400 shrink-0" id="globalPokedexCount">0 / 559 (0%)</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
             <div id="globalPokedexBar"
@@ -167,13 +285,14 @@
           </div>
         </div>
 
-        <!-- Current Route Progress -->
+        <!-- 2nd Bar: Contextual Progress (Current Route in Encounters OR Active Filter in Pokédex) -->
         <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-300 flex items-center gap-1.5 truncate max-w-[280px]">
-              <span>📍</span> <span id="routeProgressLabel">In This Route: All Routes</span>
+          <div class="flex items-center justify-between text-xs gap-2">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5 truncate max-w-[320px]">
+              <span id="contextProgressIcon">📍</span> <span id="routeProgressLabel" class="truncate">In This Route: All
+                Routes</span>
             </span>
-            <span class="font-mono font-bold text-emerald-400" id="routePokedexCount">0 / 0 (0%)</span>
+            <span class="font-mono font-bold text-emerald-400 shrink-0" id="routePokedexCount">0 / 0 (0%)</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
             <div id="routePokedexBar"
@@ -186,164 +305,176 @@
     </div>
   </section>
 
-  <!-- Filter Controls Section -->
-  <section class="max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
+  <!-- Shared Loading State -->
+  <div id="loadingState" class="max-w-7xl w-full mx-auto px-4 flex flex-col items-center justify-center py-20 text-center space-y-3">
+    <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+    <p id="loadingText" class="text-sm text-slate-400 font-medium">Loading Luminescent Platinum database...</p>
+  </div>
 
-    <!-- Time of Day & Fast Toggles -->
-    <div
-      class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+  <!-- ========================================================= -->
+  <!-- VIEW 1: ENCOUNTERS / ROUTES                               -->
+  <!-- ========================================================= -->
+  <div id="encountersViewWrapper" class="flex-grow flex flex-col">
 
-      <!-- Time of Day Radio/Pill Group -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-        <span id="cycleLabel"
-          class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Cycle:</span>
-        <button data-tod="all"
-          class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
-          <span>🌐</span> <span id="todAllLabel">All</span>
-        </button>
-        <button data-tod="Morning"
-          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
-          <span>☀️</span> <span id="todMorningLabel">Morning</span> <span
-            class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
-        </button>
-        <button data-tod="Day"
-          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
-          <span>🌤️</span> <span id="todDayLabel">Day</span> <span
-            class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
-        </button>
-        <button data-tod="Night"
-          class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
-          <span>🌙</span> <span id="todNightLabel">Night</span> <span
-            class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
-        </button>
+    <!-- Filter Controls Section -->
+    <section class="max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
 
-        <!-- Button: Activate System Clock -->
-        <button id="btnSmartTime"
-          class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1"
-          title="Sync with your PC clock">
-          <span>🕒</span> <span id="smartTimeLabel" class="hidden sm:inline">Use Current Time</span>
-        </button>
-      </div>
+      <!-- Time of Day & Fast Toggles -->
+      <div
+        class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
 
-      <!-- Quick Method & Caught Filters -->
-      <div class="flex items-center gap-2 overflow-x-auto text-xs">
+        <!-- Time of Day Radio/Pill Group -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+          <span id="cycleLabel"
+            class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Cycle:</span>
+          <button data-tod="all"
+            class="tod-btn active px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20">
+            <span>🌐</span> <span id="todAllLabel">All</span>
+          </button>
+          <button data-tod="Morning"
+            class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-950/30 transition-all flex items-center gap-1.5">
+            <span>☀️</span> <span id="todMorningLabel">Morning</span> <span
+              class="text-[10px] text-slate-500 font-normal">(04-10h)</span>
+          </button>
+          <button data-tod="Day"
+            class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-yellow-300 hover:border-yellow-500/40 hover:bg-yellow-950/30 transition-all flex items-center gap-1.5">
+            <span>🌤️</span> <span id="todDayLabel">Day</span> <span
+              class="text-[10px] text-slate-500 font-normal">(10-20h)</span>
+          </button>
+          <button data-tod="Night"
+            class="tod-btn px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-700/60 text-slate-300 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-950/30 transition-all flex items-center gap-1.5">
+            <span>🌙</span> <span id="todNightLabel">Night</span> <span
+              class="text-[10px] text-slate-500 font-normal">(20-04h)</span>
+          </button>
 
-        <!-- Hide Caught Toggle -->
-        <label
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
-          <input type="checkbox" id="hideCaughtCheckbox"
-            class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
-          <span id="hideCaughtLabel" class="text-xs font-medium">Hide Caught</span>
-        </label>
-
-        <!-- Method Selector -->
-        <select id="methodSelect"
-          class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
-          <option value="all">🎯 All Methods</option>
-          <option value="Walking">🌿 Grass (Walking)</option>
-          <option value="Fishing">🎣 Fishing (Rods)</option>
-          <option value="Surfing">🌊 Surf</option>
-          <option value="Incense">🌸 Incense (Regionals)</option>
-          <option value="Radar">📡 Poké Radar</option>
-          <option value="Honey Tree">🍯 Honey Tree</option>
-          <option value="Static">⚡ Static / Legendary</option>
-          <option value="Gift">🎁 Gifts / Starters</option>
-          <option value="Trade">🔄 In-Game Trades</option>
-        </select>
-
-      </div>
-
-    </div>
-
-    <!-- Search Bar & Chronological Route Dropdown -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-
-      <!-- Pokemon Name Live Search -->
-      <div class="md:col-span-5 relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+          <!-- Button: Activate System Clock -->
+          <button id="btnSmartTime"
+            class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-all flex items-center gap-1"
+            title="Sync with your PC clock">
+            <span>🕒</span> <span id="smartTimeLabel" class="hidden sm:inline">Use Current Time</span>
+          </button>
         </div>
-        <input id="searchInput" type="text"
-          placeholder="Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)..."
-          class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner">
-        <button id="clearSearch"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden"
-          title="Clear search">
-          ✕
-        </button>
+
+        <!-- Quick Method & Caught Filters -->
+        <div class="flex items-center gap-2 overflow-x-auto text-xs">
+
+          <!-- Hide Caught Toggle -->
+          <label
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 cursor-pointer select-none hover:border-slate-700 transition-colors">
+            <input type="checkbox" id="hideCaughtCheckbox"
+              class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5">
+            <span id="hideCaughtLabel" class="text-xs font-medium">Hide Caught</span>
+          </label>
+
+          <!-- Method Selector -->
+          <select id="methodSelect"
+            class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+            <option value="all">🎯 All Methods</option>
+            <option value="Walking">🌿 Grass (Walking)</option>
+            <option value="Fishing">🎣 Fishing (Rods)</option>
+            <option value="Surfing">🌊 Surf</option>
+            <option value="Incense">🌸 Incense (Regionals)</option>
+            <option value="Radar">📡 Poké Radar</option>
+            <option value="Honey Tree">🍯 Honey Tree</option>
+            <option value="Static">⚡ Static / Legendary</option>
+            <option value="Gift">🎁 Gifts / Starters</option>
+            <option value="Trade">🔄 In-Game Trades</option>
+          </select>
+
+        </div>
+
       </div>
 
-      <!-- Chronological Location Combobox with Search -->
-      <div id="locationCombobox" class="md:col-span-5 relative">
-        <div class="relative">
+      <!-- Search Bar & Chronological Route Dropdown -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+
+        <!-- Pokemon Name Live Search -->
+        <div class="md:col-span-5 relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
-          <button type="button" id="locationSelectBtn" aria-haspopup="listbox" aria-expanded="false"
-            aria-controls="locationOptionsList"
-            class="w-full pl-9 pr-14 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer flex items-center text-left">
-            <span id="locationSelectedLabel" class="truncate block w-full">🗺️ All Routes / Areas (Sinnoh Story Order)</span>
+          <input id="searchInput" type="text"
+            placeholder="Search Pokémon by name, # or route (e.g. Starly, 396, Rotom)..."
+            class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner">
+          <button id="clearSearch"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden"
+            title="Clear search">
+            ✕
           </button>
-          <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
-            <button type="button" id="clearLocationBtn"
-              class="p-1 text-slate-400 hover:text-white rounded-md transition-colors hidden text-xs leading-none"
-              title="Clear location filter">
-              ✕
-            </button>
-            <span id="locationChevron"
-              class="pointer-events-none text-slate-400 transition-transform duration-150 flex items-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </span>
-          </div>
         </div>
 
-        <!-- Dropdown Panel -->
-        <div id="locationDropdown"
-          class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-slate-900 border border-slate-700/90 rounded-xl shadow-2xl shadow-black/70 overflow-hidden">
-          <div class="p-2 border-b border-slate-800 bg-slate-950/70">
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </div>
-              <input id="locationSearchInput" type="text" autocomplete="off" placeholder="Search route or area..."
-                class="w-full pl-8 pr-7 py-1.5 bg-slate-900 border border-slate-700/80 rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all">
-              <button type="button" id="clearLocationSearchBtn"
-                class="hidden absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-white text-xs"
-                title="Clear search">
+        <!-- Chronological Location Combobox with Search -->
+        <div id="locationCombobox" class="md:col-span-5 relative">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <button type="button" id="locationSelectBtn" aria-haspopup="listbox" aria-expanded="false"
+              aria-controls="locationOptionsList"
+              class="w-full pl-9 pr-14 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner cursor-pointer flex items-center text-left">
+              <span id="locationSelectedLabel" class="truncate block w-full">🗺️ All Routes / Areas (Sinnoh Story
+                Order)</span>
+            </button>
+            <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
+              <button type="button" id="clearLocationBtn"
+                class="p-1 text-slate-400 hover:text-white rounded-md transition-colors hidden text-xs leading-none"
+                title="Clear location filter">
                 ✕
               </button>
+              <span id="locationChevron"
+                class="pointer-events-none text-slate-400 transition-transform duration-150 flex items-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </span>
             </div>
           </div>
-          <div id="locationOptionsList" role="listbox" class="max-h-72 overflow-y-auto py-1"></div>
+
+          <!-- Dropdown Panel -->
+          <div id="locationDropdown"
+            class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-slate-900 border border-slate-700/90 rounded-xl shadow-2xl shadow-black/70 overflow-hidden">
+            <div class="p-2 border-b border-slate-800 bg-slate-950/70">
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <input id="locationSearchInput" type="text" autocomplete="off" placeholder="Search route or area..."
+                  class="w-full pl-8 pr-7 py-1.5 bg-slate-900 border border-slate-700/80 rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all">
+                <button type="button" id="clearLocationSearchBtn"
+                  class="hidden absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-white text-xs"
+                  title="Clear search">
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div id="locationOptionsList" role="listbox" class="max-h-72 overflow-y-auto py-1"></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Reset Filters Button -->
-      <div class="md:col-span-2 flex items-center">
-        <button id="btnResetFilters"
-          class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
-          <span>🔄</span>
-          <span id="btnResetFiltersLabel">Reset Filters</span>
-        </button>
-      </div>
+        <!-- Reset Filters Button -->
+        <div class="md:col-span-2 flex items-center">
+          <button id="btnResetFilters"
+            class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
+            <span>🔄</span>
+            <span id="btnResetFiltersLabel">Reset Filters</span>
+          </button>
+        </div>
 
-    </div>
+      </div>
 
       <!-- Active Filter Summary & Result Count -->
-      <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5 flex-wrap gap-2">
         <div class="flex items-center gap-2">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>
@@ -359,43 +490,193 @@
         </div>
       </div>
 
-  </section>
+    </section>
 
-  <!-- Encounters Grid Section -->
-  <main class="max-w-7xl w-full mx-auto px-4 pb-16 flex-grow">
+    <!-- Encounters Grid Section -->
+    <main class="max-w-7xl w-full mx-auto px-4 pb-16 flex-grow">
 
-    <!-- Loading State -->
-    <div id="loadingState" class="flex flex-col items-center justify-center py-20 text-center space-y-3">
-      <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-      <p id="loadingText" class="text-sm text-slate-400 font-medium">Loading Luminescent Platinum database...</p>
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
+        <div class="text-5xl">🔍</div>
+        <h3 id="emptyTitle" class="text-lg font-bold text-white">No encounters found</h3>
+        <p id="emptyDesc" class="text-xs text-slate-400 max-w-md">No Pokémon match the active filters. If you are in
+          "Available Now" mode, all Pokémon for this time and route may already be caught — or check the Pokédex tab for
+          evolution-only Pokémon!</p>
+        <div class="flex items-center gap-2 flex-wrap justify-center">
+          <button id="emptyResetBtn" onclick="resetAllFilters()"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
+            Restore Default Filters
+          </button>
+          <button id="emptyGoPokedexBtn" type="button"
+            class="px-4 py-2 bg-cyan-950/70 hover:bg-cyan-900/70 text-xs font-semibold rounded-lg text-cyan-300 border border-cyan-800/70">
+            📖 Search in Pokédex
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <!-- Cards rendered via JavaScript -->
+      </div>
+
+      <!-- Load More Trigger -->
+      <div id="loadMoreContainer" class="py-6 text-center hidden">
+        <button id="btnLoadMore"
+          class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
+          Load More Encounters...
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 2: COMPLETE POKÉDEX                                  -->
+  <!-- ========================================================= -->
+  <div id="pokedexViewWrapper" class="hidden flex-grow flex flex-col">
+
+    <!-- Pokédex Filter Controls -->
+    <section class="max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
+      <div
+        class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+
+        <!-- Status Filter Pills (All / Missing / Caught) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+          <span id="dexStatusLabel"
+            class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider hidden sm:inline">Status:</span>
+          <button type="button" data-dex-status="all"
+            class="dex-status-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5">
+            <span>📖</span> <span id="dexStatusAllLabel">All</span>
+          </button>
+          <button type="button" data-dex-status="missing"
+            class="dex-status-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5">
+            <span>○</span> <span id="dexStatusMissingLabel">Missing</span>
+          </button>
+          <button type="button" data-dex-status="caught"
+            class="dex-status-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5">
+            <span>✓</span> <span id="dexStatusCaughtLabel">Caught</span>
+          </button>
+        </div>
+
+        <!-- Dropdown Filters: How to Obtain, Generation, Type -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <select id="dexObtainSelect"
+            class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+            <option value="all">🎯 All Sources</option>
+            <option value="wild">🌿 Catchable in Routes</option>
+            <option value="nonwild">🧬 Evolution / Egg Only</option>
+            <option value="forms">✨ Regional & Lumi Forms</option>
+          </select>
+
+          <select id="dexGenSelect"
+            class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+            <option value="all">🌐 All Generations</option>
+            <option value="Gen 1">Gen 1 • Kanto</option>
+            <option value="Gen 2">Gen 2 • Johto</option>
+            <option value="Gen 3">Gen 3 • Hoenn</option>
+            <option value="Gen 4">Gen 4 • Sinnoh</option>
+            <option value="Lumi Extras">✨ Lumi Extras (Gen 5–9)</option>
+          </select>
+
+          <select id="dexTypeSelect"
+            class="bg-slate-950 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none cursor-pointer">
+            <option value="all">🔥 All Types</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Pokédex Search & Reset Row -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        <div class="md:col-span-10 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <input id="dexSearchInput" type="text"
+            placeholder="Search Pokédex by name, #, type, evolution, or caught route (e.g. Infernape, 392, Tinkaton)..."
+            class="w-full pl-9 pr-8 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all shadow-inner">
+          <button id="dexClearSearch"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden"
+            title="Clear search">
+            ✕
+          </button>
+        </div>
+
+        <div class="md:col-span-2 flex items-center">
+          <button id="btnResetDexFilters" type="button"
+            class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
+            <span>🔄</span>
+            <span id="btnResetDexFiltersLabel">Reset Filters</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pokédex Result Count -->
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>
+            <span id="dexShowingPrefix">Showing</span>
+            <b id="dexCountDisplay" class="text-white">0</b>
+            <span id="dexShowingOf">of</span>
+            <span id="dexTotalDisplay">0</span>
+            <span id="dexShowingSuffix">Pokémon in Pokédex</span>
+          </span>
+        </div>
+        <span id="dexHintClickDetails" class="text-[11px] text-slate-500">💡 Click any Pokémon card to view evolutions,
+          routes & edit origin</span>
+      </div>
+    </section>
+
+    <!-- Pokédex Grid Section -->
+    <main class="max-w-7xl w-full mx-auto px-4 pb-16 flex-grow">
+      <div id="dexEmptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
+        <div class="text-5xl">📖</div>
+        <h3 id="dexEmptyTitle" class="text-lg font-bold text-white">No Pokémon found</h3>
+        <p id="dexEmptyDesc" class="text-xs text-slate-400 max-w-md">No Pokédex entries match your current filters.</p>
+        <button id="dexEmptyResetBtn" type="button"
+          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
+          Restore Default Filters
+        </button>
+      </div>
+
+      <div id="pokedexGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <!-- Pokédex cards rendered via JS -->
+      </div>
+
+      <div id="dexLoadMoreContainer" class="py-6 text-center hidden">
+        <button id="btnDexLoadMore" type="button"
+          class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
+          Load More Pokémon...
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- POKÉMON DETAIL MODAL (Evolutions, Routes & Origin Editor) -->
+  <!-- ========================================================= -->
+  <div id="pokemonDetailModal"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
+    <div
+      class="bg-[#0b1222] border border-slate-700/90 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+
+      <!-- Modal Header -->
+      <div id="detailModalHeader"
+        class="px-5 py-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-3">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Modal Scrollable Content -->
+      <div id="detailModalBody" class="p-5 overflow-y-auto space-y-5 text-xs">
+        <!-- Populated dynamically -->
+      </div>
+
     </div>
-
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center space-y-3">
-      <div class="text-5xl">🔍</div>
-      <h3 id="emptyTitle" class="text-lg font-bold text-white">No encounters found</h3>
-      <p id="emptyDesc" class="text-xs text-slate-400 max-w-md">No Pokémon match the active filters. If you are in
-        "Available Now" mode, all Pokémon for this time and route may already be caught!</p>
-      <button id="emptyResetBtn" onclick="resetAllFilters()"
-        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-cyan-400 border border-slate-700">
-        Restore Default Filters
-      </button>
-    </div>
-
-    <!-- Cards Grid -->
-    <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-      <!-- Cards rendered via JavaScript -->
-    </div>
-
-    <!-- Infinite Scroll / Load More Trigger -->
-    <div id="loadMoreContainer" class="py-6 text-center hidden">
-      <button id="btnLoadMore"
-        class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-bold text-cyan-400 transition-all shadow-md">
-        Load More Encounters...
-      </button>
-    </div>
-
-  </main>
+  </div>
 
   <!-- Confirmation Modal: Reset Catches -->
   <div id="resetModal"
@@ -407,8 +688,8 @@
       </div>
       <div class="text-center space-y-1">
         <h3 id="resetModalTitle" class="text-base font-bold text-white">Reset All Catches?</h3>
-        <p id="resetModalDesc" class="text-xs text-slate-400">This action will remove all caught Pokémon marks from this
-          browser. We recommend exporting a backup first.</p>
+        <p id="resetModalDesc" class="text-xs text-slate-400">This action will remove all caught Pokémon marks and
+          saved capture locations. We recommend exporting a backup first.</p>
       </div>
       <div class="grid grid-cols-2 gap-3 pt-2">
         <button id="btnCancelReset"
@@ -434,26 +715,79 @@
   <footer class="bg-[#0b1120] border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
       <p id="footerTitle"><b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b></p>
-      <p id="footerSource" class="text-slate-600">Database: <span
-          class="text-slate-400">luminescent_encounters.json</span></p>
+      <p id="footerSource" class="text-slate-600">Databases: <span class="text-slate-400">luminescent_pokedex.json •
+          luminescent_encounters.json</span></p>
     </div>
   </footer>
 
   <!-- Application Logic -->
   <script>
-    // Application Metadata & Storage Keys (kept compatible with existing saves)
+    // Application Metadata & Storage Keys (kept 100% compatible with existing saves)
     const APP_NAME = 'Lumi Tracker';
-    const APP_DATA_VERSION = '2.2F';
+    const APP_DATA_VERSION = '2.3-DEX';
     const STORAGE_CAUGHT_KEY = 'lumi_caught_pokemon';
+    const STORAGE_ORIGINS_KEY = 'lumi_caught_origins';
     const STORAGE_PREFS_KEY = 'lumi_filter_preferences';
     const STORAGE_LANG_KEY = 'lumi_language';
     const DEFAULT_LANG = 'en';
+
+    const ALL_POKEMON_TYPES = [
+      'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice',
+      'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
+      'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
+    ];
+
+    const TYPE_THEME = {
+      Normal: 'bg-stone-800/80 text-stone-200 border-stone-600/60',
+      Fire: 'bg-orange-950/80 text-orange-300 border-orange-700/60',
+      Water: 'bg-blue-950/80 text-blue-300 border-blue-700/60',
+      Electric: 'bg-yellow-950/80 text-yellow-300 border-yellow-700/60',
+      Grass: 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60',
+      Ice: 'bg-cyan-950/80 text-cyan-200 border-cyan-700/60',
+      Fighting: 'bg-red-950/80 text-red-300 border-red-800/60',
+      Poison: 'bg-purple-950/80 text-purple-300 border-purple-700/60',
+      Ground: 'bg-amber-950/80 text-amber-300 border-amber-700/60',
+      Flying: 'bg-indigo-950/80 text-indigo-200 border-indigo-700/60',
+      Psychic: 'bg-pink-950/80 text-pink-300 border-pink-700/60',
+      Bug: 'bg-lime-950/80 text-lime-300 border-lime-700/60',
+      Rock: 'bg-yellow-950/60 text-amber-200 border-amber-800/60',
+      Ghost: 'bg-violet-950/80 text-violet-300 border-violet-700/60',
+      Dragon: 'bg-indigo-950/90 text-cyan-300 border-indigo-600/70',
+      Dark: 'bg-slate-900 text-slate-300 border-slate-600/80',
+      Steel: 'bg-slate-800/90 text-sky-200 border-slate-600/70',
+      Fairy: 'bg-fuchsia-950/80 text-fuchsia-300 border-fuchsia-700/60',
+    };
+
+    const FORM_BADGE_THEME = {
+      alolan: { labelEn: 'Alola', labelPt: 'Alola', cls: 'bg-sky-950/80 text-sky-300 border-sky-700/60' },
+      galarian: { labelEn: 'Galar', labelPt: 'Galar', cls: 'bg-fuchsia-950/80 text-fuchsia-300 border-fuchsia-700/60' },
+      hisuian: { labelEn: 'Hisui', labelPt: 'Hisui', cls: 'bg-amber-950/80 text-amber-300 border-amber-700/60' },
+      special: { labelEn: 'Special', labelPt: 'Especial', cls: 'bg-purple-950/80 text-purple-300 border-purple-700/60' },
+    };
 
     // Bilingual UI Strings Dictionary
     const UI_STRINGS = {
       en: {
         htmlLang: 'en',
-        headerSubtitle: 'Encounter Guide • Pokémon Luminescent Platinum',
+        headerSubtitleEncounters: 'Encounter Guide • Pokémon Luminescent Platinum',
+        headerSubtitlePokedex: 'Complete Pokédex • Pokémon Luminescent Platinum',
+        activeChipEncounters: '🗺️ Routes',
+        activeChipPokedex: '📖 Pokédex',
+        openMenuTitle: 'Switch between Pokédex and Encounters',
+        closeMenuTitle: 'Close menu',
+        sidemenuSubtitle: 'Navigation',
+        sidemenuSectionViews: 'Tracker Modes',
+        navEncountersTitle: 'Encounters / Routes',
+        navEncountersDesc: 'Catch locations by route, cycle & method',
+        navPokedexTitle: 'Complete Pokédex',
+        navPokedexDesc: 'All Pokémon, evolutions & Lumi forms',
+        sidemenuSectionShortcuts: 'Quick Filters',
+        shortcutMissingEvoLabel: 'Evolution / Egg Only',
+        shortcutRegionalFormsLabel: 'Regional & Special Forms',
+        sidemenuSummaryTitle: 'Collection Summary',
+        summaryTotalLabel: 'Total Pokédex',
+        summaryWildLabel: 'Route Catchable',
+        summaryEvoLabel: 'Evolution / Egg',
         calculating: 'Calculating...',
         periodMorning: '☀️ Morning (04h-10h)',
         periodDay: '🌤️ Day (10h-20h)',
@@ -467,8 +801,10 @@
         resetTitle: 'Reset catches',
         langSwitcherTitle: 'Language / Idioma',
         globalPokedexLabel: 'Pokédex Progress (Luminescent)',
-        routeAllLabel: (count) => `In This Route: All Routes (${count} species)`,
+        globalProgressTitle: 'Click to open Complete Pokédex',
+        routeAllLabel: (count) => `Catchable in Routes (${count} species)`,
         routeSingleLabel: (loc) => `In This Route: ${loc}`,
+        dexFilterProgressLabel: (count) => `In Current Filter (${count} Pokémon)`,
         cycleLabel: 'Cycle:',
         todAll: 'All',
         todMorning: 'Morning',
@@ -503,27 +839,104 @@
         loadingText: 'Loading Luminescent Platinum database...',
         errorLoadingTitle: 'Error loading data',
         errorFetchEncounters: 'Failed to load luminescent_encounters.json',
+        errorFetchPokedex: 'Failed to load luminescent_pokedex.json',
         emptyTitle: 'No encounters found',
-        emptyDesc: 'No Pokémon match the active filters. If you are in "Available Now" mode, all Pokémon for this time and route may already be caught!',
+        emptyDesc: 'No Pokémon match the active filters. All Pokémon for this time/route may already be caught — or check the Pokédex for evolution-only Pokémon!',
         emptyResetBtn: 'Restore Default Filters',
+        emptyGoPokedexBtn: '📖 Open Pokédex',
         loadMoreBtn: 'Load More Encounters...',
-        resetModalTitle: 'Reset All Catches?',
-        resetModalDesc: 'This action will remove all caught Pokémon marks from this browser. We recommend exporting a backup first.',
-        btnCancelReset: 'Cancel',
-        btnConfirmReset: 'Confirm Reset',
-        footerTitle: '<b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b>',
-        footerSource: 'Database: <span class="text-slate-400">luminescent_encounters.json</span>',
+        // Pokédex View Strings
+        dexStatusLabel: 'Status:',
+        dexStatusAll: 'All',
+        dexStatusMissing: 'Missing',
+        dexStatusCaught: 'Caught',
+        dexObtainOptions: {
+          all: '🎯 All Sources',
+          wild: '🌿 Catchable in Routes',
+          nonwild: '🧬 Evolution / Egg Only',
+          forms: '✨ Regional & Lumi Forms',
+        },
+        dexGenOptions: {
+          all: '🌐 All Generations',
+          'Gen 1': 'Gen 1 • Kanto (#001–151)',
+          'Gen 2': 'Gen 2 • Johto (#152–251)',
+          'Gen 3': 'Gen 3 • Hoenn (#252–386)',
+          'Gen 4': 'Gen 4 • Sinnoh (#387–493)',
+          'Lumi Extras': '✨ Lumi Extras (Gen 5–9)',
+        },
+        dexTypeAll: '🔥 All Types',
+        types: {
+          Normal: 'Normal', Fire: 'Fire', Water: 'Water', Electric: 'Electric',
+          Grass: 'Grass', Ice: 'Ice', Fighting: 'Fighting', Poison: 'Poison',
+          Ground: 'Ground', Flying: 'Flying', Psychic: 'Psychic', Bug: 'Bug',
+          Rock: 'Rock', Ghost: 'Ghost', Dragon: 'Dragon', Dark: 'Dark',
+          Steel: 'Steel', Fairy: 'Fairy'
+        },
+        dexSearchPlaceholder: 'Search Pokédex by name, #, type, evolution, or caught route (e.g. Infernape, 392, Tinkaton)...',
+        dexShowingSuffix: 'Pokémon in Pokédex',
+        dexHintClickDetails: '💡 Click any Pokémon card to view evolutions, routes & edit origin',
+        dexEmptyTitle: 'No Pokémon found',
+        dexEmptyDesc: 'No Pokédex entries match your active filters.',
+        dexLoadMoreBtn: 'Load More Pokémon...',
+        dexCardRegister: 'Register',
+        dexCardRegistered: 'Caught',
+        dexSummaryCaughtRoute: (loc) => `Caught at: ${loc}`,
+        dexSummaryCaughtOrigin: (label) => `Obtained: ${label}`,
+        dexSummaryRoutes: (n) => n === 1 ? 'Catchable in 1 route' : `Catchable in ${n} routes`,
+        dexSummaryEvolvesFrom: (parent, method) => `Evolves from ${parent} (${method})`,
+        // Encounter Card Origin Buttons
         cardTodAny: 'Any Time',
         cardTodAnyTitle: 'Available at any time (Morning, Day, and Night)',
         cardTodMorning: 'Morning',
         cardTodDay: 'Day',
         cardTodNight: 'Night',
-        cardCaught: 'Caught',
+        cardCaughtHere: 'Caught here',
+        cardCaughtHereTitle: 'Click to unmark from Pokédex',
+        cardInDexShort: (origin) => `In Dex (${origin})`,
+        cardSetHere: 'Set here',
+        cardSetHereTitle: 'Update caught location to this route',
         cardCatch: 'Catch',
-        cardCatchTitle: 'Mark as caught in Lumi Tracker',
+        cardCatchTitle: 'Mark as caught in this route',
+        cardOpenDetailsTitle: 'View Pokédex details, evolutions & routes',
         cardLevelLabel: 'Level',
         cardLevelPrefix: 'Lv.',
         cardRarityLabel: 'Rarity',
+        originLabels: {
+          manual: 'Pokédex',
+          evolution: 'Evolution',
+          breeding: 'Egg / Daycare',
+          gift: 'Gift',
+          trade: 'Trade',
+        },
+        // Detail Modal Strings
+        modalStatusTitle: 'Pokédex Status & Origin',
+        modalMarkCaught: '○ Register in Pokédex',
+        modalMarkedCaught: '✓ Registered in Pokédex (Click to Unmark)',
+        modalOriginSelectLabel: 'Where / How Obtained:',
+        modalOriginNotCaughtOpt: '— Not registered yet (select to register) —',
+        modalOriginGroupGeneral: 'General Methods',
+        modalOriginOptManual: '📖 Pokédex / Manual (No specific route)',
+        modalOriginOptEvolution: '🧬 Evolution',
+        modalOriginOptBreeding: '🥚 Egg / Daycare (Breeding)',
+        modalOriginOptGift: '🎁 Gift / Event',
+        modalOriginOptTrade: '🔄 Trade',
+        modalOriginGroupRoutes: '📍 Catchable Routes in Game',
+        modalEvolutionTitle: 'Evolution Chain (Luminescent Platinum)',
+        modalNoEvolution: 'Does not evolve.',
+        modalLocationsTitle: (n) => `Catch Locations (${n})`,
+        modalNoWildTitle: 'Not Catchable in Wild Routes',
+        modalNoWildEvoDesc: (parent, method) => `Obtain by evolving <b>${parent}</b> (${method}).`,
+        modalViewParentBtn: (parent) => `View ${parent}`,
+        modalBtnCatchHere: '📍 Caught Here',
+        modalBtnCaughtHere: '✓ Caught Here',
+        modalBtnJumpRoute: '🗺️ Open Route',
+        // Reset & Footer
+        resetModalTitle: 'Reset All Catches?',
+        resetModalDesc: 'This action will remove all caught Pokémon marks and saved capture locations. We recommend exporting a backup first.',
+        btnCancelReset: 'Cancel',
+        btnConfirmReset: 'Confirm Reset',
+        footerTitle: '<b>Lumi Tracker</b> • Data from <b>Luminescent Platinum</b>',
+        footerSource: 'Databases: <span class="text-slate-400">luminescent_pokedex.json • luminescent_encounters.json</span>',
         methods: {
           'Walking': '🌿 Grass',
           'Surfing': '🌊 Surf',
@@ -539,13 +952,15 @@
         },
         toastDefault: 'Operation completed successfully!',
         toastUnmarked: (name) => `${name} unmarked from Pokédex`,
-        toastCaught: (name) => `${name} registered as Caught!`,
+        toastCaughtDex: (name, origin) => `${name} registered (${origin})!`,
+        toastCaughtRoute: (name, loc) => `${name} caught at ${loc}!`,
+        toastOriginUpdated: (name, origin) => `${name} origin updated: ${origin}`,
         toastFiltersReset: 'Filters reset',
         toastAvailableNowOn: '"Available Now" mode enabled!',
         toastAvailableNowOff: '"Available Now" mode disabled',
         toastCycleSynced: (label) => `Cycle synced with PC: ${label}`,
         toastBackupExported: 'Backup exported successfully!',
-        toastBackupLoaded: (count) => `Backup loaded! ${count} catches restored.`,
+        toastBackupLoaded: (count) => `Backup loaded! ${count} Pokémon restored.`,
         errorInvalidBackup: 'Invalid backup format.',
         alertImportError: 'Error importing backup: ',
         toastCatchesReset: 'All catches have been reset',
@@ -553,7 +968,25 @@
       },
       pt: {
         htmlLang: 'pt-BR',
-        headerSubtitle: 'Guia de Encontros • Pokémon Luminescent Platinum',
+        headerSubtitleEncounters: 'Guia de Encontros • Pokémon Luminescent Platinum',
+        headerSubtitlePokedex: 'Pokédex Completa • Pokémon Luminescent Platinum',
+        activeChipEncounters: '🗺️ Rotas',
+        activeChipPokedex: '📖 Pokédex',
+        openMenuTitle: 'Alternar entre Pokédex e Encontros',
+        closeMenuTitle: 'Fechar menu',
+        sidemenuSubtitle: 'Navegação',
+        sidemenuSectionViews: 'Modos do Tracker',
+        navEncountersTitle: 'Encontros / Rotas',
+        navEncountersDesc: 'Locais de captura por rota, horário e método',
+        navPokedexTitle: 'Pokédex Completa',
+        navPokedexDesc: 'Todos os Pokémon, evoluções e formas Lumi',
+        sidemenuSectionShortcuts: 'Atalhos Rápidos',
+        shortcutMissingEvoLabel: 'Só Evolução / Ovo',
+        shortcutRegionalFormsLabel: 'Formas Regionais & Especiais',
+        sidemenuSummaryTitle: 'Resumo da Coleção',
+        summaryTotalLabel: 'Pokédex Total',
+        summaryWildLabel: 'Capturáveis em Rotas',
+        summaryEvoLabel: 'Evolução / Ovo',
         calculating: 'Calculando...',
         periodMorning: '☀️ Manhã (04h-10h)',
         periodDay: '🌤️ Dia (10h-20h)',
@@ -567,8 +1000,10 @@
         resetTitle: 'Resetar capturas',
         langSwitcherTitle: 'Idioma / Language',
         globalPokedexLabel: 'Progresso da Pokédex (Luminescent)',
-        routeAllLabel: (count) => `Nesta Rota: Todas as Rotas (${count} espécies)`,
+        globalProgressTitle: 'Clique para abrir a Pokédex Completa',
+        routeAllLabel: (count) => `Capturáveis em Rotas (${count} espécies)`,
         routeSingleLabel: (loc) => `Nesta Rota: ${loc}`,
+        dexFilterProgressLabel: (count) => `Neste Filtro (${count} Pokémon)`,
         cycleLabel: 'Ciclo:',
         todAll: 'Todos',
         todMorning: 'Manhã',
@@ -603,27 +1038,104 @@
         loadingText: 'Carregando base de dados do Luminescent Platinum...',
         errorLoadingTitle: 'Erro ao carregar os dados',
         errorFetchEncounters: 'Falha ao carregar luminescent_encounters.json',
+        errorFetchPokedex: 'Falha ao carregar luminescent_pokedex.json',
         emptyTitle: 'Nenhum encontro localizado',
-        emptyDesc: 'Nenhum Pokémon corresponde aos filtros ativos. Se você estiver no modo "Disponível Agora", todos os Pokémon deste horário e rota já podem ter sido capturados!',
+        emptyDesc: 'Nenhum Pokémon corresponde aos filtros ativos. Todos deste horário/rota já podem ter sido pegos — ou confira a Pokédex para Pokémon exclusivos de evolução!',
         emptyResetBtn: 'Restaurar Filtros Padrão',
+        emptyGoPokedexBtn: '📖 Abrir Pokédex',
         loadMoreBtn: 'Carregar Mais Encontros...',
-        resetModalTitle: 'Resetar Todas as Capturas?',
-        resetModalDesc: 'Esta ação removerá todas as marcações de Pokémon capturados do navegador. Recomendamos exportar um backup antes.',
-        btnCancelReset: 'Cancelar',
-        btnConfirmReset: 'Confirmar Reset',
-        footerTitle: '<b>Lumi Tracker</b> • Dados de <b>Luminescent Platinum</b>',
-        footerSource: 'Base: <span class="text-slate-400">luminescent_encounters.json</span>',
+        // Pokédex View Strings
+        dexStatusLabel: 'Status:',
+        dexStatusAll: 'Todos',
+        dexStatusMissing: 'Faltando',
+        dexStatusCaught: 'Obtidos',
+        dexObtainOptions: {
+          all: '🎯 Todas as Fontes',
+          wild: '🌿 Capturáveis em Rotas',
+          nonwild: '🧬 Só Evolução / Ovo',
+          forms: '✨ Formas Regionais & Lumi',
+        },
+        dexGenOptions: {
+          all: '🌐 Todas as Gerações',
+          'Gen 1': 'Gen 1 • Kanto (#001–151)',
+          'Gen 2': 'Gen 2 • Johto (#152–251)',
+          'Gen 3': 'Gen 3 • Hoenn (#252–386)',
+          'Gen 4': 'Gen 4 • Sinnoh (#387–493)',
+          'Lumi Extras': '✨ Extras Lumi (Gen 5–9)',
+        },
+        dexTypeAll: '🔥 Todos os Tipos',
+        types: {
+          Normal: 'Normal', Fire: 'Fogo', Water: 'Água', Electric: 'Elétrico',
+          Grass: 'Planta', Ice: 'Gelo', Fighting: 'Lutador', Poison: 'Venenoso',
+          Ground: 'Terra', Flying: 'Voador', Psychic: 'Psíquico', Bug: 'Inseto',
+          Rock: 'Pedra', Ghost: 'Fantasma', Dragon: 'Dragão', Dark: 'Sombrio',
+          Steel: 'Aço', Fairy: 'Fada'
+        },
+        dexSearchPlaceholder: 'Buscar na Pokédex por nome, nº, tipo, evolução ou rota onde pegou (ex: Infernape, 392, Tinkaton)...',
+        dexShowingSuffix: 'Pokémon na Pokédex',
+        dexHintClickDetails: '💡 Clique em qualquer card para ver evoluções, rotas e editar onde pegou',
+        dexEmptyTitle: 'Nenhum Pokémon encontrado',
+        dexEmptyDesc: 'Nenhum Pokémon da Pokédex corresponde aos filtros selecionados.',
+        dexLoadMoreBtn: 'Carregar Mais Pokémon...',
+        dexCardRegister: 'Registrar',
+        dexCardRegistered: 'Obtido',
+        dexSummaryCaughtRoute: (loc) => `Pego em: ${loc}`,
+        dexSummaryCaughtOrigin: (label) => `Obtido: ${label}`,
+        dexSummaryRoutes: (n) => n === 1 ? 'Capturável em 1 rota' : `Capturável em ${n} rotas`,
+        dexSummaryEvolvesFrom: (parent, method) => `Evolui de ${parent} (${method})`,
+        // Encounter Card Origin Buttons
         cardTodAny: 'Qualquer Hora',
         cardTodAnyTitle: 'Disponível a qualquer horário (Manhã, Dia e Noite)',
         cardTodMorning: 'Manhã',
         cardTodDay: 'Dia',
         cardTodNight: 'Noite',
-        cardCaught: 'Capturado',
+        cardCaughtHere: 'Pego aqui',
+        cardCaughtHereTitle: 'Clique para desmarcar da Pokédex',
+        cardInDexShort: (origin) => `Na Dex (${origin})`,
+        cardSetHere: 'Peguei aqui',
+        cardSetHereTitle: 'Transferir o local de captura para esta rota',
         cardCatch: 'Registrar',
-        cardCatchTitle: 'Marcar como capturado no Lumi Tracker',
+        cardCatchTitle: 'Marcar como capturado nesta rota',
+        cardOpenDetailsTitle: 'Ver detalhes na Pokédex, evoluções e rotas',
         cardLevelLabel: 'Nível',
         cardLevelPrefix: 'Nv.',
         cardRarityLabel: 'Raridade',
+        originLabels: {
+          manual: 'Pokédex',
+          evolution: 'Evolução',
+          breeding: 'Ovo / Daycare',
+          gift: 'Presente',
+          trade: 'Troca',
+        },
+        // Detail Modal Strings
+        modalStatusTitle: 'Status na Pokédex & Origem',
+        modalMarkCaught: '○ Registrar na Pokédex',
+        modalMarkedCaught: '✓ Registrado na Pokédex (Clique p/ Desmarcar)',
+        modalOriginSelectLabel: 'Onde / Como foi obtido:',
+        modalOriginNotCaughtOpt: '— Ainda não registrado (selecione para registrar) —',
+        modalOriginGroupGeneral: 'Métodos Gerais',
+        modalOriginOptManual: '📖 Pokédex / Manual (Sem rota específica)',
+        modalOriginOptEvolution: '🧬 Evolução',
+        modalOriginOptBreeding: '🥚 Ovo / Daycare (Breeding)',
+        modalOriginOptGift: '🎁 Presente / Evento',
+        modalOriginOptTrade: '🔄 Troca',
+        modalOriginGroupRoutes: '📍 Rotas Disponíveis no Jogo',
+        modalEvolutionTitle: 'Linha Evolutiva (Luminescent Platinum)',
+        modalNoEvolution: 'Não possui evolução.',
+        modalLocationsTitle: (n) => `Locais de Captura (${n})`,
+        modalNoWildTitle: 'Não Capturável Selvagem nas Rotas',
+        modalNoWildEvoDesc: (parent, method) => `Obtenha evoluindo <b>${parent}</b> (${method}).`,
+        modalViewParentBtn: (parent) => `Ver ${parent}`,
+        modalBtnCatchHere: '📍 Peguei Aqui',
+        modalBtnCaughtHere: '✓ Pego Aqui',
+        modalBtnJumpRoute: '🗺️ Abrir Rota',
+        // Reset & Footer
+        resetModalTitle: 'Resetar Todas as Capturas?',
+        resetModalDesc: 'Esta ação removerá todas as marcações da Pokédex e locais de captura salvos. Recomendamos exportar um backup antes.',
+        btnCancelReset: 'Cancelar',
+        btnConfirmReset: 'Confirmar Reset',
+        footerTitle: '<b>Lumi Tracker</b> • Dados de <b>Luminescent Platinum</b>',
+        footerSource: 'Bases: <span class="text-slate-400">luminescent_pokedex.json • luminescent_encounters.json</span>',
         methods: {
           'Walking': '🌿 Grama',
           'Surfing': '🌊 Surf',
@@ -639,13 +1151,15 @@
         },
         toastDefault: 'Operação realizada com sucesso!',
         toastUnmarked: (name) => `${name} desmarcado da Pokédex`,
-        toastCaught: (name) => `${name} registrado como Capturado!`,
+        toastCaughtDex: (name, origin) => `${name} registrado (${origin})!`,
+        toastCaughtRoute: (name, loc) => `${name} capturado em ${loc}!`,
+        toastOriginUpdated: (name, origin) => `Origem de ${name} atualizada: ${origin}`,
         toastFiltersReset: 'Filtros redefinidos',
         toastAvailableNowOn: "Modo 'Disponível Agora' ativado!",
         toastAvailableNowOff: "Modo 'Disponível Agora' desativado",
         toastCycleSynced: (label) => `Ciclo sincronizado com o PC: ${label}`,
         toastBackupExported: 'Backup exportado com sucesso!',
-        toastBackupLoaded: (count) => `Backup carregado! ${count} capturas restauradas.`,
+        toastBackupLoaded: (count) => `Backup carregado! ${count} Pokémon restaurados.`,
         errorInvalidBackup: 'Formato de backup inválido.',
         alertImportError: 'Erro ao importar backup: ',
         toastCatchesReset: 'Todas as capturas foram resetadas',
@@ -656,39 +1170,91 @@
     // Active Language State
     let currentLang = DEFAULT_LANG;
 
-    // State Store
+    // Databases & Indexes
     let allEncounters = [];
     let filteredEncounters = [];
+    let allPokedex = [];
+    let filteredPokedex = [];
+    let pokedexByName = new Map();
+    let encountersByPokemon = new Map();
     let orderedLocations = [];
-    let allUniqueSpecies = new Set();
+    let allWildSpecies = new Set();
     let dataLoaded = false;
 
-    // Lumi Tracker Captured State (Set of Pokémon Names)
+    // Unified Caught State + Per-Pokémon Caught Origin
     let caughtSpecies = new Set();
+    let caughtOrigins = {}; // { [pokemonName]: { type: 'route'|'evolution'|'breeding'|'gift'|'trade'|'manual', location?: string, method?: string } }
 
-    // Pagination limit
-    let displayLimit = 48;
+    // Pagination limits
     const PAGE_CHUNK = 48;
+    const DEX_PAGE_CHUNK = 60;
+    let displayLimit = PAGE_CHUNK;
+    let dexDisplayLimit = DEX_PAGE_CHUNK;
 
-    // Filter state
+    // Currently open Pokémon in Detail Modal
+    let activeModalPokemon = null;
+    let isSidemenuOpen = false;
+
+    // Persisted Filter & View State
     const filterState = {
+      activeView: 'encounters', // 'encounters' | 'pokedex'
       search: '',
       location: 'all',
       timeOfDay: 'all',
       method: 'all',
       onlyAvailableNow: false,
       hideCaught: false,
+      dexSearch: '',
+      dexStatus: 'all', // 'all' | 'missing' | 'caught'
+      dexObtain: 'all', // 'all' | 'wild' | 'nonwild' | 'forms'
+      dexGen: 'all',
+      dexType: 'all',
       language: DEFAULT_LANG
     };
 
     // DOM Elements
+    const sidemenuBackdrop = document.getElementById('sidemenuBackdrop');
+    const sidemenuDrawer = document.getElementById('sidemenuDrawer');
+    const btnOpenSidemenu = document.getElementById('btnOpenSidemenu');
+    const btnCloseSidemenu = document.getElementById('btnCloseSidemenu');
+    const activeViewChip = document.getElementById('activeViewChip');
+    const sidemenuSubtitle = document.getElementById('sidemenuSubtitle');
+    const sidemenuSectionViews = document.getElementById('sidemenuSectionViews');
+    const navBtnEncounters = document.getElementById('navBtnEncounters');
+    const navBtnPokedex = document.getElementById('navBtnPokedex');
+    const navEncountersTitle = document.getElementById('navEncountersTitle');
+    const navEncountersDesc = document.getElementById('navEncountersDesc');
+    const navEncountersBadge = document.getElementById('navEncountersBadge');
+    const navPokedexTitle = document.getElementById('navPokedexTitle');
+    const navPokedexDesc = document.getElementById('navPokedexDesc');
+    const navPokedexBadge = document.getElementById('navPokedexBadge');
+    const sidemenuSectionShortcuts = document.getElementById('sidemenuSectionShortcuts');
+    const shortcutMissingEvo = document.getElementById('shortcutMissingEvo');
+    const shortcutMissingEvoLabel = document.getElementById('shortcutMissingEvoLabel');
+    const shortcutMissingEvoCount = document.getElementById('shortcutMissingEvoCount');
+    const shortcutRegionalForms = document.getElementById('shortcutRegionalForms');
+    const shortcutRegionalFormsLabel = document.getElementById('shortcutRegionalFormsLabel');
+    const shortcutRegionalFormsCount = document.getElementById('shortcutRegionalFormsCount');
+    const sidemenuSummaryTitle = document.getElementById('sidemenuSummaryTitle');
+    const summaryTotalLabel = document.getElementById('summaryTotalLabel');
+    const summaryTotalVal = document.getElementById('summaryTotalVal');
+    const summaryWildLabel = document.getElementById('summaryWildLabel');
+    const summaryWildVal = document.getElementById('summaryWildVal');
+    const summaryEvoLabel = document.getElementById('summaryEvoLabel');
+    const summaryEvoVal = document.getElementById('summaryEvoVal');
+
+    const encountersViewWrapper = document.getElementById('encountersViewWrapper');
+    const pokedexViewWrapper = document.getElementById('pokedexViewWrapper');
+
     const headerSubtitle = document.getElementById('headerSubtitle');
     const availableNowLabel = document.getElementById('availableNowLabel');
     const btnExportLabel = document.getElementById('btnExportLabel');
     const importLabel = document.getElementById('importLabel');
     const btnImportLabel = document.getElementById('btnImportLabel');
     const langSwitcher = document.getElementById('langSwitcher');
+    const globalProgressCard = document.getElementById('globalProgressCard');
     const globalPokedexLabel = document.getElementById('globalPokedexLabel');
+    const contextProgressIcon = document.getElementById('contextProgressIcon');
     const cycleLabel = document.getElementById('cycleLabel');
     const todAllLabel = document.getElementById('todAllLabel');
     const todMorningLabel = document.getElementById('todMorningLabel');
@@ -705,6 +1271,7 @@
     const emptyTitle = document.getElementById('emptyTitle');
     const emptyDesc = document.getElementById('emptyDesc');
     const emptyResetBtn = document.getElementById('emptyResetBtn');
+    const emptyGoPokedexBtn = document.getElementById('emptyGoPokedexBtn');
     const resetModalTitle = document.getElementById('resetModalTitle');
     const resetModalDesc = document.getElementById('resetModalDesc');
     const footerTitle = document.getElementById('footerTitle');
@@ -740,6 +1307,37 @@
     const periodDisplay = document.getElementById('periodDisplay');
     const periodIcon = document.getElementById('periodIcon');
 
+    // Pokédex View Elements
+    const dexStatusLabel = document.getElementById('dexStatusLabel');
+    const dexStatusAllLabel = document.getElementById('dexStatusAllLabel');
+    const dexStatusMissingLabel = document.getElementById('dexStatusMissingLabel');
+    const dexStatusCaughtLabel = document.getElementById('dexStatusCaughtLabel');
+    const dexObtainSelect = document.getElementById('dexObtainSelect');
+    const dexGenSelect = document.getElementById('dexGenSelect');
+    const dexTypeSelect = document.getElementById('dexTypeSelect');
+    const dexSearchInput = document.getElementById('dexSearchInput');
+    const dexClearSearch = document.getElementById('dexClearSearch');
+    const btnResetDexFilters = document.getElementById('btnResetDexFilters');
+    const btnResetDexFiltersLabel = document.getElementById('btnResetDexFiltersLabel');
+    const dexShowingPrefix = document.getElementById('dexShowingPrefix');
+    const dexCountDisplay = document.getElementById('dexCountDisplay');
+    const dexShowingOf = document.getElementById('dexShowingOf');
+    const dexTotalDisplay = document.getElementById('dexTotalDisplay');
+    const dexShowingSuffix = document.getElementById('dexShowingSuffix');
+    const dexHintClickDetails = document.getElementById('dexHintClickDetails');
+    const dexEmptyState = document.getElementById('dexEmptyState');
+    const dexEmptyTitle = document.getElementById('dexEmptyTitle');
+    const dexEmptyDesc = document.getElementById('dexEmptyDesc');
+    const dexEmptyResetBtn = document.getElementById('dexEmptyResetBtn');
+    const pokedexGrid = document.getElementById('pokedexGrid');
+    const dexLoadMoreContainer = document.getElementById('dexLoadMoreContainer');
+    const btnDexLoadMore = document.getElementById('btnDexLoadMore');
+
+    // Detail Modal Elements
+    const pokemonDetailModal = document.getElementById('pokemonDetailModal');
+    const detailModalHeader = document.getElementById('detailModalHeader');
+    const detailModalBody = document.getElementById('detailModalBody');
+
     // Progress Elements
     const globalPokedexCount = document.getElementById('globalPokedexCount');
     const globalPokedexBar = document.getElementById('globalPokedexBar');
@@ -758,7 +1356,7 @@
     const toastMessage = document.getElementById('toastMessage');
     const toastIcon = document.getElementById('toastIcon');
 
-    // Method badge visual theme configuration (labels localized via UI_STRINGS)
+    // Method badge visual theme configuration
     const METHOD_THEME = {
       'Walking': { bg: 'bg-emerald-950/60', text: 'text-emerald-300', border: 'border-emerald-800/60' },
       'Surfing': { bg: 'bg-blue-950/60', text: 'text-blue-300', border: 'border-blue-800/60' },
@@ -786,14 +1384,14 @@
     }
 
     function escapeAttr(str) {
-      return String(str)
+      return String(str ?? '')
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
     }
 
-    // Keep proper location names in English as in the ROM, translating only qualifiers in PT mode
+    // Keep proper location names in English as in the ROM, translating qualifiers in PT mode
     function formatLocationName(loc, lang = currentLang) {
       if (!loc || lang !== 'pt') return loc;
 
@@ -840,6 +1438,40 @@
         .replace(/ - Lobby\b/g, ' - Saguão');
     }
 
+    // Format a Pokémon's saved origin for display
+    function formatOriginDisplay(pokemonName, short = false) {
+      const s = strings();
+      const origin = caughtOrigins[pokemonName];
+      const dexEntry = pokedexByName.get(pokemonName);
+
+      if (!origin || !origin.type) {
+        if (dexEntry && !dexEntry.isCatchable && dexEntry.obtainCategory === 'evolution') {
+          return s.originLabels.evolution;
+        }
+        return s.originLabels.manual;
+      }
+
+      if (origin.type === 'route' && origin.location) {
+        const formattedLoc = formatLocationName(origin.location, currentLang);
+        if (short && formattedLoc.length > 20) {
+          return formattedLoc.slice(0, 19) + '…';
+        }
+        return formattedLoc;
+      }
+
+      return s.originLabels[origin.type] || s.originLabels.manual;
+    }
+
+    function getDefaultDexOriginType(pokemonName) {
+      const dexEntry = pokedexByName.get(pokemonName);
+      if (!dexEntry) return 'manual';
+      if (!dexEntry.isCatchable) {
+        if (dexEntry.obtainCategory === 'evolution') return 'evolution';
+        if (dexEntry.obtainCategory === 'breeding') return 'breeding';
+      }
+      return 'manual';
+    }
+
     // Toast Notification Display Helper
     let toastTimeout = null;
     function showToast(msg, icon = '✨') {
@@ -877,6 +1509,54 @@
     }
     setInterval(updateClock, 1000);
 
+    // Sidemenu Controls
+    function openSidemenu() {
+      isSidemenuOpen = true;
+      sidemenuBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      sidemenuDrawer.classList.remove('-translate-x-full');
+    }
+
+    function closeSidemenu() {
+      isSidemenuOpen = false;
+      sidemenuBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      sidemenuDrawer.classList.add('-translate-x-full');
+    }
+
+    function setActiveView(view, options = {}) {
+      const { savePrefs = true, closeMenu = true } = options;
+      filterState.activeView = view === 'pokedex' ? 'pokedex' : 'encounters';
+      if (closeMenu) closeSidemenu();
+
+      const isDex = filterState.activeView === 'pokedex';
+      if (dataLoaded) {
+        encountersViewWrapper.classList.toggle('hidden', isDex);
+        pokedexViewWrapper.classList.toggle('hidden', !isDex);
+      }
+
+      const s = strings();
+      headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
+      activeViewChip.textContent = isDex ? s.activeChipPokedex : s.activeChipEncounters;
+
+      // Highlight active navigation item in Sidemenu
+      [
+        { btn: navBtnEncounters, active: !isDex, ring: 'border-emerald-500/50 bg-emerald-950/30 shadow-sm' },
+        { btn: navBtnPokedex, active: isDex, ring: 'border-cyan-500/50 bg-cyan-950/30 shadow-sm' }
+      ].forEach(({ btn, active, ring }) => {
+        btn.className = 'w-full p-3 rounded-xl border text-left transition-all flex items-start justify-between gap-2 cursor-pointer ' +
+          (active ? ring : 'border-slate-800 bg-slate-900/60 hover:bg-slate-800/80 hover:border-slate-700');
+      });
+
+      if (savePrefs) savePreferences();
+      if (dataLoaded) {
+        if (isDex) {
+          applyDexFilters(false);
+        } else {
+          applyFilters(false);
+        }
+        updateProgressCounters();
+      }
+    }
+
     // Sync segmented language toggle buttons
     function syncLangButtonsUI() {
       document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -892,12 +1572,42 @@
       });
     }
 
+    function populateDexTypeSelect() {
+      const s = strings();
+      const currentVal = filterState.dexType || 'all';
+      let html = `<option value="all">${escapeAttr(s.dexTypeAll)}</option>`;
+      ALL_POKEMON_TYPES.forEach(t => {
+        const label = s.types[t] || t;
+        html += `<option value="${t}">${escapeAttr(label)}</option>`;
+      });
+      dexTypeSelect.innerHTML = html;
+      dexTypeSelect.value = currentVal;
+    }
+
     // Apply all UI translations for the active language
     function applyTranslations() {
       const s = strings();
       document.documentElement.lang = s.htmlLang;
 
-      headerSubtitle.textContent = s.headerSubtitle;
+      const isDex = filterState.activeView === 'pokedex';
+      headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
+      activeViewChip.textContent = isDex ? s.activeChipPokedex : s.activeChipEncounters;
+      btnOpenSidemenu.title = s.openMenuTitle;
+      btnCloseSidemenu.title = s.closeMenuTitle;
+      sidemenuSubtitle.textContent = s.sidemenuSubtitle;
+      sidemenuSectionViews.textContent = s.sidemenuSectionViews;
+      navEncountersTitle.textContent = s.navEncountersTitle;
+      navEncountersDesc.textContent = s.navEncountersDesc;
+      navPokedexTitle.textContent = s.navPokedexTitle;
+      navPokedexDesc.textContent = s.navPokedexDesc;
+      sidemenuSectionShortcuts.textContent = s.sidemenuSectionShortcuts;
+      shortcutMissingEvoLabel.textContent = s.shortcutMissingEvoLabel;
+      shortcutRegionalFormsLabel.textContent = s.shortcutRegionalFormsLabel;
+      sidemenuSummaryTitle.textContent = s.sidemenuSummaryTitle;
+      summaryTotalLabel.textContent = s.summaryTotalLabel;
+      summaryWildLabel.textContent = s.summaryWildLabel;
+      summaryEvoLabel.textContent = s.summaryEvoLabel;
+
       availableNowLabel.textContent = s.availableNowLabel;
       btnAvailableNow.title = s.availableNowTitle;
       btnExportLabel.textContent = s.backupLabel;
@@ -908,6 +1618,7 @@
       langSwitcher.title = s.langSwitcherTitle;
 
       globalPokedexLabel.textContent = s.globalPokedexLabel;
+      globalProgressCard.title = s.globalProgressTitle;
 
       cycleLabel.textContent = s.cycleLabel;
       todAllLabel.textContent = s.todAll;
@@ -940,7 +1651,34 @@
       emptyTitle.textContent = s.emptyTitle;
       emptyDesc.textContent = s.emptyDesc;
       emptyResetBtn.textContent = s.emptyResetBtn;
+      emptyGoPokedexBtn.textContent = s.emptyGoPokedexBtn;
       btnLoadMore.textContent = s.loadMoreBtn;
+
+      // Pokédex View Translations
+      dexStatusLabel.textContent = s.dexStatusLabel;
+      dexStatusAllLabel.textContent = s.dexStatusAll;
+      dexStatusMissingLabel.textContent = s.dexStatusMissing;
+      dexStatusCaughtLabel.textContent = s.dexStatusCaught;
+
+      Array.from(dexObtainSelect.options).forEach(opt => {
+        if (s.dexObtainOptions[opt.value]) opt.textContent = s.dexObtainOptions[opt.value];
+      });
+      Array.from(dexGenSelect.options).forEach(opt => {
+        if (s.dexGenOptions[opt.value]) opt.textContent = s.dexGenOptions[opt.value];
+      });
+      populateDexTypeSelect();
+
+      dexSearchInput.placeholder = s.dexSearchPlaceholder;
+      dexClearSearch.title = s.clearSearchTitle;
+      btnResetDexFiltersLabel.textContent = s.resetFiltersLabel;
+      dexShowingPrefix.textContent = s.showingPrefix;
+      dexShowingOf.textContent = s.showingOf;
+      dexShowingSuffix.textContent = s.dexShowingSuffix;
+      dexHintClickDetails.textContent = s.dexHintClickDetails;
+      dexEmptyTitle.textContent = s.dexEmptyTitle;
+      dexEmptyDesc.textContent = s.dexEmptyDesc;
+      dexEmptyResetBtn.textContent = s.emptyResetBtn;
+      btnDexLoadMore.textContent = s.dexLoadMoreBtn;
 
       resetModalTitle.textContent = s.resetModalTitle;
       resetModalDesc.textContent = s.resetModalDesc;
@@ -956,10 +1694,16 @@
       if (dataLoaded) {
         const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
         totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
+        dexTotalDisplay.textContent = allPokedex.length.toLocaleString(locale);
         populateLocationsDropdown(orderedLocations);
         syncFilterUI();
+        syncDexFilterUI();
+        applyFilters(false);
+        applyDexFilters(false);
         updateProgressCounters();
-        renderCards();
+        if (activeModalPokemon) {
+          renderDetailModal(activeModalPokemon);
+        }
       }
     }
 
@@ -981,7 +1725,7 @@
       }).catch(() => { });
     }
 
-    // Persist caught species and preferences to backend (pywebview API or server.py /api/state)
+    // Persist caught species, origins, and preferences to backend
     function syncStateToBackend(payload) {
       try {
         if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.set_state === 'function') {
@@ -1025,8 +1769,18 @@
       }
     }
 
-    // Sprite URLs Generator
+    // Sprite URLs Generator (prefers precomputed TeamLumi/Showdown URLs from luminescent_pokedex.json)
     function getSpriteUrls(pokemonName, id) {
+      const dexEntry = pokedexByName.get(pokemonName);
+      if (dexEntry && dexEntry.spriteUrl) {
+        const isSmooth = dexEntry.spriteUrl.endsWith('.webp');
+        return {
+          primaryUrl: dexEntry.spriteUrl,
+          fallbackUrl: dexEntry.fallbackSpriteUrl || '',
+          smoothArt: isSmooth
+        };
+      }
+
       let slug = pokemonName.toLowerCase()
         .replace("alolan ", "")
         .replace("galarian ", "")
@@ -1042,17 +1796,39 @@
 
       const showdownUrl = `https://play.pokemonshowdown.com/sprites/gen5/${slug}.png`;
       const pokeApiUrl = id ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` : '';
-      return { showdownUrl, pokeApiUrl };
+      return { primaryUrl: showdownUrl, fallbackUrl: pokeApiUrl, smoothArt: false };
+    }
+
+    function sanitizeOriginsMap(raw) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+      const cleaned = {};
+      Object.entries(raw).forEach(([mon, info]) => {
+        if (!mon || !info || typeof info !== 'object') return;
+        const entry = {};
+        ['type', 'location', 'method', 'note', 'updatedAt'].forEach(k => {
+          if (typeof info[k] === 'string' && info[k].trim()) entry[k] = info[k].trim();
+        });
+        if (entry.type) cleaned[mon] = entry;
+      });
+      return cleaned;
     }
 
     function applyFilterPrefs(parsedPrefs) {
       if (!parsedPrefs || typeof parsedPrefs !== 'object') return null;
+      if (parsedPrefs.activeView === 'pokedex' || parsedPrefs.activeView === 'encounters') {
+        filterState.activeView = parsedPrefs.activeView;
+      }
       if (parsedPrefs.search !== undefined) filterState.search = parsedPrefs.search;
       if (parsedPrefs.location !== undefined) filterState.location = parsedPrefs.location;
       if (parsedPrefs.timeOfDay !== undefined) filterState.timeOfDay = parsedPrefs.timeOfDay;
       if (parsedPrefs.method !== undefined) filterState.method = parsedPrefs.method;
       if (parsedPrefs.onlyAvailableNow !== undefined) filterState.onlyAvailableNow = parsedPrefs.onlyAvailableNow;
       if (parsedPrefs.hideCaught !== undefined) filterState.hideCaught = parsedPrefs.hideCaught;
+      if (parsedPrefs.dexSearch !== undefined) filterState.dexSearch = parsedPrefs.dexSearch;
+      if (parsedPrefs.dexStatus !== undefined) filterState.dexStatus = parsedPrefs.dexStatus;
+      if (parsedPrefs.dexObtain !== undefined) filterState.dexObtain = parsedPrefs.dexObtain;
+      if (parsedPrefs.dexGen !== undefined) filterState.dexGen = parsedPrefs.dexGen;
+      if (parsedPrefs.dexType !== undefined) filterState.dexType = parsedPrefs.dexType;
       return parsedPrefs.language !== undefined ? normalizeLang(parsedPrefs.language) : null;
     }
 
@@ -1060,6 +1836,7 @@
       if (!backendState || typeof backendState !== 'object') return;
 
       const backendCaught = Array.isArray(backendState.caught) ? backendState.caught : [];
+      const backendOrigins = sanitizeOriginsMap(backendState.origins);
       const hasBackendCaught = backendCaught.length > 0;
       const hasBackendPrefs = Boolean(
         backendState.exists &&
@@ -1070,13 +1847,16 @@
 
       if (hasBackendCaught) {
         caughtSpecies = new Set(backendCaught);
+        caughtOrigins = { ...caughtOrigins, ...backendOrigins };
+        pruneOriginsToCaught();
         try {
           localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(backendCaught));
+          localStorage.setItem(STORAGE_ORIGINS_KEY, JSON.stringify(caughtOrigins));
         } catch (e) { }
       } else if (caughtSpecies.size > 0) {
-        // Preserve local catches if backend state is empty or not created yet
         syncStateToBackend({
           caught: Array.from(caughtSpecies),
+          origins: caughtOrigins,
           prefs: filterState
         });
       }
@@ -1091,12 +1871,20 @@
 
       if (dataLoaded) {
         syncFilterUI();
-        updateProgressCounters();
-        applyFilters(false);
+        syncDexFilterUI();
+        setActiveView(filterState.activeView, { savePrefs: false, closeMenu: false });
       }
     }
 
-    // Persistence: Load Caught Set, Preferences & Language
+    function pruneOriginsToCaught() {
+      Object.keys(caughtOrigins).forEach(mon => {
+        if (!caughtSpecies.has(mon)) {
+          delete caughtOrigins[mon];
+        }
+      });
+    }
+
+    // Persistence: Load Caught Set, Origins, Preferences & Language
     function loadSavedState() {
       try {
         const rawCaught = localStorage.getItem(STORAGE_CAUGHT_KEY);
@@ -1108,6 +1896,16 @@
         }
       } catch (e) {
         console.error('Error loading caught state:', e);
+      }
+
+      try {
+        const rawOrigins = localStorage.getItem(STORAGE_ORIGINS_KEY);
+        if (rawOrigins) {
+          caughtOrigins = sanitizeOriginsMap(JSON.parse(rawOrigins));
+          pruneOriginsToCaught();
+        }
+      } catch (e) {
+        console.error('Error loading caught origins:', e);
       }
 
       let prefLang = null;
@@ -1142,69 +1940,173 @@
       }
     }
 
-    // Persistence: Save Caught Set
+    // Persistence: Save Caught Set + Origins
     function saveCaughtState(syncBackend = true) {
+      pruneOriginsToCaught();
       const caughtArray = Array.from(caughtSpecies);
       try {
         localStorage.setItem(STORAGE_CAUGHT_KEY, JSON.stringify(caughtArray));
+        localStorage.setItem(STORAGE_ORIGINS_KEY, JSON.stringify(caughtOrigins));
       } catch (e) {
         console.error('Error saving caught state:', e);
       }
       if (syncBackend) {
-        syncStateToBackend({ caught: caughtArray });
+        syncStateToBackend({ caught: caughtArray, origins: caughtOrigins });
       }
     }
 
-    // Toggle Capture status for a Pokémon
-    window.toggleCatch = function (pokemonName) {
+    // Refresh all views & open modal after state mutation
+    function refreshAfterCatchChange() {
+      saveCaughtState();
+      applyFilters(false);
+      applyDexFilters(false);
+      updateProgressCounters();
+      if (activeModalPokemon) {
+        renderDetailModal(activeModalPokemon);
+      }
+    }
+
+    // Catch Actions
+    function catchAtRoute(pokemonName, location, method) {
+      const s = strings();
+      const isTransfer = caughtSpecies.has(pokemonName);
+      caughtSpecies.add(pokemonName);
+      caughtOrigins[pokemonName] = {
+        type: 'route',
+        location: location,
+        method: method || 'Walking',
+        updatedAt: new Date().toISOString()
+      };
+      const dispLoc = formatLocationName(location, currentLang);
+      if (isTransfer) {
+        showToast(s.toastOriginUpdated(pokemonName, dispLoc), '📍');
+      } else {
+        showToast(s.toastCaughtRoute(pokemonName, dispLoc), '✅');
+      }
+      refreshAfterCatchChange();
+    }
+
+    function unmarkPokemon(pokemonName) {
+      const s = strings();
+      caughtSpecies.delete(pokemonName);
+      delete caughtOrigins[pokemonName];
+      showToast(s.toastUnmarked(pokemonName), '○');
+      refreshAfterCatchChange();
+    }
+
+    function toggleDexCatch(pokemonName) {
       const s = strings();
       if (caughtSpecies.has(pokemonName)) {
-        caughtSpecies.delete(pokemonName);
-        showToast(s.toastUnmarked(pokemonName), '○');
-      } else {
-        caughtSpecies.add(pokemonName);
-        showToast(s.toastCaught(pokemonName), '✅');
+        unmarkPokemon(pokemonName);
+        return;
       }
-      saveCaughtState();
-      updateProgressCounters();
-      applyFilters();
-    };
+      const defaultType = getDefaultDexOriginType(pokemonName);
+      caughtSpecies.add(pokemonName);
+      caughtOrigins[pokemonName] = {
+        type: defaultType,
+        updatedAt: new Date().toISOString()
+      };
+      showToast(s.toastCaughtDex(pokemonName, formatOriginDisplay(pokemonName, false)), '✅');
+      refreshAfterCatchChange();
+    }
 
-    // Update Global and Route Progress Bars
+    function setCustomOrigin(pokemonName, originPayload) {
+      const s = strings();
+      if (!originPayload || originPayload.type === 'none') {
+        if (caughtSpecies.has(pokemonName)) {
+          unmarkPokemon(pokemonName);
+        }
+        return;
+      }
+      const wasCaught = caughtSpecies.has(pokemonName);
+      caughtSpecies.add(pokemonName);
+      caughtOrigins[pokemonName] = {
+        ...originPayload,
+        updatedAt: new Date().toISOString()
+      };
+      const disp = formatOriginDisplay(pokemonName, false);
+      showToast(wasCaught ? s.toastOriginUpdated(pokemonName, disp) : s.toastCaughtDex(pokemonName, disp), '✅');
+      refreshAfterCatchChange();
+    }
+
+    // Update Global Bar, Contextual 2nd Bar, and Sidemenu Counters
     function updateProgressCounters() {
       const s = strings();
-      // 1. Global Pokédex Progress
-      const totalSpecies = allUniqueSpecies.size || 434;
-      let caughtCount = 0;
-      allUniqueSpecies.forEach(species => {
-        if (caughtSpecies.has(species)) caughtCount++;
+
+      // 1. Global Pokédex Progress (All 559 entries in luminescent_pokedex.json)
+      const totalDex = allPokedex.length || 559;
+      let caughtDexCount = 0;
+      let wildTotal = 0, wildCaught = 0;
+      let evoTotal = 0, evoCaught = 0;
+      let formsTotal = 0, formsCaught = 0;
+
+      allPokedex.forEach(entry => {
+        const isCaught = caughtSpecies.has(entry.pokemon);
+        if (isCaught) caughtDexCount++;
+        if (entry.isCatchable) {
+          wildTotal++;
+          if (isCaught) wildCaught++;
+        } else {
+          evoTotal++;
+          if (isCaught) evoCaught++;
+        }
+        if (entry.formCategory !== 'base') {
+          formsTotal++;
+          if (isCaught) formsCaught++;
+        }
       });
-      const globalPct = totalSpecies > 0 ? ((caughtCount / totalSpecies) * 100).toFixed(1) : 0;
-      globalPokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
+
+      const globalPct = totalDex > 0 ? ((caughtDexCount / totalDex) * 100).toFixed(1) : '0.0';
+      globalPokedexCount.textContent = `${caughtDexCount} / ${totalDex} (${globalPct}%)`;
       globalPokedexBar.style.width = `${globalPct}%`;
 
-      // 2. Current Route Progress
-      if (filterState.location && filterState.location !== 'all') {
-        const routeEncounters = allEncounters.filter(e => e.location === filterState.location);
-        const routeSpecies = new Set(routeEncounters.map(e => e.pokemon));
-        let routeCaught = 0;
-        routeSpecies.forEach(species => {
-          if (caughtSpecies.has(species)) routeCaught++;
-        });
-        const routeTotal = routeSpecies.size;
-        const routePct = routeTotal > 0 ? ((routeCaught / routeTotal) * 100).toFixed(0) : 0;
+      // Update Sidemenu Badges & Breakdown
+      navEncountersBadge.textContent = `${wildCaught}/${wildTotal || 434}`;
+      navPokedexBadge.textContent = `${caughtDexCount}/${totalDex}`;
+      shortcutMissingEvoCount.textContent = `${evoCaught}/${evoTotal}`;
+      shortcutRegionalFormsCount.textContent = `${formsCaught}/${formsTotal}`;
+      summaryTotalVal.textContent = `${caughtDexCount} / ${totalDex}`;
+      summaryWildVal.textContent = `${wildCaught} / ${wildTotal || 434}`;
+      summaryEvoVal.textContent = `${evoCaught} / ${evoTotal}`;
 
-        routeProgressLabel.textContent = s.routeSingleLabel(formatLocationName(filterState.location, currentLang));
-        routePokedexCount.textContent = `${routeCaught} / ${routeTotal} (${routePct}%)`;
-        routePokedexBar.style.width = `${routePct}%`;
+      // 2. Contextual 2nd Progress Bar
+      if (filterState.activeView === 'pokedex') {
+        contextProgressIcon.textContent = '🔎';
+        const filterTotal = filteredPokedex.length;
+        let filterCaught = 0;
+        filteredPokedex.forEach(entry => {
+          if (caughtSpecies.has(entry.pokemon)) filterCaught++;
+        });
+        const filterPct = filterTotal > 0 ? ((filterCaught / filterTotal) * 100).toFixed(1) : '0.0';
+        routeProgressLabel.textContent = s.dexFilterProgressLabel(filterTotal);
+        routePokedexCount.textContent = `${filterCaught} / ${filterTotal} (${filterPct}%)`;
+        routePokedexBar.style.width = `${filterPct}%`;
       } else {
-        routeProgressLabel.textContent = s.routeAllLabel(allUniqueSpecies.size);
-        routePokedexCount.textContent = `${caughtCount} / ${totalSpecies} (${globalPct}%)`;
-        routePokedexBar.style.width = `${globalPct}%`;
+        contextProgressIcon.textContent = '📍';
+        if (filterState.location && filterState.location !== 'all') {
+          const routeEncounters = allEncounters.filter(e => e.location === filterState.location);
+          const routeSpecies = new Set(routeEncounters.map(e => e.pokemon));
+          let routeCaught = 0;
+          routeSpecies.forEach(species => {
+            if (caughtSpecies.has(species)) routeCaught++;
+          });
+          const routeTotal = routeSpecies.size;
+          const routePct = routeTotal > 0 ? ((routeCaught / routeTotal) * 100).toFixed(0) : '0';
+
+          routeProgressLabel.textContent = s.routeSingleLabel(formatLocationName(filterState.location, currentLang));
+          routePokedexCount.textContent = `${routeCaught} / ${routeTotal} (${routePct}%)`;
+          routePokedexBar.style.width = `${routePct}%`;
+        } else {
+          const wTotal = wildTotal || allWildSpecies.size || 434;
+          const wPct = wTotal > 0 ? ((wildCaught / wTotal) * 100).toFixed(1) : '0.0';
+          routeProgressLabel.textContent = s.routeAllLabel(wTotal);
+          routePokedexCount.textContent = `${wildCaught} / ${wTotal} (${wPct}%)`;
+          routePokedexBar.style.width = `${wPct}%`;
+        }
       }
     }
 
-    // Apply Current UI Settings to Filter Elements
+    // Apply Current UI Settings to Encounters Filter Elements
     function syncFilterUI() {
       searchInput.value = filterState.search || '';
       clearSearch.classList.toggle('hidden', !filterState.search);
@@ -1212,7 +2114,6 @@
       methodSelect.value = filterState.method || 'all';
       hideCaughtCheckbox.checked = filterState.hideCaught || false;
 
-      // Time buttons
       document.querySelectorAll('.tod-btn').forEach(btn => {
         btn.classList.remove('active', 'bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm', 'shadow-cyan-500/20');
         if (btn.dataset.tod === filterState.timeOfDay) {
@@ -1221,6 +2122,23 @@
       });
 
       syncAvailableNowUI();
+    }
+
+    // Apply Current UI Settings to Pokédex Filter Elements
+    function syncDexFilterUI() {
+      dexSearchInput.value = filterState.dexSearch || '';
+      dexClearSearch.classList.toggle('hidden', !filterState.dexSearch);
+      dexObtainSelect.value = filterState.dexObtain || 'all';
+      dexGenSelect.value = filterState.dexGen || 'all';
+      dexTypeSelect.value = filterState.dexType || 'all';
+
+      document.querySelectorAll('.dex-status-btn').forEach(btn => {
+        const isActive = btn.dataset.dexStatus === (filterState.dexStatus || 'all');
+        btn.className = 'dex-status-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ' +
+          (isActive
+            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20'
+            : 'border-slate-700/60 text-slate-300 hover:text-white hover:border-slate-600');
+      });
     }
 
     function syncAvailableNowUI() {
@@ -1246,7 +2164,7 @@
     let locationActiveIndex = -1;
     let visibleLocationOptions = [];
 
-    function normalizeLocationSearchText(str) {
+    function normalizeSearchText(str) {
       return String(str || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -1271,7 +2189,7 @@
     function getFilteredLocationOptions() {
       const s = strings();
       const rawQuery = locationSearchInput.value.trim();
-      const normQuery = normalizeLocationSearchText(rawQuery);
+      const normQuery = normalizeSearchText(rawQuery);
       const options = [];
 
       if (!normQuery) {
@@ -1279,8 +2197,8 @@
       }
 
       orderedLocations.forEach(loc => {
-        const enMatch = !normQuery || normalizeLocationSearchText(loc).includes(normQuery);
-        const ptMatch = !normQuery || normalizeLocationSearchText(formatLocationName(loc, 'pt')).includes(normQuery);
+        const enMatch = !normQuery || normalizeSearchText(loc).includes(normQuery);
+        const ptMatch = !normQuery || normalizeSearchText(formatLocationName(loc, 'pt')).includes(normQuery);
         if (enMatch || ptMatch) {
           options.push({
             value: loc,
@@ -1293,294 +2211,326 @@
     }
 
     function getLocationOptionClass(isSelected, isActive) {
-            let cls = 'w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ';
-            if (isSelected) {
-              cls += 'bg-cyan-500/20 text-cyan-300 font-semibold ';
-              if (isActive) cls += 'ring-1 ring-inset ring-cyan-400/60 ';
-            } else if (isActive) {
-              cls += 'bg-slate-800 text-white ';
-            } else {
-              cls += 'text-slate-200 hover:bg-slate-800/80 hover:text-white ';
-            }
-            return cls;
-          }
+      let cls = 'w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ';
+      if (isSelected) {
+        cls += 'bg-cyan-500/20 text-cyan-300 font-semibold ';
+        if (isActive) cls += 'ring-1 ring-inset ring-cyan-400/60 ';
+      } else if (isActive) {
+        cls += 'bg-slate-800 text-white ';
+      } else {
+        cls += 'text-slate-200 hover:bg-slate-800/80 hover:text-white ';
+      }
+      return cls;
+    }
 
     function renderLocationOptions() {
-            const s = strings();
-            visibleLocationOptions = getFilteredLocationOptions();
-            locationOptionsList.innerHTML = '';
+      const s = strings();
+      visibleLocationOptions = getFilteredLocationOptions();
+      locationOptionsList.innerHTML = '';
 
-            if (visibleLocationOptions.length === 0) {
-              locationActiveIndex = -1;
-              const emptyEl = document.createElement('div');
-              emptyEl.className = 'px-3 py-4 text-center text-xs text-slate-400';
-              emptyEl.textContent = s.locationSearchEmpty;
-              locationOptionsList.appendChild(emptyEl);
-              return;
-            }
+      if (visibleLocationOptions.length === 0) {
+        locationActiveIndex = -1;
+        const emptyEl = document.createElement('div');
+        emptyEl.className = 'px-3 py-4 text-center text-xs text-slate-400';
+        emptyEl.textContent = s.locationSearchEmpty;
+        locationOptionsList.appendChild(emptyEl);
+        return;
+      }
 
-            if (locationActiveIndex >= visibleLocationOptions.length) {
-              locationActiveIndex = visibleLocationOptions.length - 1;
-            }
+      if (locationActiveIndex >= visibleLocationOptions.length) {
+        locationActiveIndex = visibleLocationOptions.length - 1;
+      }
 
-            const currentVal = filterState.location || 'all';
+      const currentVal = filterState.location || 'all';
 
-            visibleLocationOptions.forEach((opt, idx) => {
-              const isSelected = opt.value === currentVal;
-              const isActive = idx === locationActiveIndex;
+      visibleLocationOptions.forEach((opt, idx) => {
+        const isSelected = opt.value === currentVal;
+        const isActive = idx === locationActiveIndex;
 
-              const btn = document.createElement('button');
-              btn.type = 'button';
-              btn.setAttribute('role', 'option');
-              btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-              btn.dataset.value = opt.value;
-              btn.dataset.index = String(idx);
-              btn.className = getLocationOptionClass(isSelected, isActive);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('role', 'option');
+        btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        btn.dataset.value = opt.value;
+        btn.dataset.index = String(idx);
+        btn.className = getLocationOptionClass(isSelected, isActive);
 
-              const labelSpan = document.createElement('span');
-              labelSpan.className = 'truncate';
-              labelSpan.textContent = opt.label;
-              btn.appendChild(labelSpan);
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'truncate';
+        labelSpan.textContent = opt.label;
+        btn.appendChild(labelSpan);
 
-              if (isSelected) {
-                const checkSpan = document.createElement('span');
-                checkSpan.className = 'text-cyan-400 shrink-0 text-[11px] font-bold';
-                checkSpan.textContent = '✓';
-                btn.appendChild(checkSpan);
-              }
+        if (isSelected) {
+          const checkSpan = document.createElement('span');
+          checkSpan.className = 'text-cyan-400 shrink-0 text-[11px] font-bold';
+          checkSpan.textContent = '✓';
+          btn.appendChild(checkSpan);
+        }
 
-              btn.addEventListener('click', () => {
-                selectLocation(opt.value);
-              });
+        btn.addEventListener('click', () => {
+          selectLocation(opt.value);
+        });
 
-              locationOptionsList.appendChild(btn);
-            });
-          }
+        locationOptionsList.appendChild(btn);
+      });
+    }
 
     function updateLocationOptionHighlight(scrollBlock = 'nearest') {
-            const optionEls = locationOptionsList.querySelectorAll('[role="option"]');
-            const currentVal = filterState.location || 'all';
-            optionEls.forEach((el, idx) => {
-              const isSelected = el.dataset.value === currentVal;
-              const isActive = idx === locationActiveIndex;
-              el.className = getLocationOptionClass(isSelected, isActive);
-              if (isActive) {
-                el.scrollIntoView({ block: scrollBlock });
-              }
-            });
-          }
+      const optionEls = locationOptionsList.querySelectorAll('[role="option"]');
+      const currentVal = filterState.location || 'all';
+      optionEls.forEach((el, idx) => {
+        const isSelected = el.dataset.value === currentVal;
+        const isActive = idx === locationActiveIndex;
+        el.className = getLocationOptionClass(isSelected, isActive);
+        if (isActive) {
+          el.scrollIntoView({ block: scrollBlock });
+        }
+      });
+    }
 
     function highlightSelectedLocationOption(scrollBlock = 'nearest') {
-            const selectedIdx = visibleLocationOptions.findIndex(o => o.value === (filterState.location || 'all'));
-            if (selectedIdx >= 0) {
-              locationActiveIndex = selectedIdx;
-              updateLocationOptionHighlight(scrollBlock);
-            }
-          }
+      const selectedIdx = visibleLocationOptions.findIndex(o => o.value === (filterState.location || 'all'));
+      if (selectedIdx >= 0) {
+        locationActiveIndex = selectedIdx;
+        updateLocationOptionHighlight(scrollBlock);
+      }
+    }
 
     function openLocationDropdown() {
-            if (isLocationDropdownOpen) return;
-            isLocationDropdownOpen = true;
-            locationDropdown.classList.remove('hidden');
-            locationSelectBtn.setAttribute('aria-expanded', 'true');
-            locationChevron.classList.add('rotate-180');
+      if (isLocationDropdownOpen) return;
+      isLocationDropdownOpen = true;
+      locationDropdown.classList.remove('hidden');
+      locationSelectBtn.setAttribute('aria-expanded', 'true');
+      locationChevron.classList.add('rotate-180');
 
-            locationSearchInput.value = '';
-            clearLocationSearchBtn.classList.add('hidden');
-            locationActiveIndex = -1;
-            renderLocationOptions();
-            highlightSelectedLocationOption('center');
+      locationSearchInput.value = '';
+      clearLocationSearchBtn.classList.add('hidden');
+      locationActiveIndex = -1;
+      renderLocationOptions();
+      highlightSelectedLocationOption('center');
 
-            requestAnimationFrame(() => {
-              locationSearchInput.focus();
-            });
-          }
+      requestAnimationFrame(() => {
+        locationSearchInput.focus();
+      });
+    }
 
     function closeLocationDropdown(restoreFocus = false) {
-            if (!isLocationDropdownOpen) return;
-            isLocationDropdownOpen = false;
-            locationDropdown.classList.add('hidden');
-            locationSelectBtn.setAttribute('aria-expanded', 'false');
-            locationChevron.classList.remove('rotate-180');
-            locationSearchInput.value = '';
-            clearLocationSearchBtn.classList.add('hidden');
-            locationActiveIndex = -1;
-            if (restoreFocus) {
-              locationSelectBtn.focus();
-            }
-          }
+      if (!isLocationDropdownOpen) return;
+      isLocationDropdownOpen = false;
+      locationDropdown.classList.add('hidden');
+      locationSelectBtn.setAttribute('aria-expanded', 'false');
+      locationChevron.classList.remove('rotate-180');
+      locationSearchInput.value = '';
+      clearLocationSearchBtn.classList.add('hidden');
+      locationActiveIndex = -1;
+      if (restoreFocus) {
+        locationSelectBtn.focus();
+      }
+    }
 
     function selectLocation(value) {
-            filterState.location = value || 'all';
-            closeLocationDropdown(false);
-            syncLocationSelectUI();
-            applyFilters();
-          }
+      filterState.location = value || 'all';
+      closeLocationDropdown(false);
+      syncLocationSelectUI();
+      applyFilters();
+    }
 
-    // Populate Location Dropdown (keeping canonical EN value, displaying localized label)
-    function populateLocationsDropdown(locations) {
-            syncLocationSelectUI();
-          }
+    function populateLocationsDropdown() {
+      syncLocationSelectUI();
+    }
 
-    // Main Filtering Function
+    // =========================================================
+    // ENCOUNTERS FILTERING & RENDERING
+    // =========================================================
     function applyFilters(savePrefs = true) {
-            displayLimit = PAGE_CHUNK;
-            if (savePrefs) {
-              savePreferences();
-            }
-            updateProgressCounters();
+      displayLimit = PAGE_CHUNK;
+      if (savePrefs) {
+        savePreferences();
+      }
 
-            const currentPeriod = getSinnohPeriod().key;
+      const currentPeriod = getSinnohPeriod().key;
 
-            filteredEncounters = allEncounters.filter(item => {
-              const isCaught = caughtSpecies.has(item.pokemon);
+      filteredEncounters = allEncounters.filter(item => {
+        const isCaught = caughtSpecies.has(item.pokemon);
 
-              // Mode: "Available Now" Logic
-              if (filterState.onlyAvailableNow) {
-                if (isCaught) return false;
-                if (!item.time_of_day.includes(currentPeriod)) return false;
-              }
+        // Mode: "Available Now" Logic
+        if (filterState.onlyAvailableNow) {
+          if (isCaught) return false;
+          if (!item.time_of_day.includes(currentPeriod)) return false;
+        }
 
-              // Hide Caught checkbox
-              if (filterState.hideCaught && isCaught) {
-                return false;
-              }
+        // Hide Caught checkbox
+        if (filterState.hideCaught && isCaught) {
+          return false;
+        }
 
-              // Location Filter
-              if (filterState.location !== 'all' && item.location !== filterState.location) {
-                return false;
-              }
+        // Location Filter
+        if (filterState.location !== 'all' && item.location !== filterState.location) {
+          return false;
+        }
 
-              // Time of Day Filter (when not forced by Available Now)
-              if (!filterState.onlyAvailableNow && filterState.timeOfDay !== 'all') {
-                if (!item.time_of_day.includes(filterState.timeOfDay)) {
-                  return false;
-                }
-              }
-
-              // Method Filter
-              if (filterState.method !== 'all') {
-                if (filterState.method === 'Fishing') {
-                  if (!item.method.includes('Rod')) return false;
-                } else if (filterState.method === 'Static') {
-                  if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
-                } else if (item.method !== filterState.method) {
-                  return false;
-                }
-              }
-
-              // Search Query (Pokemon name, Dex ID, or Location in EN/PT)
-              if (filterState.search) {
-                const query = filterState.search.toLowerCase();
-                const nameMatch = item.pokemon.toLowerCase().includes(query);
-                const idMatch = String(item.id).includes(query);
-                const locMatch = item.location.toLowerCase().includes(query) ||
-                  formatLocationName(item.location, 'pt').toLowerCase().includes(query);
-                if (!nameMatch && !idMatch && !locMatch) {
-                  return false;
-                }
-              }
-
-              return true;
-            });
-
-            renderCards();
+        // Time of Day Filter (when not forced by Available Now)
+        if (!filterState.onlyAvailableNow && filterState.timeOfDay !== 'all') {
+          if (!item.time_of_day.includes(filterState.timeOfDay)) {
+            return false;
           }
+        }
 
-    // Render Cards in Grid
+        // Method Filter
+        if (filterState.method !== 'all') {
+          if (filterState.method === 'Fishing') {
+            if (!item.method.includes('Rod')) return false;
+          } else if (filterState.method === 'Static') {
+            if (item.method !== 'Static' && item.method !== 'Legendaries') return false;
+          } else if (item.method !== filterState.method) {
+            return false;
+          }
+        }
+
+        // Search Query (Pokemon name, Dex ID, or Location in EN/PT)
+        if (filterState.search) {
+          const query = normalizeSearchText(filterState.search);
+          const nameMatch = normalizeSearchText(item.pokemon).includes(query);
+          const idMatch = String(item.id).includes(query);
+          const locMatch = normalizeSearchText(item.location).includes(query) ||
+            normalizeSearchText(formatLocationName(item.location, 'pt')).includes(query);
+          if (!nameMatch && !idMatch && !locMatch) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      updateProgressCounters();
+      renderCards();
+    }
+
     function renderCards() {
-            const s = strings();
-            const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
-            countDisplay.textContent = filteredEncounters.length.toLocaleString(locale);
+      const s = strings();
+      const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+      countDisplay.textContent = filteredEncounters.length.toLocaleString(locale);
 
-            if (filteredEncounters.length === 0) {
-              cardsGrid.innerHTML = '';
-              emptyState.classList.remove('hidden');
-              loadMoreContainer.classList.add('hidden');
-              return;
-            }
+      if (filteredEncounters.length === 0) {
+        cardsGrid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        loadMoreContainer.classList.add('hidden');
+        return;
+      }
 
-            emptyState.classList.add('hidden');
+      emptyState.classList.add('hidden');
 
-            const itemsToShow = filteredEncounters.slice(0, displayLimit);
+      const itemsToShow = filteredEncounters.slice(0, displayLimit);
 
-            let html = '';
-            itemsToShow.forEach(item => {
-              const { showdownUrl, pokeApiUrl } = getSpriteUrls(item.pokemon, item.id);
-              const theme = METHOD_THEME[item.method] || { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
-              const methodLabel = s.methods[item.method] || item.method;
-              const isCaught = caughtSpecies.has(item.pokemon);
-              const displayLocation = formatLocationName(item.location, currentLang);
+      let html = '';
+      itemsToShow.forEach(item => {
+        const { primaryUrl, fallbackUrl, smoothArt } = getSpriteUrls(item.pokemon, item.id);
+        const theme = METHOD_THEME[item.method] || { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+        const methodLabel = s.methods[item.method] || item.method;
+        const isCaught = caughtSpecies.has(item.pokemon);
+        const origin = caughtOrigins[item.pokemon];
+        const isCaughtHere = isCaught && origin && origin.type === 'route' && origin.location === item.location;
+        const displayLocation = formatLocationName(item.location, currentLang);
 
-              // Time of Day Badges
-              let todBadge = '';
-              if (item.time_of_day.length === 3) {
-                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="${escapeAttr(s.cardTodAnyTitle)}">
+        // Time of Day Badges
+        let todBadge = '';
+        if (item.time_of_day.length === 3) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center gap-1" title="${escapeAttr(s.cardTodAnyTitle)}">
             <span>⏱️</span> <span>${s.cardTodAny}</span>
           </span>`;
-              } else if (item.time_of_day.includes('Morning')) {
-                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
+        } else if (item.time_of_day.includes('Morning')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/80 flex items-center gap-1 shadow-sm shadow-amber-950/40">
             <span>☀️</span> <span>${s.cardTodMorning}</span>
           </span>`;
-              } else if (item.time_of_day.includes('Day')) {
-                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
+        } else if (item.time_of_day.includes('Day')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-950/70 text-yellow-300 border border-yellow-800/80 flex items-center gap-1 shadow-sm shadow-yellow-950/40">
             <span>🌤️</span> <span>${s.cardTodDay}</span>
           </span>`;
-              } else if (item.time_of_day.includes('Night')) {
-                todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
+        } else if (item.time_of_day.includes('Night')) {
+          todBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 flex items-center gap-1 shadow-sm shadow-indigo-950/40">
             <span>🌙</span> <span>${s.cardTodNight}</span>
           </span>`;
-              }
+        }
 
-              // Captured Checkbox / Button Badge
-              const catchBtnClass = isCaught
-                ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-emerald-500/30'
-                : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700';
+        // Action Controls based on Origin State
+        let catchActionHtml = '';
+        let originSubBannerHtml = '';
 
-              const catchBtnText = isCaught
-                ? `<span>✓</span> <span>${s.cardCaught}</span>`
-                : `<span>○</span> <span>${s.cardCatch}</span>`;
+        if (!isCaught) {
+          catchActionHtml = `
+            <button type="button"
+              data-action="catch-route"
+              data-pokemon="${escapeAttr(item.pokemon)}"
+              data-location="${escapeAttr(item.location)}"
+              data-method="${escapeAttr(item.method)}"
+              class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 hover:border-cyan-500/50 cursor-pointer"
+              title="${escapeAttr(s.cardCatchTitle)}">
+              <span>○</span> <span>${s.cardCatch}</span>
+            </button>`;
+        } else if (isCaughtHere) {
+          catchActionHtml = `
+            <button type="button"
+              data-action="unmark-pokemon"
+              data-pokemon="${escapeAttr(item.pokemon)}"
+              class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-rose-950/60 hover:border-rose-500/50 hover:text-rose-200 cursor-pointer"
+              title="${escapeAttr(s.cardCaughtHereTitle)}">
+              <span>✓</span> <span>${s.cardCaughtHere}</span>
+            </button>`;
+        } else {
+          const shortOrigin = formatOriginDisplay(item.pokemon, true);
+          const fullOrigin = formatOriginDisplay(item.pokemon, false);
+          catchActionHtml = `
+            <button type="button"
+              data-action="transfer-route"
+              data-pokemon="${escapeAttr(item.pokemon)}"
+              data-location="${escapeAttr(item.location)}"
+              data-method="${escapeAttr(item.method)}"
+              class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 bg-cyan-950/60 border-cyan-700/60 text-cyan-300 hover:bg-emerald-950/70 hover:border-emerald-500/60 hover:text-emerald-300 font-semibold cursor-pointer"
+              title="${escapeAttr(s.cardSetHereTitle)}">
+              <span>📍</span> <span>${s.cardSetHere}</span>
+            </button>`;
+          originSubBannerHtml = `
+            <div data-action="open-detail" data-pokemon="${escapeAttr(item.pokemon)}"
+              class="mb-2 px-2 py-1 rounded-lg bg-emerald-950/35 border border-emerald-800/40 text-[10px] text-emerald-300/90 flex items-center justify-between gap-1 cursor-pointer hover:border-emerald-600/60 transition-colors"
+              title="${escapeAttr(s.cardInDexShort(fullOrigin))}">
+              <span class="truncate">✓ ${escapeAttr(s.cardInDexShort(shortOrigin))}</span>
+              <span class="text-slate-400 shrink-0">📖</span>
+            </div>`;
+        }
 
-              // Bilingual conditions note
-              const condText = currentLang === 'pt'
-                ? (item.conditions_pt || item.conditions)
-                : item.conditions;
-              const hasSpecialCond = condText && condText !== 'None' && condText !== 'Nenhuma';
-              const condHtml = hasSpecialCond
-                ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${escapeAttr(condText)}">
+        // Bilingual conditions note
+        const condText = currentLang === 'pt'
+          ? (item.conditions_pt || item.conditions)
+          : item.conditions;
+        const hasSpecialCond = condText && condText !== 'None' && condText !== 'Nenhuma';
+        const condHtml = hasSpecialCond
+          ? `<div class="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5 line-clamp-2" title="${escapeAttr(condText)}">
               <span class="text-cyan-400 shrink-0">ℹ️</span>
               <span class="leading-tight">${condText}</span>
             </div>`
-                : '';
+          : '';
 
-              html += `
+        html += `
           <div class="pkm-card ${isCaught ? 'is-caught' : ''} bg-slate-900/85 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-3.5 flex flex-col justify-between shadow-md hover:shadow-cyan-950/20 group relative overflow-hidden">
-            
-            <!-- Top Card Header: ID, Location & Catch Toggle -->
             <div>
               <div class="flex items-center justify-between text-xs text-slate-400 pb-2 mb-2 border-b border-slate-800/60 gap-2">
                 <span class="font-mono text-[11px] text-slate-500 font-bold shrink-0">#${item.id ? String(item.id).padStart(3, '0') : '???'}</span>
                 <span class="font-medium text-slate-300 truncate text-[11px]" title="${escapeAttr(displayLocation)}">📍 ${displayLocation}</span>
-                
-                <!-- Quick Catch Toggle Button -->
-                <button 
-                  onclick="toggleCatch('${item.pokemon.replace(/'/g, "\\'")}')" 
-                  class="shrink-0 px-2 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 ${catchBtnClass}"
-                  title="${escapeAttr(s.cardCatchTitle)}"
-                >
-                  ${catchBtnText}
-                </button>
+                ${catchActionHtml}
               </div>
 
-              <!-- Main Card Body: Sprite + Pokemon Name + Method/Time Badges -->
-              <div class="flex items-center gap-3">
+              ${originSubBannerHtml}
+
+              <!-- Main Card Body: Clickable to open Pokédex Detail Modal -->
+              <div data-action="open-detail" data-pokemon="${escapeAttr(item.pokemon)}"
+                class="flex items-center gap-3 cursor-pointer" title="${escapeAttr(s.cardOpenDetailsTitle)}">
                 <div class="w-14 h-14 shrink-0 bg-slate-950/90 rounded-xl border border-slate-800 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-inner">
-                  <img 
-                    src="${showdownUrl}" 
-                    alt="${escapeAttr(item.pokemon)}" 
-                    class="sprite-img max-w-full max-h-full object-contain" 
+                  <img
+                    src="${escapeAttr(primaryUrl)}"
+                    alt="${escapeAttr(item.pokemon)}"
+                    class="sprite-img ${smoothArt ? 'smooth-art' : ''} max-w-full max-h-full object-contain"
                     loading="lazy"
-                    onerror="this.onerror=null; this.src='${pokeApiUrl}'; if(!this.src) this.style.display='none';"
+                    onerror="this.onerror=null; this.src='${escapeAttr(fallbackUrl)}'; if(!this.src) this.style.display='none';"
                   />
                 </div>
                 <div class="flex-grow min-w-0">
@@ -1609,399 +2559,1054 @@
               </div>
             </div>
 
-            <!-- Conditions / Notes -->
             ${condHtml}
           </div>
         `;
-            });
+      });
 
-            cardsGrid.innerHTML = html;
+      cardsGrid.innerHTML = html;
+      loadMoreContainer.classList.toggle('hidden', displayLimit >= filteredEncounters.length);
+    }
 
-            // Toggle Load More button
-            if (displayLimit < filteredEncounters.length) {
-              loadMoreContainer.classList.remove('hidden');
-            } else {
-              loadMoreContainer.classList.add('hidden');
-            }
+    // =========================================================
+    // POKÉDEX FILTERING & RENDERING
+    // =========================================================
+    function applyDexFilters(savePrefs = true) {
+      dexDisplayLimit = DEX_PAGE_CHUNK;
+      if (savePrefs) {
+        savePreferences();
+      }
+
+      const s = strings();
+      const normQuery = normalizeSearchText(filterState.dexSearch);
+
+      filteredPokedex = allPokedex.filter(entry => {
+        const isCaught = caughtSpecies.has(entry.pokemon);
+
+        // Status filter
+        if (filterState.dexStatus === 'caught' && !isCaught) return false;
+        if (filterState.dexStatus === 'missing' && isCaught) return false;
+
+        // Obtain source filter
+        if (filterState.dexObtain === 'wild' && !entry.isCatchable) return false;
+        if (filterState.dexObtain === 'nonwild' && entry.isCatchable) return false;
+        if (filterState.dexObtain === 'forms' && entry.formCategory === 'base') return false;
+
+        // Generation filter
+        if (filterState.dexGen !== 'all' && entry.generation !== filterState.dexGen) return false;
+
+        // Type filter
+        if (filterState.dexType !== 'all' && !(entry.types || []).includes(filterState.dexType)) return false;
+
+        // Search query (name, dexId, EN/PT types, evolution parent, or saved caught location)
+        if (normQuery) {
+          const nameMatch = normalizeSearchText(entry.pokemon).includes(normQuery);
+          const idMatch = String(entry.dexId).padStart(3, '0').includes(normQuery) || String(entry.dexId).includes(normQuery);
+          const typeMatch = (entry.types || []).some(t =>
+            normalizeSearchText(t).includes(normQuery) ||
+            normalizeSearchText(s.types[t] || '').includes(normQuery)
+          );
+          const parentMatch = entry.evolvesFrom && normalizeSearchText(entry.evolvesFrom.pokemon).includes(normQuery);
+          const originStr = isCaught ? normalizeSearchText(formatOriginDisplay(entry.pokemon, false)) : '';
+          const originMatch = Boolean(originStr && originStr.includes(normQuery));
+
+          if (!nameMatch && !idMatch && !typeMatch && !parentMatch && !originMatch) {
+            return false;
           }
+        }
+
+        return true;
+      });
+
+      updateProgressCounters();
+      renderPokedexCards();
+    }
+
+    function renderTypeBadges(types) {
+      const s = strings();
+      return (types || []).map(t => {
+        const cls = TYPE_THEME[t] || 'bg-slate-800 text-slate-300 border-slate-700';
+        const label = s.types[t] || t;
+        return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${cls}">${escapeAttr(label)}</span>`;
+      }).join('');
+    }
+
+    function renderPokedexCards() {
+      const s = strings();
+      const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+      dexCountDisplay.textContent = filteredPokedex.length.toLocaleString(locale);
+
+      if (filteredPokedex.length === 0) {
+        pokedexGrid.innerHTML = '';
+        dexEmptyState.classList.remove('hidden');
+        dexLoadMoreContainer.classList.add('hidden');
+        return;
+      }
+
+      dexEmptyState.classList.add('hidden');
+      const itemsToShow = filteredPokedex.slice(0, dexDisplayLimit);
+
+      let html = '';
+      itemsToShow.forEach(entry => {
+        const isCaught = caughtSpecies.has(entry.pokemon);
+        const isSmooth = (entry.spriteUrl || '').endsWith('.webp');
+
+        // Form badge if non-base
+        let formBadgeHtml = '';
+        if (entry.formCategory && entry.formCategory !== 'base' && FORM_BADGE_THEME[entry.formCategory]) {
+          const fb = FORM_BADGE_THEME[entry.formCategory];
+          const fbLabel = currentLang === 'pt' ? fb.labelPt : fb.labelEn;
+          formBadgeHtml = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${fb.cls}">${escapeAttr(fbLabel)}</span>`;
+        }
+
+        const btnClass = isCaught
+          ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold hover:bg-emerald-500/30'
+          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 hover:border-cyan-500/50';
+        const btnText = isCaught
+          ? `<span>✓</span> <span>${s.dexCardRegistered}</span>`
+          : `<span>○</span> <span>${s.dexCardRegister}</span>`;
+
+        // Summary Footer (Origin when caught, Obtain guide when missing)
+        let summaryHtml = '';
+        if (isCaught) {
+          const origin = caughtOrigins[entry.pokemon];
+          const dispOrigin = formatOriginDisplay(entry.pokemon, false);
+          const summaryText = (origin && origin.type === 'route')
+            ? s.dexSummaryCaughtRoute(dispOrigin)
+            : s.dexSummaryCaughtOrigin(dispOrigin);
+          summaryHtml = `
+            <div data-action="open-detail" data-pokemon="${escapeAttr(entry.pokemon)}"
+              class="mt-3 pt-2.5 border-t border-emerald-900/50 text-[11px] text-emerald-300 flex items-center justify-between gap-1.5 cursor-pointer group/sum">
+              <span class="truncate font-medium">✅ ${escapeAttr(summaryText)}</span>
+              <span class="text-slate-400 group-hover/sum:text-cyan-300 shrink-0 text-[10px]">✎</span>
+            </div>`;
+        } else {
+          let hintIcon = '📍';
+          let hintColor = 'text-slate-300';
+          let hintText = '';
+
+          if (entry.isCatchable) {
+            hintIcon = '📍';
+            hintColor = 'text-emerald-300/90';
+            hintText = s.dexSummaryRoutes(entry.routeCount);
+            if (entry.evolvesFrom) {
+              hintText += ` • 🧬 ${entry.evolvesFrom.pokemon}`;
+            }
+          } else if (entry.evolvesFrom) {
+            hintIcon = '🧬';
+            hintColor = 'text-purple-300';
+            const evoMethod = currentLang === 'pt' ? entry.evolvesFrom.method_pt : entry.evolvesFrom.method_en;
+            hintText = s.dexSummaryEvolvesFrom(entry.evolvesFrom.pokemon, evoMethod);
+          } else if (entry.obtainCategory === 'breeding') {
+            hintIcon = '🥚';
+            hintColor = 'text-amber-300';
+            hintText = (currentLang === 'pt' ? entry.specialNote_pt : entry.specialNote_en) || 'Egg / Daycare';
+          } else {
+            hintIcon = '⚡';
+            hintColor = 'text-cyan-300';
+            hintText = (currentLang === 'pt' ? entry.specialNote_pt : entry.specialNote_en) || 'Special Event';
+          }
+
+          summaryHtml = `
+            <div data-action="open-detail" data-pokemon="${escapeAttr(entry.pokemon)}"
+              class="mt-3 pt-2.5 border-t border-slate-800/80 text-[11px] ${hintColor} flex items-center justify-between gap-1.5 cursor-pointer"
+              title="${escapeAttr(hintText)}">
+              <span class="truncate">${hintIcon} ${escapeAttr(hintText)}</span>
+              <span class="text-slate-500 shrink-0 text-[10px]">›</span>
+            </div>`;
+        }
+
+        html += `
+          <div class="pkm-card ${isCaught ? 'is-caught' : ''} bg-slate-900/85 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-3.5 flex flex-col justify-between shadow-md hover:shadow-cyan-950/20 group relative overflow-hidden">
+            <div>
+              <!-- Header: #ID, Form Badge & Quick Toggle -->
+              <div class="flex items-center justify-between text-xs text-slate-400 pb-2 mb-2 border-b border-slate-800/60 gap-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="font-mono text-[11px] text-slate-400 font-bold shrink-0">#${String(entry.dexId).padStart(3, '0')}</span>
+                  ${formBadgeHtml}
+                </div>
+                <button type="button"
+                  data-action="toggle-dex"
+                  data-pokemon="${escapeAttr(entry.pokemon)}"
+                  class="shrink-0 px-2.5 py-0.5 rounded-lg border text-[10px] transition-all flex items-center gap-1 active:scale-95 cursor-pointer ${btnClass}">
+                  ${btnText}
+                </button>
+              </div>
+
+              <!-- Body: Sprite + Name + Types -->
+              <div data-action="open-detail" data-pokemon="${escapeAttr(entry.pokemon)}"
+                class="flex items-center gap-3 cursor-pointer">
+                <div class="w-14 h-14 shrink-0 bg-slate-950/90 rounded-xl border border-slate-800 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-inner">
+                  <img
+                    src="${escapeAttr(entry.spriteUrl)}"
+                    alt="${escapeAttr(entry.pokemon)}"
+                    class="sprite-img ${isSmooth ? 'smooth-art' : ''} max-w-full max-h-full object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='${escapeAttr(entry.fallbackSpriteUrl || '')}'; if(!this.src) this.style.display='none';"
+                  />
+                </div>
+                <div class="flex-grow min-w-0">
+                  <h4 class="font-black text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
+                    ${entry.pokemon}
+                  </h4>
+                  <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    ${renderTypeBadges(entry.types)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            ${summaryHtml}
+          </div>
+        `;
+      });
+
+      pokedexGrid.innerHTML = html;
+      dexLoadMoreContainer.classList.toggle('hidden', dexDisplayLimit >= filteredPokedex.length);
+    }
+
+    // =========================================================
+    // POKÉMON DETAIL MODAL (Evolutions, Locations & Origin Editor)
+    // =========================================================
+    function renderEvoTreeHtml(node, currentPokemonName) {
+      const isCurrent = node.pokemon === currentPokemonName;
+      const isNodeCaught = caughtSpecies.has(node.pokemon);
+      const isSmooth = (node.spriteUrl || '').endsWith('.webp');
+      const nodeCardCls = isCurrent
+        ? 'border-cyan-500/70 bg-cyan-950/30 ring-1 ring-cyan-500/40'
+        : (isNodeCaught ? 'border-emerald-700/60 bg-slate-900/90 hover:border-cyan-500/50' : 'border-slate-800 bg-slate-950/80 hover:border-slate-600');
+
+      const nodeBox = `
+        <button type="button" data-action="open-detail" data-pokemon="${escapeAttr(node.pokemon)}"
+          class="p-2 rounded-xl border ${nodeCardCls} transition-all flex items-center gap-2 text-left shrink-0 cursor-pointer">
+          <div class="w-10 h-10 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center p-0.5 shrink-0">
+            <img src="${escapeAttr(node.spriteUrl)}" alt="${escapeAttr(node.pokemon)}"
+              class="sprite-img ${isSmooth ? 'smooth-art' : ''} max-w-full max-h-full object-contain"
+              onerror="this.onerror=null; this.src='${escapeAttr(node.fallbackSpriteUrl || '')}';" />
+          </div>
+          <div class="min-w-0 pr-1">
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>#${String(node.dexId).padStart(3, '0')}</span>
+              ${isNodeCaught ? '<span class="text-emerald-400 font-bold">✓</span>' : ''}
+            </div>
+            <div class="text-xs font-bold text-white truncate max-w-[115px]">${node.pokemon}</div>
+          </div>
+        </button>`;
+
+      if (!node.evolvesInto || node.evolvesInto.length === 0) {
+        return nodeBox;
+      }
+
+      const childrenRows = node.evolvesInto.map(child => {
+        const methodStr = currentLang === 'pt' ? (child.method_pt || child.method_en) : child.method_en;
+        return `
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex flex-col items-center justify-center px-2 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[10px] text-cyan-300 font-semibold max-w-[175px] text-center leading-tight">
+              <span>→ ${escapeAttr(methodStr)}</span>
+            </div>
+            ${renderEvoTreeHtml(child, currentPokemonName)}
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          ${nodeBox}
+          <div class="flex flex-col gap-2 pl-3 sm:pl-0 border-l-2 sm:border-l-0 border-slate-800">
+            ${childrenRows}
+          </div>
+        </div>`;
+    }
+
+    function openDetailModal(pokemonName) {
+      if (!pokedexByName.has(pokemonName)) return;
+      activeModalPokemon = pokemonName;
+      renderDetailModal(pokemonName);
+      pokemonDetailModal.classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      activeModalPokemon = null;
+      pokemonDetailModal.classList.add('hidden');
+    }
+
+    function renderDetailModal(pokemonName) {
+      const entry = pokedexByName.get(pokemonName);
+      if (!entry) return;
+
+      const s = strings();
+      const isCaught = caughtSpecies.has(pokemonName);
+      const origin = caughtOrigins[pokemonName];
+      const monEncounters = encountersByPokemon.get(pokemonName) || [];
+      const isSmooth = (entry.spriteUrl || '').endsWith('.webp');
+
+      let formBadgeHtml = '';
+      if (entry.formCategory && entry.formCategory !== 'base' && FORM_BADGE_THEME[entry.formCategory]) {
+        const fb = FORM_BADGE_THEME[entry.formCategory];
+        formBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${fb.cls}">${escapeAttr(currentLang === 'pt' ? fb.labelPt : fb.labelEn)}</span>`;
+      }
+
+      // 1. Header
+      detailModalHeader.innerHTML = `
+        <div class="flex items-center gap-3.5 min-w-0">
+          <div class="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center p-1.5 shrink-0 shadow-inner">
+            <img src="${escapeAttr(entry.spriteUrl)}" alt="${escapeAttr(entry.pokemon)}"
+              class="sprite-img ${isSmooth ? 'smooth-art' : ''} max-w-full max-h-full object-contain"
+              onerror="this.onerror=null; this.src='${escapeAttr(entry.fallbackSpriteUrl || '')}';" />
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-mono text-xs font-bold text-cyan-400">#${String(entry.dexId).padStart(3, '0')}</span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">${escapeAttr(entry.generation)}</span>
+              ${formBadgeHtml}
+            </div>
+            <h3 class="text-lg font-black text-white truncate mt-0.5">${entry.pokemon}</h3>
+            <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+              ${renderTypeBadges(entry.types)}
+            </div>
+          </div>
+        </div>
+        <button type="button" id="btnCloseDetailModal"
+          class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors shrink-0 cursor-pointer">
+          ✕
+        </button>
+      `;
+
+      // 2. Origin Selector Options
+      const uniqueRoutes = [];
+      const routeDefaultMethod = {};
+      monEncounters.forEach(enc => {
+        if (!uniqueRoutes.includes(enc.location)) {
+          uniqueRoutes.push(enc.location);
+          routeDefaultMethod[enc.location] = enc.method;
+        }
+      });
+      if (origin && origin.type === 'route' && origin.location && !uniqueRoutes.includes(origin.location)) {
+        uniqueRoutes.unshift(origin.location);
+        routeDefaultMethod[origin.location] = origin.method || 'Walking';
+      }
+
+      let currentOriginVal = 'none';
+      if (isCaught) {
+        if (origin && origin.type === 'route' && origin.location) {
+          currentOriginVal = `route::${origin.location}`;
+        } else if (origin && origin.type) {
+          currentOriginVal = `type::${origin.type}`;
+        } else {
+          currentOriginVal = `type::${getDefaultDexOriginType(pokemonName)}`;
+        }
+      }
+
+      let routeOptionsHtml = '';
+      if (uniqueRoutes.length > 0) {
+        routeOptionsHtml = `<optgroup label="${escapeAttr(s.modalOriginGroupRoutes)}">` +
+          uniqueRoutes.map(loc => {
+            const val = `route::${loc}`;
+            const sel = currentOriginVal === val ? 'selected' : '';
+            const mLabel = s.methods[routeDefaultMethod[loc]] || routeDefaultMethod[loc] || '';
+            return `<option value="${escapeAttr(val)}" data-method="${escapeAttr(routeDefaultMethod[loc] || 'Walking')}" ${sel}>📍 ${escapeAttr(formatLocationName(loc, currentLang))} (${escapeAttr(mLabel)})</option>`;
+          }).join('') +
+          `</optgroup>`;
+      }
+
+      const statusToggleCls = isCaught
+        ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 hover:bg-rose-950/50 hover:border-rose-500/50 hover:text-rose-200'
+        : 'bg-cyan-600/20 border-cyan-500/60 text-cyan-200 hover:bg-cyan-600/30';
+
+      // 3. Evolution Chain HTML
+      const hasEvo = entry.evolutionChain && entry.evolutionChain.some(root => root.evolvesInto && root.evolvesInto.length > 0);
+      const evoHtml = hasEvo
+        ? `<div class="space-y-3 overflow-x-auto pb-1">${entry.evolutionChain.map(root => renderEvoTreeHtml(root, pokemonName)).join('')}</div>`
+        : `<p class="text-slate-400 italic">${s.modalNoEvolution}</p>`;
+
+      // 4. Locations / Obtain Guide HTML
+      let locationsSectionHtml = '';
+      if (monEncounters.length > 0) {
+        const rowsHtml = monEncounters.map(enc => {
+          const isThisOrigin = isCaught && origin && origin.type === 'route' && origin.location === enc.location;
+          const mLabel = s.methods[enc.method] || enc.method;
+          const condText = currentLang === 'pt' ? (enc.conditions_pt || enc.conditions) : enc.conditions;
+          const showCond = condText && condText !== 'None' && condText !== 'Nenhuma';
+
+          const setBtnCls = isThisOrigin
+            ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold'
+            : 'bg-slate-800 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300';
+
+          return `
+            <div class="p-3 rounded-xl bg-slate-950/80 border ${isThisOrigin ? 'border-emerald-600/50' : 'border-slate-800'} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div class="min-w-0 space-y-1">
+                <div class="font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
+                  <span>📍 ${escapeAttr(formatLocationName(enc.location, currentLang))}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-cyan-300 border border-slate-700">${escapeAttr(mLabel)}</span>
+                  <span class="text-[11px] text-blue-300 font-mono">${s.cardLevelPrefix} ${escapeAttr(enc.levels)}</span>
+                  <span class="text-[11px] text-emerald-400 font-mono">${escapeAttr(enc.rate)}</span>
+                </div>
+                ${showCond ? `<div class="text-[11px] text-slate-400">ℹ️ ${escapeAttr(condText)}</div>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button"
+                  data-action="catch-route"
+                  data-pokemon="${escapeAttr(pokemonName)}"
+                  data-location="${escapeAttr(enc.location)}"
+                  data-method="${escapeAttr(enc.method)}"
+                  class="px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors cursor-pointer ${setBtnCls}">
+                  ${isThisOrigin ? s.modalBtnCaughtHere : s.modalBtnCatchHere}
+                </button>
+                <button type="button"
+                  data-action="jump-route"
+                  data-location="${escapeAttr(enc.location)}"
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-cyan-300 font-semibold transition-colors cursor-pointer">
+                  ${s.modalBtnJumpRoute}
+                </button>
+              </div>
+            </div>`;
+        }).join('');
+
+        locationsSectionHtml = `
+          <div class="space-y-2.5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">${s.modalLocationsTitle(monEncounters.length)}</h4>
+            <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+              ${rowsHtml}
+            </div>
+          </div>`;
+      } else {
+        let nonWildBody = '';
+        if (entry.evolvesFrom) {
+          const evoMethod = currentLang === 'pt' ? entry.evolvesFrom.method_pt : entry.evolvesFrom.method_en;
+          nonWildBody = `
+            <p class="text-slate-300">${s.modalNoWildEvoDesc(escapeAttr(entry.evolvesFrom.pokemon), escapeAttr(evoMethod))}</p>
+            <button type="button" data-action="open-detail" data-pokemon="${escapeAttr(entry.evolvesFrom.pokemon)}"
+              class="mt-2 px-3 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900/70 border border-purple-700/60 text-purple-200 font-semibold text-xs transition-colors cursor-pointer">
+              🧬 ${escapeAttr(s.modalViewParentBtn(entry.evolvesFrom.pokemon))}
+            </button>`;
+        } else {
+          const specialTxt = (currentLang === 'pt' ? entry.specialNote_pt : entry.specialNote_en) || '';
+          nonWildBody = `<p class="text-slate-300">${escapeAttr(specialTxt)}</p>`;
+        }
+
+        locationsSectionHtml = `
+          <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-purple-300 flex items-center gap-1.5">
+              <span>🧬</span> <span>${s.modalNoWildTitle}</span>
+            </div>
+            ${nonWildBody}
+          </div>`;
+      }
+
+      detailModalBody.innerHTML = `
+        <!-- Status & Origin Box -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">${s.modalStatusTitle}</span>
+            <button type="button" data-action="toggle-dex" data-pokemon="${escapeAttr(pokemonName)}"
+              class="px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${statusToggleCls}">
+              ${isCaught ? s.modalMarkedCaught : s.modalMarkCaught}
+            </button>
+          </div>
+
+          <div class="space-y-1">
+            <label for="modalOriginSelect" class="block text-[11px] text-slate-400 font-medium">${s.modalOriginSelectLabel}</label>
+            <select id="modalOriginSelect"
+              class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer">
+              <option value="none" ${currentOriginVal === 'none' ? 'selected' : ''}>${escapeAttr(s.modalOriginNotCaughtOpt)}</option>
+              <optgroup label="${escapeAttr(s.modalOriginGroupGeneral)}">
+                <option value="type::manual" ${currentOriginVal === 'type::manual' ? 'selected' : ''}>${escapeAttr(s.modalOriginOptManual)}</option>
+                <option value="type::evolution" ${currentOriginVal === 'type::evolution' ? 'selected' : ''}>${escapeAttr(s.modalOriginOptEvolution)}</option>
+                <option value="type::breeding" ${currentOriginVal === 'type::breeding' ? 'selected' : ''}>${escapeAttr(s.modalOriginOptBreeding)}</option>
+                <option value="type::gift" ${currentOriginVal === 'type::gift' ? 'selected' : ''}>${escapeAttr(s.modalOriginOptGift)}</option>
+                <option value="type::trade" ${currentOriginVal === 'type::trade' ? 'selected' : ''}>${escapeAttr(s.modalOriginOptTrade)}</option>
+              </optgroup>
+              ${routeOptionsHtml}
+            </select>
+          </div>
+        </div>
+
+        <!-- Evolution Chain -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">${s.modalEvolutionTitle}</h4>
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/90">
+            ${evoHtml}
+          </div>
+        </div>
+
+        <!-- Catch Locations / Obtain Info -->
+        ${locationsSectionHtml}
+      `;
+
+      document.getElementById('btnCloseDetailModal').addEventListener('click', closeDetailModal);
+      const originSelectEl = document.getElementById('modalOriginSelect');
+      originSelectEl.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'none') {
+          setCustomOrigin(pokemonName, { type: 'none' });
+        } else if (val.startsWith('type::')) {
+          setCustomOrigin(pokemonName, { type: val.slice(6) });
+        } else if (val.startsWith('route::')) {
+          const loc = val.slice(7);
+          const opt = originSelectEl.options[originSelectEl.selectedIndex];
+          const method = opt?.dataset?.method || 'Walking';
+          setCustomOrigin(pokemonName, { type: 'route', location: loc, method });
+        }
+      });
+    }
+
+    // Delegated Action Handler for Grids & Detail Modal
+    function handleCardActionClick(e) {
+      const actionEl = e.target.closest('[data-action]');
+      if (!actionEl) return;
+
+      const action = actionEl.dataset.action;
+      const pokemon = actionEl.dataset.pokemon;
+      const location = actionEl.dataset.location;
+      const method = actionEl.dataset.method;
+
+      if (action === 'catch-route' && pokemon && location) {
+        e.stopPropagation();
+        catchAtRoute(pokemon, location, method);
+      } else if (action === 'transfer-route' && pokemon && location) {
+        e.stopPropagation();
+        catchAtRoute(pokemon, location, method);
+      } else if (action === 'unmark-pokemon' && pokemon) {
+        e.stopPropagation();
+        unmarkPokemon(pokemon);
+      } else if (action === 'toggle-dex' && pokemon) {
+        e.stopPropagation();
+        toggleDexCatch(pokemon);
+      } else if (action === 'open-detail' && pokemon) {
+        e.stopPropagation();
+        openDetailModal(pokemon);
+      } else if (action === 'jump-route' && location) {
+        e.stopPropagation();
+        closeDetailModal();
+        filterState.location = location;
+        filterState.search = '';
+        syncFilterUI();
+        setActiveView('encounters');
+      }
+    }
+
+    cardsGrid.addEventListener('click', handleCardActionClick);
+    pokedexGrid.addEventListener('click', handleCardActionClick);
+    detailModalBody.addEventListener('click', handleCardActionClick);
+
+    pokemonDetailModal.addEventListener('click', (e) => {
+      if (e.target === pokemonDetailModal) closeDetailModal();
+    });
+
+    // Sidemenu Events
+    btnOpenSidemenu.addEventListener('click', openSidemenu);
+    btnCloseSidemenu.addEventListener('click', closeSidemenu);
+    sidemenuBackdrop.addEventListener('click', closeSidemenu);
+    navBtnEncounters.addEventListener('click', () => setActiveView('encounters'));
+    navBtnPokedex.addEventListener('click', () => setActiveView('pokedex'));
+
+    shortcutMissingEvo.addEventListener('click', () => {
+      filterState.dexObtain = 'nonwild';
+      filterState.dexStatus = 'missing';
+      syncDexFilterUI();
+      setActiveView('pokedex');
+    });
+
+    shortcutRegionalForms.addEventListener('click', () => {
+      filterState.dexObtain = 'forms';
+      filterState.dexStatus = 'all';
+      syncDexFilterUI();
+      setActiveView('pokedex');
+    });
+
+    globalProgressCard.addEventListener('click', () => {
+      if (filterState.activeView !== 'pokedex') {
+        setActiveView('pokedex');
+      }
+    });
+
+    emptyGoPokedexBtn.addEventListener('click', () => {
+      if (filterState.search) {
+        filterState.dexSearch = filterState.search;
+        syncDexFilterUI();
+      }
+      setActiveView('pokedex');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (activeModalPokemon) {
+          closeDetailModal();
+        } else if (isSidemenuOpen) {
+          closeSidemenu();
+        }
+      }
+    });
 
     // Language switcher click handlers
     document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const selectedLang = normalizeLang(btn.dataset.lang);
-              if (selectedLang && selectedLang !== currentLang) {
-                setLanguage(selectedLang, { syncBackend: true, notifyToast: true });
-              }
-            });
-          });
+      btn.addEventListener('click', () => {
+        const selectedLang = normalizeLang(btn.dataset.lang);
+        if (selectedLang && selectedLang !== currentLang) {
+          setLanguage(selectedLang, { syncBackend: true, notifyToast: true });
+        }
+      });
+    });
 
-        // Listen for pywebview desktop bridge readiness
-        window.addEventListener('pywebviewready', async () => {
-          try {
-            if (window.pywebview && window.pywebview.api) {
-              if (typeof window.pywebview.api.get_state === 'function') {
-                const backendState = await window.pywebview.api.get_state();
-                applyBackendState(backendState);
-              }
-              if (typeof window.pywebview.api.get_lang === 'function') {
-                const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
-                if (urlLang) {
-                  setLanguage(urlLang, { syncBackend: true, notifyToast: false });
-                } else {
-                  const backendLang = normalizeLang(await window.pywebview.api.get_lang());
-                  if (backendLang && backendLang !== currentLang) {
-                    setLanguage(backendLang, { syncBackend: false, notifyToast: false });
-                  }
-                }
-              }
-            }
-          } catch (e) {
-            console.warn('Could not sync initial state/language with pywebview:', e);
+    // Listen for pywebview desktop bridge readiness
+    window.addEventListener('pywebviewready', async () => {
+      try {
+        if (window.pywebview && window.pywebview.api) {
+          if (typeof window.pywebview.api.get_state === 'function') {
+            const backendState = await window.pywebview.api.get_state();
+            applyBackendState(backendState);
           }
-        });
-
-        // Load More Items Button
-        btnLoadMore.addEventListener('click', () => {
-          displayLimit += PAGE_CHUNK;
-          renderCards();
-        });
-
-        // Reset All Filters Helper
-        window.resetAllFilters = function () {
-          filterState.search = '';
-          filterState.location = 'all';
-          filterState.timeOfDay = 'all';
-          filterState.method = 'all';
-          filterState.onlyAvailableNow = false;
-          filterState.hideCaught = false;
-
-          closeLocationDropdown(false);
-          syncFilterUI();
-          applyFilters();
-          showToast(strings().toastFiltersReset, '🔄');
-        };
-        btnResetFilters.addEventListener('click', resetAllFilters);
-
-        // Toggle: "Available Now" Mode
-        btnAvailableNow.addEventListener('click', () => {
-          filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
-          syncAvailableNowUI();
-          applyFilters();
-          if (filterState.onlyAvailableNow) {
-            showToast(strings().toastAvailableNowOn, '⚡');
-          } else {
-            showToast(strings().toastAvailableNowOff, '🌐');
-          }
-        });
-
-        // Hide Caught Checkbox
-        hideCaughtCheckbox.addEventListener('change', (e) => {
-          filterState.hideCaught = e.target.checked;
-          applyFilters();
-        });
-
-        // Smart Time Button
-        btnSmartTime.addEventListener('click', () => {
-          const current = getSinnohPeriod(new Date(), currentLang);
-          filterState.timeOfDay = current.key;
-          syncFilterUI();
-          applyFilters();
-          showToast(strings().toastCycleSynced(current.label), current.icon);
-        });
-
-        // Time of Day Buttons
-        document.querySelectorAll('.tod-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            filterState.timeOfDay = btn.dataset.tod;
-            if (filterState.onlyAvailableNow) {
-              filterState.onlyAvailableNow = false;
-              syncAvailableNowUI();
-            }
-            syncFilterUI();
-            applyFilters();
-          });
-        });
-
-        // Search Input with Debounce
-        let searchTimer = null;
-        searchInput.addEventListener('input', (e) => {
-          clearTimeout(searchTimer);
-          const val = e.target.value.trim();
-          clearSearch.classList.toggle('hidden', val.length === 0);
-          searchTimer = setTimeout(() => {
-            filterState.search = val;
-            applyFilters();
-          }, 150);
-        });
-
-        clearSearch.addEventListener('click', () => {
-          searchInput.value = '';
-          clearSearch.classList.add('hidden');
-          filterState.search = '';
-          applyFilters();
-        });
-
-    // Location Combobox Events
-    locationSelectBtn.addEventListener('click', () => {
-            if (isLocationDropdownOpen) {
-              closeLocationDropdown(false);
-            } else {
-              openLocationDropdown();
-            }
-          });
-
-          locationSelectBtn.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              openLocationDropdown();
-            }
-          });
-
-          clearLocationBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            selectLocation('all');
-          });
-
-          locationSearchInput.addEventListener('input', () => {
-            const hasText = locationSearchInput.value.trim().length > 0;
-            clearLocationSearchBtn.classList.toggle('hidden', !hasText);
-            locationActiveIndex = hasText ? 0 : -1;
-            renderLocationOptions();
-            if (!hasText) {
-              highlightSelectedLocationOption();
-            }
-          });
-
-          clearLocationSearchBtn.addEventListener('click', () => {
-            locationSearchInput.value = '';
-            clearLocationSearchBtn.classList.add('hidden');
-            locationActiveIndex = -1;
-            renderLocationOptions();
-            highlightSelectedLocationOption();
-            locationSearchInput.focus();
-          });
-
-          locationCombobox.addEventListener('keydown', (e) => {
-            if (!isLocationDropdownOpen) return;
-
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              closeLocationDropdown(true);
-            } else if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              if (visibleLocationOptions.length > 0) {
-                locationActiveIndex = (locationActiveIndex + 1) % visibleLocationOptions.length;
-                updateLocationOptionHighlight();
-              }
-            } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              if (visibleLocationOptions.length > 0) {
-                locationActiveIndex = locationActiveIndex <= 0
-                  ? visibleLocationOptions.length - 1
-                  : locationActiveIndex - 1;
-                updateLocationOptionHighlight();
-              }
-            } else if (e.key === 'Enter') {
-              if (document.activeElement === clearLocationSearchBtn) return;
-              e.preventDefault();
-              if (visibleLocationOptions.length > 0) {
-                const idx = locationActiveIndex >= 0 ? locationActiveIndex : 0;
-                selectLocation(visibleLocationOptions[idx].value);
-              }
-            } else if (e.key === 'Tab') {
-              closeLocationDropdown(false);
-            }
-          });
-
-          document.addEventListener('click', (e) => {
-            if (isLocationDropdownOpen && !locationCombobox.contains(e.target)) {
-              closeLocationDropdown(false);
-            }
-          });
-
-          methodSelect.addEventListener('change', (e) => {
-            filterState.method = e.target.value;
-            applyFilters();
-          });
-
-          // --- Backup, Import & Reset Functionality ---
-
-          // 1. Export JSON Backup
-          btnExport.addEventListener('click', () => {
-            const backupData = {
-              app: APP_NAME,
-              version: APP_DATA_VERSION,
-              exportedAt: new Date().toISOString(),
-              totalCaught: caughtSpecies.size,
-              caughtPokemon: Array.from(caughtSpecies),
-              filterPreferences: filterState
-            };
-
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const downloadLink = document.createElement('a');
-            downloadLink.href = url;
-            downloadLink.download = `lumi_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(url);
-
-            showToast(strings().toastBackupExported, '💾');
-          });
-
-          // 2. Import JSON Backup (maintains compatibility with older backup exports)
-          importFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              try {
-                const imported = JSON.parse(event.target.result);
-                if (Array.isArray(imported.caughtPokemon)) {
-                  caughtSpecies = new Set(imported.caughtPokemon);
-                  saveCaughtState();
-
-                  if (imported.filterPreferences) {
-                    Object.assign(filterState, imported.filterPreferences);
-                    const importedLang = normalizeLang(imported.filterPreferences.language);
-                    if (importedLang) {
-                      setLanguage(importedLang, { syncBackend: true, notifyToast: false });
-                    }
-                    syncFilterUI();
-                  }
-
-                  updateProgressCounters();
-                  applyFilters();
-                  showToast(strings().toastBackupLoaded(caughtSpecies.size), '📂');
-                } else {
-                  throw new Error(strings().errorInvalidBackup);
-                }
-              } catch (err) {
-                alert(strings().alertImportError + err.message);
-              }
-            };
-            reader.readAsText(file);
-            importFileInput.value = '';
-          });
-
-          // 3. Reset Confirmation Modal
-          btnResetModal.addEventListener('click', () => {
-            resetModal.classList.remove('hidden');
-          });
-
-          btnCancelReset.addEventListener('click', () => {
-            resetModal.classList.add('hidden');
-          });
-
-          btnConfirmReset.addEventListener('click', () => {
-            caughtSpecies.clear();
-            saveCaughtState();
-            resetModal.classList.add('hidden');
-            updateProgressCounters();
-            applyFilters();
-            showToast(strings().toastCatchesReset, '🗑️');
-          });
-
-          // Sync saved state from pywebview API or server.py /api/state
-          async function syncInitialStateFromServer() {
-            if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_state === 'function') {
-              try {
-                const backendState = await window.pywebview.api.get_state();
-                applyBackendState(backendState);
-              } catch (e) { }
-              return;
-            }
-
-            try {
-              const res = await fetch('./api/state', { cache: 'no-store' });
-              if (res.ok) {
-                const backendState = await res.json();
-                applyBackendState(backendState);
-              }
-            } catch (e) {
-              // Static file server without /api/state (safe fallback to localStorage)
-            }
-          }
-
-          // Sync language from server.py /api/lang if running outside pywebview
-          async function syncInitialLangFromServer() {
+          if (typeof window.pywebview.api.get_lang === 'function') {
             const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
             if (urlLang) {
               setLanguage(urlLang, { syncBackend: true, notifyToast: false });
-              return;
-            }
-
-            if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
-              try {
-                const backendLang = normalizeLang(await window.pywebview.api.get_lang());
-                if (backendLang && backendLang !== currentLang) {
-                  setLanguage(backendLang, { syncBackend: false, notifyToast: false });
-                }
-              } catch (e) { }
-              return;
-            }
-
-            try {
-              const res = await fetch('./api/lang', { cache: 'no-store' });
-              if (res.ok) {
-                const payload = await res.json();
-                const serverLang = normalizeLang(payload.lang);
-                if (serverLang && serverLang !== currentLang) {
-                  setLanguage(serverLang, { syncBackend: false, notifyToast: false });
-                }
+            } else {
+              const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+              if (backendLang && backendLang !== currentLang) {
+                setLanguage(backendLang, { syncBackend: false, notifyToast: false });
               }
-            } catch (e) {
-              // Static file server without /api/lang (safe fallback to localStorage / EN)
             }
           }
+        }
+      } catch (e) {
+        console.warn('Could not sync initial state/language with pywebview:', e);
+      }
+    });
 
-          // Initial Tracker Setup
-          async function initTracker() {
-            try {
-              loadSavedState();
-              await syncInitialStateFromServer();
-              applyTranslations();
-              await syncInitialLangFromServer();
+    // Load More Items Buttons
+    btnLoadMore.addEventListener('click', () => {
+      displayLimit += PAGE_CHUNK;
+      renderCards();
+    });
 
-              // Fetch ordered locations list
-              const locRes = await fetch('./ordered_locations.json');
-              if (locRes.ok) {
-                orderedLocations = await locRes.json();
-                populateLocationsDropdown(orderedLocations);
+    btnDexLoadMore.addEventListener('click', () => {
+      dexDisplayLimit += DEX_PAGE_CHUNK;
+      renderPokedexCards();
+    });
+
+    // Reset Encounters Filters Helper
+    window.resetAllFilters = function () {
+      filterState.search = '';
+      filterState.location = 'all';
+      filterState.timeOfDay = 'all';
+      filterState.method = 'all';
+      filterState.onlyAvailableNow = false;
+      filterState.hideCaught = false;
+
+      closeLocationDropdown(false);
+      syncFilterUI();
+      applyFilters();
+      showToast(strings().toastFiltersReset, '🔄');
+    };
+    btnResetFilters.addEventListener('click', resetAllFilters);
+
+    // Reset Pokédex Filters Helper
+    function resetDexFilters() {
+      filterState.dexSearch = '';
+      filterState.dexStatus = 'all';
+      filterState.dexObtain = 'all';
+      filterState.dexGen = 'all';
+      filterState.dexType = 'all';
+      syncDexFilterUI();
+      applyDexFilters();
+      showToast(strings().toastFiltersReset, '🔄');
+    }
+    btnResetDexFilters.addEventListener('click', resetDexFilters);
+    dexEmptyResetBtn.addEventListener('click', resetDexFilters);
+
+    // Pokédex Filter Controls Events
+    document.querySelectorAll('.dex-status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterState.dexStatus = btn.dataset.dexStatus || 'all';
+        syncDexFilterUI();
+        applyDexFilters();
+      });
+    });
+
+    dexObtainSelect.addEventListener('change', (e) => {
+      filterState.dexObtain = e.target.value;
+      applyDexFilters();
+    });
+
+    dexGenSelect.addEventListener('change', (e) => {
+      filterState.dexGen = e.target.value;
+      applyDexFilters();
+    });
+
+    dexTypeSelect.addEventListener('change', (e) => {
+      filterState.dexType = e.target.value;
+      applyDexFilters();
+    });
+
+    let dexSearchTimer = null;
+    dexSearchInput.addEventListener('input', (e) => {
+      clearTimeout(dexSearchTimer);
+      const val = e.target.value.trim();
+      dexClearSearch.classList.toggle('hidden', val.length === 0);
+      dexSearchTimer = setTimeout(() => {
+        filterState.dexSearch = val;
+        applyDexFilters();
+      }, 150);
+    });
+
+    dexClearSearch.addEventListener('click', () => {
+      dexSearchInput.value = '';
+      dexClearSearch.classList.add('hidden');
+      filterState.dexSearch = '';
+      applyDexFilters();
+    });
+
+    // Toggle: "Available Now" Mode
+    btnAvailableNow.addEventListener('click', () => {
+      filterState.onlyAvailableNow = !filterState.onlyAvailableNow;
+      if (filterState.onlyAvailableNow && filterState.activeView !== 'encounters') {
+        setActiveView('encounters', { savePrefs: false, closeMenu: true });
+      }
+      syncAvailableNowUI();
+      applyFilters();
+      if (filterState.onlyAvailableNow) {
+        showToast(strings().toastAvailableNowOn, '⚡');
+      } else {
+        showToast(strings().toastAvailableNowOff, '🌐');
+      }
+    });
+
+    // Hide Caught Checkbox
+    hideCaughtCheckbox.addEventListener('change', (e) => {
+      filterState.hideCaught = e.target.checked;
+      applyFilters();
+    });
+
+    // Smart Time Button
+    btnSmartTime.addEventListener('click', () => {
+      const current = getSinnohPeriod(new Date(), currentLang);
+      filterState.timeOfDay = current.key;
+      syncFilterUI();
+      applyFilters();
+      showToast(strings().toastCycleSynced(current.label), current.icon);
+    });
+
+    // Time of Day Buttons
+    document.querySelectorAll('.tod-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterState.timeOfDay = btn.dataset.tod;
+        if (filterState.onlyAvailableNow) {
+          filterState.onlyAvailableNow = false;
+          syncAvailableNowUI();
+        }
+        syncFilterUI();
+        applyFilters();
+      });
+    });
+
+    // Encounters Search Input with Debounce
+    let searchTimer = null;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      const val = e.target.value.trim();
+      clearSearch.classList.toggle('hidden', val.length === 0);
+      searchTimer = setTimeout(() => {
+        filterState.search = val;
+        applyFilters();
+      }, 150);
+    });
+
+    clearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearch.classList.add('hidden');
+      filterState.search = '';
+      applyFilters();
+    });
+
+    // Location Combobox Events
+    locationSelectBtn.addEventListener('click', () => {
+      if (isLocationDropdownOpen) {
+        closeLocationDropdown(false);
+      } else {
+        openLocationDropdown();
+      }
+    });
+
+    locationSelectBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLocationDropdown();
+      }
+    });
+
+    clearLocationBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectLocation('all');
+    });
+
+    locationSearchInput.addEventListener('input', () => {
+      const hasText = locationSearchInput.value.trim().length > 0;
+      clearLocationSearchBtn.classList.toggle('hidden', !hasText);
+      locationActiveIndex = hasText ? 0 : -1;
+      renderLocationOptions();
+      if (!hasText) {
+        highlightSelectedLocationOption();
+      }
+    });
+
+    clearLocationSearchBtn.addEventListener('click', () => {
+      locationSearchInput.value = '';
+      clearLocationSearchBtn.classList.add('hidden');
+      locationActiveIndex = -1;
+      renderLocationOptions();
+      highlightSelectedLocationOption();
+      locationSearchInput.focus();
+    });
+
+    locationCombobox.addEventListener('keydown', (e) => {
+      if (!isLocationDropdownOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeLocationDropdown(true);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (visibleLocationOptions.length > 0) {
+          locationActiveIndex = (locationActiveIndex + 1) % visibleLocationOptions.length;
+          updateLocationOptionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (visibleLocationOptions.length > 0) {
+          locationActiveIndex = locationActiveIndex <= 0
+            ? visibleLocationOptions.length - 1
+            : locationActiveIndex - 1;
+          updateLocationOptionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        if (document.activeElement === clearLocationSearchBtn) return;
+        e.preventDefault();
+        if (visibleLocationOptions.length > 0) {
+          const idx = locationActiveIndex >= 0 ? locationActiveIndex : 0;
+          selectLocation(visibleLocationOptions[idx].value);
+        }
+      } else if (e.key === 'Tab') {
+        closeLocationDropdown(false);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (isLocationDropdownOpen && !locationCombobox.contains(e.target)) {
+        closeLocationDropdown(false);
+      }
+    });
+
+    methodSelect.addEventListener('change', (e) => {
+      filterState.method = e.target.value;
+      applyFilters();
+    });
+
+    // --- Backup, Import & Reset Functionality ---
+
+    // 1. Export JSON Backup (includes caughtOrigins + full backwards compatibility)
+    btnExport.addEventListener('click', () => {
+      const backupData = {
+        app: APP_NAME,
+        version: APP_DATA_VERSION,
+        exportedAt: new Date().toISOString(),
+        totalCaught: caughtSpecies.size,
+        caughtPokemon: Array.from(caughtSpecies),
+        caughtOrigins: caughtOrigins,
+        filterPreferences: filterState
+      };
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = `lumi_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+
+      showToast(strings().toastBackupExported, '💾');
+    });
+
+    // 2. Import JSON Backup (supports both new backups with caughtOrigins and legacy backups)
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported.caughtPokemon)) {
+            caughtSpecies = new Set(imported.caughtPokemon);
+            caughtOrigins = sanitizeOriginsMap(imported.caughtOrigins || {});
+            saveCaughtState();
+
+            if (imported.filterPreferences) {
+              applyFilterPrefs(imported.filterPreferences);
+              const importedLang = normalizeLang(imported.filterPreferences.language);
+              if (importedLang) {
+                setLanguage(importedLang, { syncBackend: true, notifyToast: false });
               }
-
-              // Fetch encounters database
-              const encRes = await fetch('./luminescent_encounters.json');
-              if (!encRes.ok) throw new Error(strings().errorFetchEncounters);
-              allEncounters = await encRes.json();
-              dataLoaded = true;
-
-              // Index all unique species in Luminescent
-              allEncounters.forEach(encounter => {
-                if (encounter.pokemon) allUniqueSpecies.add(encounter.pokemon);
-              });
-
-              const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
-              totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
-              loadingState.classList.add('hidden');
-
               syncFilterUI();
-              updateProgressCounters();
-              applyFilters(false);
-            } catch (err) {
-              console.error('Initialization error:', err);
-              const s = strings();
-              loadingState.innerHTML = `
+              syncDexFilterUI();
+              setActiveView(filterState.activeView, { savePrefs: true, closeMenu: false });
+            }
+
+            applyFilters(false);
+            applyDexFilters(false);
+            updateProgressCounters();
+            showToast(strings().toastBackupLoaded(caughtSpecies.size), '📂');
+          } else {
+            throw new Error(strings().errorInvalidBackup);
+          }
+        } catch (err) {
+          alert(strings().alertImportError + err.message);
+        }
+      };
+      reader.readAsText(file);
+      importFileInput.value = '';
+    });
+
+    // 3. Reset Confirmation Modal
+    btnResetModal.addEventListener('click', () => {
+      resetModal.classList.remove('hidden');
+    });
+
+    btnCancelReset.addEventListener('click', () => {
+      resetModal.classList.add('hidden');
+    });
+
+    btnConfirmReset.addEventListener('click', () => {
+      caughtSpecies.clear();
+      caughtOrigins = {};
+      saveCaughtState();
+      resetModal.classList.add('hidden');
+      applyFilters(false);
+      applyDexFilters(false);
+      updateProgressCounters();
+      showToast(strings().toastCatchesReset, '🗑️');
+    });
+
+    // Sync saved state from pywebview API or server.py /api/state
+    async function syncInitialStateFromServer() {
+      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_state === 'function') {
+        try {
+          const backendState = await window.pywebview.api.get_state();
+          applyBackendState(backendState);
+        } catch (e) { }
+        return;
+      }
+
+      try {
+        const res = await fetch('./api/state', { cache: 'no-store' });
+        if (res.ok) {
+          const backendState = await res.json();
+          applyBackendState(backendState);
+        }
+      } catch (e) {
+        // Static file server without /api/state (safe fallback to localStorage)
+      }
+    }
+
+    // Sync language from server.py /api/lang if running outside pywebview
+    async function syncInitialLangFromServer() {
+      const urlLang = normalizeLang(new URLSearchParams(window.location.search).get('lang'));
+      if (urlLang) {
+        setLanguage(urlLang, { syncBackend: true, notifyToast: false });
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_lang === 'function') {
+        try {
+          const backendLang = normalizeLang(await window.pywebview.api.get_lang());
+          if (backendLang && backendLang !== currentLang) {
+            setLanguage(backendLang, { syncBackend: false, notifyToast: false });
+          }
+        } catch (e) { }
+        return;
+      }
+
+      try {
+        const res = await fetch('./api/lang', { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          const serverLang = normalizeLang(payload.lang);
+          if (serverLang && serverLang !== currentLang) {
+            setLanguage(serverLang, { syncBackend: false, notifyToast: false });
+          }
+        }
+      } catch (e) { }
+    }
+
+    // Initial Tracker Setup
+    async function initTracker() {
+      try {
+        // Hide views until database finishes loading
+        encountersViewWrapper.classList.add('hidden');
+        pokedexViewWrapper.classList.add('hidden');
+
+        loadSavedState();
+        await syncInitialStateFromServer();
+        applyTranslations();
+        await syncInitialLangFromServer();
+
+        // Fetch ordered locations, encounters, and full Pokédex in parallel
+        const [locRes, encRes, dexRes] = await Promise.all([
+          fetch('./ordered_locations.json'),
+          fetch('./luminescent_encounters.json'),
+          fetch('./luminescent_pokedex.json')
+        ]);
+
+        if (locRes.ok) {
+          orderedLocations = await locRes.json();
+          populateLocationsDropdown(orderedLocations);
+        }
+
+        if (!encRes.ok) throw new Error(strings().errorFetchEncounters);
+        allEncounters = await encRes.json();
+
+        if (!dexRes.ok) throw new Error(strings().errorFetchPokedex);
+        allPokedex = await dexRes.json();
+
+        // Index Pokédex & Encounters by Pokémon canonical name
+        pokedexByName.clear();
+        allPokedex.forEach(entry => {
+          pokedexByName.set(entry.pokemon, entry);
+        });
+
+        encountersByPokemon.clear();
+        allWildSpecies.clear();
+        allEncounters.forEach(enc => {
+          if (!enc.pokemon) return;
+          allWildSpecies.add(enc.pokemon);
+          if (!encountersByPokemon.has(enc.pokemon)) {
+            encountersByPokemon.set(enc.pokemon, []);
+          }
+          encountersByPokemon.get(enc.pokemon).push(enc);
+        });
+
+        dataLoaded = true;
+        loadingState.classList.add('hidden');
+
+        const locale = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+        totalDisplay.textContent = allEncounters.length.toLocaleString(locale);
+        dexTotalDisplay.textContent = allPokedex.length.toLocaleString(locale);
+
+        syncFilterUI();
+        syncDexFilterUI();
+        setActiveView(filterState.activeView, { savePrefs: false, closeMenu: false });
+      } catch (err) {
+        console.error('Initialization error:', err);
+        const s = strings();
+        loadingState.innerHTML = `
           <div class="text-rose-400 text-3xl">⚠️</div>
           <h3 class="text-base font-bold text-white">${s.errorLoadingTitle}</h3>
-          <p class="text-xs text-slate-400">${err.message}</p>
+          <p class="text-xs text-slate-400">${escapeAttr(err.message)}</p>
         `;
-            }
-          }
+      }
+    }
 
-          initTracker();
+    initTracker();
   </script>
 </body>
 

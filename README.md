@@ -4,9 +4,11 @@ Encounter progress tracker for **Pokémon Luminescent Platinum**. Browse Pokémo
 
 ## Features
 
-- **Progression-Ordered Route Filter**: Routes ordered in `ordered_locations.json` combined with the `luminescent_encounters.json` database.
+- **Dual Mode via Sidemenu (`Encontros / Rotas` & `Pokédex Completa`)**:
+  - **Encounters / Routes**: Progression-ordered route guide (`ordered_locations.json` + `luminescent_encounters.json`) with catch-origin tracking (`Caught here` vs `In Dex ([Route])` + one-click transfer).
+  - **Complete Pokédex**: Tracks all **559** obtainable Luminescent Platinum entries (513 base species + Regional forms + Lumi Special forms), including evolution-only and breeding-only Pokémon, interactive evolution chains, and an origin editor modal.
 - **"Available Now" Mode**: Automatically filters encounters based on the current system time (Morning, Day, or Night) and the selected route, while hiding already-caught Pokémon.
-- **Persistent Progress**: Saves caught Pokémon and filter preferences in `localStorage` (stored in `%APPDATA%\LumiTracker` in desktop mode), with **JSON Backup / Import** support.
+- **Persistent Progress**: Saves caught Pokémon, capture origins, and filter preferences in `localStorage` and `%APPDATA%\LumiTracker\state.json`, with **JSON Backup / Import** support.
 - **Bilingual Support (EN / PT)**: Defaults to English with a compact `EN | PT` header toggle in the UI and unified language persistence (`%APPDATA%\LumiTracker\lang.txt` + `localStorage`). All CLI scripts and `.bat` launchers also support `--lang en|pt`.
 - **Desktop or Browser Mode**: Runs in a native desktop window via `pywebview` (`app.py`) or through a local fallback HTTP server (`server.py`).
 
@@ -75,10 +77,12 @@ Or run `build_exe.bat`.
 - `server.py`: Local fallback HTTP server (`localhost:8000+`).
 - `i18n_cli.py`: Shared CLI language resolution, persistence, and translations (`en`/`pt`).
 - `conditions_i18n.py`: Bilingual condition translations for encounter notes.
-- `index.html`: Web interface and tracker logic.
-- `luminescent_encounters.json`: Normalized encounter database.
+- `index.html`: Web interface (Encounters & Complete Pokédex views, Sidemenu, and Detail Modal).
+- `luminescent_encounters.json`: Normalized wild/static/gift/trade encounter database.
+- `luminescent_pokedex.json`: Complete Pokédex database (all obtainable species, forms, types, and bilingual evolution chains).
 - `ordered_locations.json`: Campaign-ordered list of locations.
-- `parse_encounters.py`: Script to extract and normalize data from `lumi-repo/`.
+- `generate_pokedex.py`: Script to build `luminescent_pokedex.json` from TeamLumi gamedata.
+- `parse_encounters.py`: Script to extract and normalize encounter data from `lumi-repo/` (and regenerate the Pokédex).
 - `build_exe.py`: PyInstaller bundler for Windows.
 - `launch_app.bat`, `start_server.bat`, `build_exe.bat`: Windows convenience launchers.
 
