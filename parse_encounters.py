@@ -355,6 +355,14 @@ def main():
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(records, f, indent=2, ensure_ascii=False)
 
+    # Also regenerate luminescent_pokedex.json if generate_pokedex.py is present
+    try:
+        from generate_pokedex import build_pokedex, OUTPUT_POKEDEX_JSON
+        dex_records = build_pokedex(OUTPUT_POKEDEX_JSON, OUTPUT_JSON)
+        print(f"  - Pokédex JSON: {OUTPUT_POKEDEX_JSON} ({len(dex_records)} entries)")
+    except Exception as exc:
+        print(f"  [WARN] Could not regenerate Pokédex JSON: {exc}")
+
     # Export CSV
     fieldnames = [
         "id",
