@@ -231,20 +231,6 @@
           </svg>
           <span id="activeViewChip" class="text-[11px] font-bold text-cyan-300 hidden sm:inline">🗺️ Routes</span>
         </button>
-
-        <div
-          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/20 shrink-0">
-          <span class="text-xl">✨</span>
-        </div>
-        <div>
-          <h1 class="text-base font-black tracking-wide text-white flex items-center gap-2 flex-wrap">
-            LUMI TRACKER <span
-              class="text-cyan-400 font-semibold text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60">LUMINESCENT
-              2.2F</span>
-          </h1>
-          <p id="headerSubtitle" class="text-[11px] text-slate-400 font-medium">Encounter Guide • Pokémon Luminescent
-            Platinum</p>
-        </div>
       </div>
 
       <!-- Live Clock & Mode Controls -->
@@ -1553,7 +1539,7 @@
       }
 
       const s = strings();
-      headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
+      if (headerSubtitle) headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
       activeViewChip.textContent = isDex ? s.activeChipPokedex : s.activeChipEncounters;
 
       // Highlight active navigation item in Sidemenu
@@ -1609,7 +1595,7 @@
       document.documentElement.lang = s.htmlLang;
 
       const isDex = filterState.activeView === 'pokedex';
-      headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
+      if (headerSubtitle) headerSubtitle.textContent = isDex ? s.headerSubtitlePokedex : s.headerSubtitleEncounters;
       activeViewChip.textContent = isDex ? s.activeChipPokedex : s.activeChipEncounters;
       btnOpenSidemenu.title = s.openMenuTitle;
       btnCloseSidemenu.title = s.closeMenuTitle;
