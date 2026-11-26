@@ -20,6 +20,7 @@ EXE_NAME = "LumiTracker"
 REQUIRED_DATA_FILES = (
     "index.html",
     "luminescent_encounters.json",
+    "luminescent_pokedex.json",
     "ordered_locations.json",
 )
 
